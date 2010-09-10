@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<classpath>
+	<classpathentry kind="src" output="out/ide/main/gen" path="src/main/gen"/>
+	<classpathentry kind="src" output="out/ide/main/man" path="src/main/man"/>
+	<classpathentry kind="src" output="out/ide/test/gen" path="src/test/gen"/>
+	<classpathentry kind="src" output="out/ide/test/man" path="src/test/man"/>
+	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
+	<classpathentry kind="con" path="org.eclipse.jdt.junit.JUNIT_CONTAINER/4"/>
+	<classpathentry kind="lib" path="/org.nabucco.framework.base/lib/log4j.jar"/>
+	<classpathentry kind="output" path="out"/>
+</classpath>

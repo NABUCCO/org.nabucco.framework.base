@@ -1,0 +1,61 @@
+/*
+ * Copyright 2010 PRODYNA AG
+ *
+ * Licensed under the Eclipse Public License (EPL), Version 1.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.opensource.org/licenses/eclipse-1.0.php or
+ * http://www.nabucco-source.org/nabucco-license.html
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+package org.nabucco.framework.base.facade.datatype.date;
+
+import org.nabucco.framework.base.facade.datatype.NabuccoDatatype;
+import org.nabucco.framework.base.facade.datatype.date.Day;
+import org.nabucco.framework.base.facade.datatype.date.Hour;
+import org.nabucco.framework.base.facade.datatype.date.Millisecond;
+import org.nabucco.framework.base.facade.datatype.date.Month;
+import org.nabucco.framework.base.facade.datatype.date.Second;
+import org.nabucco.framework.base.facade.datatype.date.Year;
+
+@Author			Oliver Teichmann
+@Company		PRODYNA AG
+@Date			2010-07-26
+@Description	A container for a time specified by its fields
+public Datatype Calendar extends NabuccoDatatype {
+
+	@Description	The year of the represented time
+	@Default 1900
+	private Basetype Year[1] year;
+
+	@Description	The month of the represented time
+	@Default 1
+	private Basetype Month[1] month;
+
+	@Description	The day of the month of the represented time
+	@Default 1
+	private Basetype Day[1] day;
+	
+	@Description	The hour of day of the represented time
+	@Default 0
+	private Basetype Hour[1] hour;
+
+	@Description	The minute of the represented time
+	@Default 0
+	private Basetype Minute[1] minute;
+
+	@Description	The second of the represented time
+	@Default 0
+	private Basetype Second[1] second;
+	
+	@Description	The millisecond of the represented time
+	@Default 0
+	private Basetype Millisecond[1] millisecond;
+	
+}
