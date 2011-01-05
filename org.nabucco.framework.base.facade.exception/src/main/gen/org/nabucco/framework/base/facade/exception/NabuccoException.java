@@ -1,25 +1,11 @@
 /*
-* Copyright 2010 PRODYNA AG
-*
-* Licensed under the Eclipse Public License (EPL), Version 1.0 (the "License");
-* you may not use this file except in compliance with the License.
-* You may obtain a copy of the License at
-*
-* http://www.opensource.org/licenses/eclipse-1.0.php or
-* http://www.nabucco-source.org/nabucco-license.html
-*
-* Unless required by applicable law or agreed to in writing, software
-* distributed under the License is distributed on an "AS IS" BASIS,
-* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-* See the License for the specific language governing permissions and
-* limitations under the License.
-*
-* Generated with NABUCCO Generator 
-*/
+ * NABUCCO Generator, Copyright (c) 2010, PRODYNA AG, Germany. All rights reserved.
+ */
 package org.nabucco.framework.base.facade.exception;
 
 import java.util.HashMap;
 import java.util.Map;
+import org.nabucco.framework.base.facade.exception.ExceptionSupport;
 
 /**
  * NabuccoException<p/>Adapter for platform exceptions to NABUCCO internal exception<p/>
@@ -27,17 +13,27 @@ import java.util.Map;
  * @version 1.0
  * @author Frank Ratschinski, PRODYNA AG, 2010-01-20
  */
-public class NabuccoException extends Exception {
-
-    private Map<String, String> parameterMap = new HashMap<String, String>();
+public class NabuccoException extends ExceptionSupport {
 
     private static final long serialVersionUID = 1L;
+
+    private Map<String, String> parameterMap = new HashMap<String, String>();
 
     private String componentId;
 
     /** Constructs a new NabuccoException instance. */
     public NabuccoException() {
         super();
+    }
+
+    /**
+     * Constructs a new NabuccoException instance.
+     *
+     * @param throwable the Throwable.
+     * @param message the String.
+     */
+    public NabuccoException(String message, Throwable throwable) {
+        super(message, throwable);
     }
 
     /**
@@ -56,16 +52,6 @@ public class NabuccoException extends Exception {
      */
     public NabuccoException(Throwable throwable) {
         super(throwable);
-    }
-
-    /**
-     * Constructs a new NabuccoException instance.
-     *
-     * @param throwable the Throwable.
-     * @param message the String.
-     */
-    public NabuccoException(String message, Throwable throwable) {
-        super(message, throwable);
     }
 
     /**

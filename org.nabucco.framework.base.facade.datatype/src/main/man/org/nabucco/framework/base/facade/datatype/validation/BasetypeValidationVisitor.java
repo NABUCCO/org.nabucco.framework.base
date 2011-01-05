@@ -50,7 +50,7 @@ public class BasetypeValidationVisitor extends DatatypeVisitor implements Visito
         ConstraintContainer container = ConstraintParser.getInstance().parseConstraint(basetype);
 
         if (container != null && !container.isEmpty()) {
-            container.check(basetype, 0, this.result);
+            container.check(basetype, basetype, 0, this.result);
         }
 
         super.visit(basetype);

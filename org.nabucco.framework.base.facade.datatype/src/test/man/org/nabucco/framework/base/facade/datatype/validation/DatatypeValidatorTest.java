@@ -39,8 +39,9 @@ public class DatatypeValidatorTest {
         user.setUsername(name);
 
         ValidationResult result = new ValidationResult();
-        user.validate(result);
+        user.validate(result, ValidationType.SHALLOW);
 
+        System.out.println(result);
         Assert.assertEquals(4, result.getErrorList().size());
     }
     

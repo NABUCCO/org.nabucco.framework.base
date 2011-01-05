@@ -16,6 +16,7 @@
  */
 package org.nabucco.framework.base.impl.component;
 
+import org.nabucco.framework.base.facade.component.Component;
 import org.nabucco.framework.base.facade.datatype.logger.NabuccoLogger;
 import org.nabucco.framework.base.facade.datatype.logger.NabuccoLoggingFactory;
 
@@ -25,8 +26,13 @@ import org.nabucco.framework.base.facade.datatype.logger.NabuccoLoggingFactory;
  * @author Frank Ratschinski, PRODYNA AG
  * @author Nicolas Moser, PRODYNA AG
  */
-public abstract class ComponentSupport {
+public abstract class ComponentSupport implements Component {
 
+    /**
+     * Comment for <code>serialVersionUID</code>
+     */
+    private static final long serialVersionUID = 1L;
+    
     /** Logger */
     private NabuccoLogger logger = NabuccoLoggingFactory.getInstance().getLogger(this.getClass());
 
@@ -52,4 +58,5 @@ public abstract class ComponentSupport {
     public void preDestroy() {
         logger.debug("Shutting down component.");
     }
+    
 }

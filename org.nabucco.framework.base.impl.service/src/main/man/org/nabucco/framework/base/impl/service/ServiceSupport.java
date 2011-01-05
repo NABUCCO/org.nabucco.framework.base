@@ -32,6 +32,16 @@ public abstract class ServiceSupport implements Service {
     /** Logger */
     private NabuccoLogger logger = NabuccoLoggingFactory.getInstance().getLogger(this.getClass());
 
+    @Override
+    public final String getName() {
+        Class<?>[] interfaces = this.getClass().getInterfaces();
+        if (interfaces.length > 0) {
+            return interfaces[0].getCanonicalName();
+        }
+
+        return null;
+    }
+
     /**
      * Getter for the NABUCCO logger.
      * 
@@ -40,4 +50,5 @@ public abstract class ServiceSupport implements Service {
     public NabuccoLogger getLogger() {
         return this.logger;
     }
+
 }

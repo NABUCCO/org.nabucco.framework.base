@@ -16,10 +16,14 @@
  */
 package org.nabucco.framework.base.facade.datatype;
 
+import java.util.ArrayList;
+import java.util.List;
+
+import org.nabucco.framework.base.facade.datatype.property.NabuccoProperty;
 import org.nabucco.framework.base.facade.datatype.validation.BasetypeValidationVisitor;
 import org.nabucco.framework.base.facade.datatype.validation.ValidationException;
 import org.nabucco.framework.base.facade.datatype.validation.ValidationResult;
-import org.nabucco.framework.base.facade.datatype.visitor.Visitable;
+import org.nabucco.framework.base.facade.datatype.validation.ValidationType;
 import org.nabucco.framework.base.facade.datatype.visitor.Visitor;
 import org.nabucco.framework.base.facade.datatype.visitor.VisitorException;
 
@@ -33,7 +37,7 @@ public abstract class BasetypeSupport implements Basetype {
     private static final long serialVersionUID = 1L;
 
     @Override
-    public void validate(ValidationResult result) throws ValidationException {
+    public void validate(ValidationResult result, ValidationType depth) throws ValidationException {
         if (result == null) {
             throw new IllegalArgumentException("Validation result is not valid [null].");
         }
@@ -52,13 +56,8 @@ public abstract class BasetypeSupport implements Basetype {
     }
 
     @Override
-    public Visitable[] getProperties() {
-        return new Visitable[0];
-    }
-
-    @Override
-    public String[] getPropertyNames() {
-        return new String[0];
+    public List<NabuccoProperty<?>> getProperties() {
+        return new ArrayList<NabuccoProperty<?>>();
     }
 
 }

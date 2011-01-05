@@ -34,6 +34,5 @@ public interface ServiceMessage extends Visitable, Validatable, Serializable {
      * 
      * @return the service message clone.
      */
-    @Override
     ServiceMessage cloneObject();
 }

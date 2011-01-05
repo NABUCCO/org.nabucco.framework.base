@@ -55,10 +55,7 @@ public enum DatatypeState implements Enumeration {
     DELETED("D"),
 
     /**
-     * The datatype was marked as DELETED and removed from database. Therefore, this datatype object
-     * must never be referenced anymore in any entity managed by NabuccoEntityManager.
-     * <p/>
-     * This state must only be defined on server side.
+     * Datatype was marked as DELETED and has already been removed from database.
      */
     DESTROYED("X");
 

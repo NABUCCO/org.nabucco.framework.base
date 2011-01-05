@@ -1,0 +1,28 @@
+/*
+ *	PRODYNA NABUCCO SKM
+ *  Copyright 2010, PRODYNA AG
+ */
+package org.nabucco.framework.base.facade.datatype.business.person;
+
+@Author			Dominic Trumpfheller
+@Company		PRODYNA AG
+@Date			2010-11-30
+@Version		1.0
+public Enumeration PersonTitle {
+
+	@LiteralId undefined
+	UNDEFINED
+	
+	@LiteralId DR
+	DR
+	
+	@LiteralId MR
+	MR
+	
+	@LiteralId MRS
+	MRS
+	
+	@LiteralId MS
+	MS
+	
+}

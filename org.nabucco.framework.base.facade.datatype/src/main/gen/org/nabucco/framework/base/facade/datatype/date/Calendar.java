@@ -1,33 +1,20 @@
 /*
-* Copyright 2010 PRODYNA AG
-*
-* Licensed under the Eclipse Public License (EPL), Version 1.0 (the "License");
-* you may not use this file except in compliance with the License.
-* You may obtain a copy of the License at
-*
-* http://www.opensource.org/licenses/eclipse-1.0.php or
-* http://www.nabucco-source.org/nabucco-license.html
-*
-* Unless required by applicable law or agreed to in writing, software
-* distributed under the License is distributed on an "AS IS" BASIS,
-* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-* See the License for the specific language governing permissions and
-* limitations under the License.
-*
-* Generated with NABUCCO Generator 
-*/
+ * NABUCCO Generator, Copyright (c) 2010, PRODYNA AG, Germany. All rights reserved.
+ */
 package org.nabucco.framework.base.facade.datatype.date;
 
+import java.util.List;
 import org.nabucco.framework.base.facade.datatype.Datatype;
 import org.nabucco.framework.base.facade.datatype.NabuccoDatatype;
 import org.nabucco.framework.base.facade.datatype.date.Day;
 import org.nabucco.framework.base.facade.datatype.date.Hour;
 import org.nabucco.framework.base.facade.datatype.date.Millisecond;
+import org.nabucco.framework.base.facade.datatype.date.Minute;
 import org.nabucco.framework.base.facade.datatype.date.Month;
 import org.nabucco.framework.base.facade.datatype.date.Second;
 import org.nabucco.framework.base.facade.datatype.date.Year;
-import org.nabucco.framework.base.facade.datatype.visitor.VisitorUtility;
-
+import org.nabucco.framework.base.facade.datatype.property.BasetypeProperty;
+import org.nabucco.framework.base.facade.datatype.property.NabuccoProperty;
 
 /**
  * Calendar<p/>A container for a time specified by its fields<p/>
@@ -36,10 +23,13 @@ import org.nabucco.framework.base.facade.datatype.visitor.VisitorUtility;
  */
 public class Calendar extends NabuccoDatatype implements Datatype {
 
-    private static final String[] CONSTRAINTS = { "l0,n;m1,1;", "l0,n;m1,1;", "l0,n;m1,1;",
-            "l0,n;m1,1;", "l0,n;m1,1;", "l0,n;m1,1;", "l0,n;m1,1;" };
-
     private static final long serialVersionUID = 1L;
+
+    private static final String[] PROPERTY_NAMES = { "year", "month", "day", "hour", "minute",
+            "second", "millisecond" };
+
+    private static final String[] PROPERTY_CONSTRAINTS = { "l0,n;m1,1;", "l0,n;m1,1;",
+            "l0,n;m1,1;", "l0,n;m1,1;", "l0,n;m1,1;", "l0,n;m1,1;", "l0,n;m1,1;" };
 
     /** The year of the represented time */
     private Year year;
@@ -68,36 +58,6 @@ public class Calendar extends NabuccoDatatype implements Datatype {
         this.initDefaults();
     }
 
-    /**
-     * CloneObject.
-     *
-     * @param clone the Calendar.
-     */
-    protected void cloneObject(Calendar clone) {
-        super.cloneObject(clone);
-        if ((this.year != null)) {
-            clone.year = this.year.cloneObject();
-        }
-        if ((this.month != null)) {
-            clone.month = this.month.cloneObject();
-        }
-        if ((this.day != null)) {
-            clone.day = this.day.cloneObject();
-        }
-        if ((this.hour != null)) {
-            clone.hour = this.hour.cloneObject();
-        }
-        if ((this.minute != null)) {
-            clone.minute = this.minute.cloneObject();
-        }
-        if ((this.second != null)) {
-            clone.second = this.second.cloneObject();
-        }
-        if ((this.millisecond != null)) {
-            clone.millisecond = this.millisecond.cloneObject();
-        }
-    }
-
     /** InitDefaults. */
     private void initDefaults() {
         year = new Year(1900);
@@ -109,11 +69,34 @@ public class Calendar extends NabuccoDatatype implements Datatype {
         millisecond = new Millisecond(0);
     }
 
-    @Override
-    public Calendar cloneObject() {
-        Calendar clone = new Calendar();
-        this.cloneObject(clone);
-        return clone;
+    /**
+     * CloneObject.
+     *
+     * @param clone the Calendar.
+     */
+    protected void cloneObject(Calendar clone) {
+        super.cloneObject(clone);
+        if ((this.getYear() != null)) {
+            clone.setYear(this.getYear().cloneObject());
+        }
+        if ((this.getMonth() != null)) {
+            clone.setMonth(this.getMonth().cloneObject());
+        }
+        if ((this.getDay() != null)) {
+            clone.setDay(this.getDay().cloneObject());
+        }
+        if ((this.getHour() != null)) {
+            clone.setHour(this.getHour().cloneObject());
+        }
+        if ((this.getMinute() != null)) {
+            clone.setMinute(this.getMinute().cloneObject());
+        }
+        if ((this.getSecond() != null)) {
+            clone.setSecond(this.getSecond().cloneObject());
+        }
+        if ((this.getMillisecond() != null)) {
+            clone.setMillisecond(this.getMillisecond().cloneObject());
+        }
     }
 
     @Override
@@ -122,8 +105,23 @@ public class Calendar extends NabuccoDatatype implements Datatype {
     }
 
     @Override
-    public String[] getConstraints() {
-        return CONSTRAINTS.clone();
+    public List<NabuccoProperty<?>> getProperties() {
+        List<NabuccoProperty<?>> properties = super.getProperties();
+        properties.add(new BasetypeProperty<Year>(PROPERTY_NAMES[0], Year.class,
+                PROPERTY_CONSTRAINTS[0], this.year));
+        properties.add(new BasetypeProperty<Month>(PROPERTY_NAMES[1], Month.class,
+                PROPERTY_CONSTRAINTS[1], this.month));
+        properties.add(new BasetypeProperty<Day>(PROPERTY_NAMES[2], Day.class,
+                PROPERTY_CONSTRAINTS[2], this.day));
+        properties.add(new BasetypeProperty<Hour>(PROPERTY_NAMES[3], Hour.class,
+                PROPERTY_CONSTRAINTS[3], this.hour));
+        properties.add(new BasetypeProperty<Minute>(PROPERTY_NAMES[4], Minute.class,
+                PROPERTY_CONSTRAINTS[4], this.minute));
+        properties.add(new BasetypeProperty<Second>(PROPERTY_NAMES[5], Second.class,
+                PROPERTY_CONSTRAINTS[5], this.second));
+        properties.add(new BasetypeProperty<Millisecond>(PROPERTY_NAMES[6], Millisecond.class,
+                PROPERTY_CONSTRAINTS[6], this.millisecond));
+        return properties;
     }
 
     @Override
@@ -180,20 +178,6 @@ public class Calendar extends NabuccoDatatype implements Datatype {
     }
 
     @Override
-    public String[] getPropertyNames() {
-        return VisitorUtility.merge(super.getPropertyNames(), new String[] { "year", "month",
-                "day", "hour", "minute", "second", "millisecond" });
-    }
-
-    @Override
-    public Object[] getProperties() {
-        return VisitorUtility.merge(
-                super.getProperties(),
-                new Object[] { this.getYear(), this.getMonth(), this.getDay(), this.getHour(),
-                        this.getMinute(), this.getSecond(), this.getMillisecond() });
-    }
-
-    @Override
     public int hashCode() {
         final int PRIME = 31;
         int result = super.hashCode();
@@ -221,6 +205,13 @@ public class Calendar extends NabuccoDatatype implements Datatype {
         appendable.append((("<millisecond>" + this.millisecond) + "</millisecond>\n"));
         appendable.append("</Calendar>\n");
         return appendable.toString();
+    }
+
+    @Override
+    public Calendar cloneObject() {
+        Calendar clone = new Calendar();
+        this.cloneObject(clone);
+        return clone;
     }
 
     /**

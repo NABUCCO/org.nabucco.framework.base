@@ -25,9 +25,6 @@ import java.util.List;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
-import org.nabucco.framework.base.facade.datatype.collection.LazyInitializationException;
-import org.nabucco.framework.base.facade.datatype.collection.NabuccoCollectionState;
-import org.nabucco.framework.base.facade.datatype.collection.NabuccoList;
 import org.nabucco.framework.base.facade.datatype.security.User;
 
 
@@ -359,17 +356,17 @@ public class NabuccoListTest {
 
     /**
      * Test method for
-     * {@link org.nabucco.framework.base.facade.datatype.collection.NabuccoList#removeLazyCollection()}
+     * {@link org.nabucco.framework.base.facade.datatype.collection.NabuccoList#detach()}
      * .
      */
     @Test
     public void testRemoveLazyCollection() {
         this.userList.add(new User());
         this.userList.setState(NabuccoCollectionState.LAZY);
-        this.userList.removeLazyCollection();
+        this.userList.detach();
 
         Assert.assertEquals(NabuccoCollectionState.LAZY, this.userList.getState());
-        Assert.assertEquals(0, this.userList.size());
+        Assert.assertEquals(0, this.userList.getDelegate().size());
     }
 
     /**

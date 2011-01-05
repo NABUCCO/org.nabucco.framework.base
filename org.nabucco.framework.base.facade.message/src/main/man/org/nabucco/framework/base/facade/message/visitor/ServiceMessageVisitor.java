@@ -16,12 +16,11 @@
  */
 package org.nabucco.framework.base.facade.message.visitor;
 
-import org.nabucco.framework.base.facade.message.ServiceMessage;
-
 import org.nabucco.framework.base.facade.datatype.visitor.DatatypeVisitor;
 import org.nabucco.framework.base.facade.datatype.visitor.Visitable;
 import org.nabucco.framework.base.facade.datatype.visitor.Visitor;
 import org.nabucco.framework.base.facade.datatype.visitor.VisitorException;
+import org.nabucco.framework.base.facade.message.ServiceMessage;
 
 /**
  * ServiceMessageVisitor

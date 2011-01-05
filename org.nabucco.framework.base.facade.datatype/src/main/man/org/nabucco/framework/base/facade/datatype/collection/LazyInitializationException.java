@@ -33,11 +33,18 @@ public class LazyInitializationException extends RuntimeException {
 
     /**
      * Creates a new {@link LazyInitializationException} instance.
+     */
+    LazyInitializationException() {
+        super(MessageFormat.format(MESSAGE, "null"));
+    }
+    
+    /**
+     * Creates a new {@link LazyInitializationException} instance.
      * 
      * @param type
      *            type of the collection.
      */
-    public LazyInitializationException(Class<?> type) {
+    LazyInitializationException(Class<?> type) {
         super(MessageFormat.format(MESSAGE, type.getCanonicalName()));
     }
 

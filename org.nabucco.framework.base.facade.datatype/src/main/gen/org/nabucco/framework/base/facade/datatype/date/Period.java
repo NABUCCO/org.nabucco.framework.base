@@ -1,29 +1,16 @@
 /*
-* Copyright 2010 PRODYNA AG
-*
-* Licensed under the Eclipse Public License (EPL), Version 1.0 (the "License");
-* you may not use this file except in compliance with the License.
-* You may obtain a copy of the License at
-*
-* http://www.opensource.org/licenses/eclipse-1.0.php or
-* http://www.nabucco-source.org/nabucco-license.html
-*
-* Unless required by applicable law or agreed to in writing, software
-* distributed under the License is distributed on an "AS IS" BASIS,
-* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-* See the License for the specific language governing permissions and
-* limitations under the License.
-*
-* Generated with NABUCCO Generator 
-*/
+ * NABUCCO Generator, Copyright (c) 2010, PRODYNA AG, Germany. All rights reserved.
+ */
 package org.nabucco.framework.base.facade.datatype.date;
 
+import java.util.List;
 import org.nabucco.framework.base.facade.datatype.Datatype;
 import org.nabucco.framework.base.facade.datatype.NabuccoDatatype;
 import org.nabucco.framework.base.facade.datatype.Number;
 import org.nabucco.framework.base.facade.datatype.date.PeriodType;
-import org.nabucco.framework.base.facade.datatype.visitor.VisitorUtility;
-
+import org.nabucco.framework.base.facade.datatype.property.BasetypeProperty;
+import org.nabucco.framework.base.facade.datatype.property.EnumProperty;
+import org.nabucco.framework.base.facade.datatype.property.NabuccoProperty;
 
 /**
  * Period<p/>A specific time<p/>
@@ -32,9 +19,11 @@ import org.nabucco.framework.base.facade.datatype.visitor.VisitorUtility;
  */
 public class Period extends NabuccoDatatype implements Datatype {
 
-    private static final String[] CONSTRAINTS = { "l0,n;m1,1;", "m1,1;" };
-
     private static final long serialVersionUID = 1L;
+
+    private static final String[] PROPERTY_NAMES = { "count", "periodType" };
+
+    private static final String[] PROPERTY_CONSTRAINTS = { "l0,n;m1,1;", "m1,1;" };
 
     /** The count of units specified by periodType */
     private Number count;
@@ -48,6 +37,10 @@ public class Period extends NabuccoDatatype implements Datatype {
         this.initDefaults();
     }
 
+    /** InitDefaults. */
+    private void initDefaults() {
+    }
+
     /**
      * CloneObject.
      *
@@ -55,21 +48,10 @@ public class Period extends NabuccoDatatype implements Datatype {
      */
     protected void cloneObject(Period clone) {
         super.cloneObject(clone);
-        if ((this.count != null)) {
-            clone.count = this.count.cloneObject();
+        if ((this.getCount() != null)) {
+            clone.setCount(this.getCount().cloneObject());
         }
-        clone.periodType = this.periodType;
-    }
-
-    /** InitDefaults. */
-    private void initDefaults() {
-    }
-
-    @Override
-    public Period cloneObject() {
-        Period clone = new Period();
-        this.cloneObject(clone);
-        return clone;
+        clone.setPeriodType(this.getPeriodType());
     }
 
     @Override
@@ -78,8 +60,13 @@ public class Period extends NabuccoDatatype implements Datatype {
     }
 
     @Override
-    public String[] getConstraints() {
-        return CONSTRAINTS.clone();
+    public List<NabuccoProperty<?>> getProperties() {
+        List<NabuccoProperty<?>> properties = super.getProperties();
+        properties.add(new BasetypeProperty<Number>(PROPERTY_NAMES[0], Number.class,
+                PROPERTY_CONSTRAINTS[0], this.count));
+        properties.add(new EnumProperty<PeriodType>(PROPERTY_NAMES[1], PeriodType.class,
+                PROPERTY_CONSTRAINTS[1], this.periodType));
+        return properties;
     }
 
     @Override
@@ -111,18 +98,6 @@ public class Period extends NabuccoDatatype implements Datatype {
     }
 
     @Override
-    public String[] getPropertyNames() {
-        return VisitorUtility.merge(super.getPropertyNames(),
-                new String[] { "count", "periodType" });
-    }
-
-    @Override
-    public Object[] getProperties() {
-        return VisitorUtility.merge(super.getProperties(),
-                new Object[] { this.getCount(), this.getPeriodType() });
-    }
-
-    @Override
     public int hashCode() {
         final int PRIME = 31;
         int result = super.hashCode();
@@ -140,6 +115,13 @@ public class Period extends NabuccoDatatype implements Datatype {
         appendable.append((("<periodType>" + this.periodType) + "</periodType>\n"));
         appendable.append("</Period>\n");
         return appendable.toString();
+    }
+
+    @Override
+    public Period cloneObject() {
+        Period clone = new Period();
+        this.cloneObject(clone);
+        return clone;
     }
 
     /**

@@ -19,6 +19,11 @@ package org.nabucco.framework.base.facade.datatype.message;
 import org.nabucco.framework.base.facade.datatype.Owner;
 import org.nabucco.framework.base.facade.datatype.NabuccoDatatype;
 
+import org.nabucco.framework.base.facade.datatype.message.CodeNumber;
+import org.nabucco.framework.base.facade.datatype.message.MessageMappingBase;
+import org.nabucco.framework.base.facade.datatype.message.MessageProperty;
+
+
 @Author			Michael Krausse
 @Company		PRODYNA AG
 @Date			2010-04-07

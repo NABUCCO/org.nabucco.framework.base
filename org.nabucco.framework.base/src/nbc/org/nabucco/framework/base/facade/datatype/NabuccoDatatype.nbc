@@ -16,6 +16,9 @@
  */
 package org.nabucco.framework.base.facade.datatype;
 
+import org.nabucco.framework.base.facade.datatype.Identifier;
+import org.nabucco.framework.base.facade.datatype.Version;
+
 @Author			Nicolas Moser
 @Company		PRODYNA AG
 @Date			2010-02-15

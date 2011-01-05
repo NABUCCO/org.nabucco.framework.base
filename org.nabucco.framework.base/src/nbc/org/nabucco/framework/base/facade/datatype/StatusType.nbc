@@ -1,0 +1,19 @@
+/*
+ *	PRODYNA NABUCCO SKM
+ *  Copyright 2010, PRODYNA AG
+ */
+package org.nabucco.framework.base.facade.datatype;
+
+@Author			Dominic Trumpfheller
+@Company		PRODYNA AG
+@Date			2010-11-30
+@Version		1.0
+public Enumeration StatusType {
+
+	@LiteralId active
+	ACTIVE
+	
+	@LiteralId inactive
+	INACTIVE
+	
+}

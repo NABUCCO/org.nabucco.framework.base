@@ -16,6 +16,7 @@
  */
 package org.nabucco.framework.base.facade.datatype.validation.constraint.element;
 
+import java.text.MessageFormat;
 import java.util.Collection;
 import java.util.regex.Pattern;
 
@@ -109,13 +110,10 @@ public class MultiplicityConstraint extends Constraint {
     @Override
     public void check(Validatable owner, Object property, String propertyName,
             ValidationResult result) {
-
-        String ownerName = owner.getClass().getSimpleName();
-
         if (property instanceof Collection<?>) {
-            checkPropertyList((Collection<?>) property, ownerName, propertyName, result);
+            checkPropertyList((Collection<?>) property, owner, propertyName, result);
         } else {
-            checkProperty(property, ownerName, propertyName, result);
+            checkProperty(property, owner, propertyName, result);
         }
     }
 
@@ -131,17 +129,22 @@ public class MultiplicityConstraint extends Constraint {
      * @param result
      *            the validation result
      */
-    private void checkProperty(Object property, String owner, String propertyName,
+    private void checkProperty(Object property, Validatable owner, String propertyName,
             ValidationResult result) {
+        
+        String ownerName = owner.getClass().getSimpleName();
+        
         if (!this.multiplicity.isOptional() && property == null) {
-            Object[] arguments = new Object[] { owner, propertyName,
+            Object[] arguments = new Object[] { ownerName, propertyName,
                     this.getMultiplicity(property), this.multiplicity.getName() };
-            result.getErrorList().add(new ValidationError(MESSAGE, arguments));
+            String message = MessageFormat.format(MESSAGE, arguments);
+            result.getErrorList().add(new ValidationError(owner, propertyName, message));
         }
         if (this.multiplicity.isMultiple()) {
-            Object[] arguments = new Object[] { owner, propertyName,
+            Object[] arguments = new Object[] { ownerName, propertyName,
                     this.getMultiplicity(property), this.multiplicity.getName() };
-            result.getErrorList().add(new ValidationError(MESSAGE, arguments));
+            String message = MessageFormat.format(MESSAGE, arguments);
+            result.getErrorList().add(new ValidationError(owner, propertyName, message));
         }
     }
 
@@ -157,8 +160,8 @@ public class MultiplicityConstraint extends Constraint {
      * @param result
      *            the validation result
      */
-    private void checkPropertyList(Collection<?> propertyList, String owner, String propertyName,
-            ValidationResult result) {
+    private void checkPropertyList(Collection<?> propertyList, Validatable owner,
+            String propertyName, ValidationResult result) {
 
         // Do not validate lazy loaded collections.
         if (propertyList instanceof NabuccoCollection<?>) {
@@ -166,16 +169,20 @@ public class MultiplicityConstraint extends Constraint {
                 return;
             }
         }
+        
+        String ownerName = owner.getClass().getSimpleName();
 
         if (!this.multiplicity.isOptional() && propertyList.isEmpty()) {
-            Object[] arguments = new Object[] { owner, propertyName,
+            Object[] arguments = new Object[] { ownerName, propertyName,
                     this.getMultiplicity(propertyList), this.multiplicity.getName() };
-            result.getErrorList().add(new ValidationError(MESSAGE, arguments));
+            String message = MessageFormat.format(MESSAGE, arguments);
+            result.getErrorList().add(new ValidationError(owner, propertyName, message));
         }
         if (!this.multiplicity.isMultiple()) {
-            Object[] arguments = new Object[] { owner, propertyName,
+            Object[] arguments = new Object[] { ownerName, propertyName,
                     this.getMultiplicity(propertyList), this.multiplicity.getName() };
-            result.getErrorList().add(new ValidationError(MESSAGE, arguments));
+            String message = MessageFormat.format(MESSAGE, arguments);
+            result.getErrorList().add(new ValidationError(owner, propertyName, message));
         }
     }
 

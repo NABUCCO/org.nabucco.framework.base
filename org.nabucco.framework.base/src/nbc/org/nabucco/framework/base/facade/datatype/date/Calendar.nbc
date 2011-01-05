@@ -20,6 +20,7 @@ import org.nabucco.framework.base.facade.datatype.NabuccoDatatype;
 import org.nabucco.framework.base.facade.datatype.date.Day;
 import org.nabucco.framework.base.facade.datatype.date.Hour;
 import org.nabucco.framework.base.facade.datatype.date.Millisecond;
+import org.nabucco.framework.base.facade.datatype.date.Minute;
 import org.nabucco.framework.base.facade.datatype.date.Month;
 import org.nabucco.framework.base.facade.datatype.date.Second;
 import org.nabucco.framework.base.facade.datatype.date.Year;

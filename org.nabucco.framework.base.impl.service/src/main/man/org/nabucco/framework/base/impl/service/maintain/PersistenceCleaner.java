@@ -16,19 +16,25 @@
  */
 package org.nabucco.framework.base.impl.service.maintain;
 
-import java.util.Collection;
+import java.util.List;
 
 import org.nabucco.framework.base.facade.datatype.Datatype;
 import org.nabucco.framework.base.facade.datatype.DatatypeState;
 import org.nabucco.framework.base.facade.datatype.NType;
 import org.nabucco.framework.base.facade.datatype.NabuccoDatatype;
 import org.nabucco.framework.base.facade.datatype.collection.NabuccoCollectionAccessor;
-import org.nabucco.framework.base.facade.datatype.collection.NabuccoList;
+import org.nabucco.framework.base.facade.datatype.property.ListProperty;
+import org.nabucco.framework.base.facade.datatype.property.NabuccoProperty;
+import org.nabucco.framework.base.facade.datatype.property.PropertyType;
 import org.nabucco.framework.base.facade.datatype.visitor.VisitorException;
 import org.nabucco.framework.base.facade.message.visitor.ServiceMessageVisitor;
 
 /**
  * PersistenceCleaner
+ * <p/>
+ * Visitor that visits all datatypes holding {@link java.util.Collection} references and replaces
+ * potential persistence implementation by java.util implementations. This is necessary since
+ * dependencies on persistence implementations must not be handled by clients.
  * 
  * @author Nicolas Moser, PRODYNA AG
  */
@@ -44,21 +50,34 @@ public class PersistenceCleaner extends ServiceMessageVisitor {
     }
 
     /**
-     * Replaces lazy initialized persistence provider specific lists by empty NabuccoLists.
+     * Replaces lazy initialized persistence provider specific collections by empty
+     * {@link java.util.Collection} implementations.
      * 
      * @param datatype
      *            the datatype to clean
      */
     private void cleanDatatype(Datatype datatype) {
-        Object[] properties = datatype.getProperties();
+        List<NabuccoProperty<?>> properties = datatype.getProperties();
+        if (properties == null) {
+            return;
+        }
 
-        if (properties != null) {
-            for (Object property : properties) {
-                if (property instanceof NabuccoList<?>) {
-                    this.cleanList((NabuccoList<?>) property);
-                }
+        for (NabuccoProperty<?> property : properties) {
+            if (property.getPropertyType() == PropertyType.LIST) {
+                this.cleanList((ListProperty<?>) property);
             }
         }
+    }
+
+    /**
+     * Cleans JPA collection implementations and replaces them by {@link java.util.Collection}
+     * instances.
+     * 
+     * @param property
+     *            the list property to clean
+     */
+    private <T extends NType> void cleanList(ListProperty<T> property) {
+        NabuccoCollectionAccessor.getInstance().detachCollection(property.getInstance());
     }
 
     /**
@@ -76,16 +95,6 @@ public class PersistenceCleaner extends ServiceMessageVisitor {
                 }
             }
         }
-    }
-
-    /**
-     * Cleans lazy initialized collections.
-     * 
-     * @param list
-     *            the list to clean
-     */
-    private <T extends NType> void cleanList(Collection<T> list) {
-        NabuccoCollectionAccessor.getInstance().detachCollection(list);
     }
 
 }

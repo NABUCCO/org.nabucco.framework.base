@@ -19,8 +19,6 @@ package org.nabucco.framework.base.facade.exception;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.nabucco.framework.base.facade.exception.NabuccoException;
-
 import org.nabucco.framework.base.facade.datatype.message.MessageMappingBase;
 import org.nabucco.framework.base.facade.datatype.message.MessageProperty;
 
@@ -124,18 +122,18 @@ public class NabuccoExceptionMapper {
 
             Throwable cause = exception.getCause();
             if (cause instanceof NabuccoException) {
-                NabuccoException nabuccoCause = (NabuccoException) cause;
+//                NabuccoException nabuccoCause = (NabuccoException) cause;
 
                 // FIXME: NBC-307!!! If https://secure.prodyna.de/jira/browse/NBC-307 has not been
                 // closed the following produces an error, because needed methods are not
                 // generated.
 
                 // MessageMappingBase mappingChildren = cause.getMapping(path.toString());
-                MessageMappingBase mappingChildren = null;
-
-                if (mappingChildren != null) {
-                    parent.getChildren().add(mappingChildren);
-                }
+//                MessageMappingBase mappingChildren = null;
+//
+//                if (mappingChildren != null) {
+//                    parent.getChildren().add(mappingChildren);
+//                }
             }
         }
     }

@@ -18,7 +18,9 @@ package org.nabucco.framework.base.facade.datatype.collection;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Iterator;
 import java.util.List;
+import java.util.ListIterator;
 
 import org.nabucco.framework.base.facade.datatype.NType;
 
@@ -39,12 +41,16 @@ public final class NabuccoList<E extends NType> extends ForwardingList<E> implem
 
     private static final long serialVersionUID = 1L;
 
+    /** State of the collection. */
     private NabuccoCollectionState state;
 
+    /** The list of elements added by the add() methods. */
     private List<E> assignedList;
 
+    /** The list of elements removed by the remove() methods. */
     private List<E> unassignedList;
 
+    /** Database synchronization status (whether the list is connected or not). */
     private boolean managed;
 
     /**
@@ -90,24 +96,6 @@ public final class NabuccoList<E extends NType> extends ForwardingList<E> implem
         this.initState(state);
     }
 
-    /**
-     * Creates a new {@link NabuccoList} based on an existing list.
-     * 
-     * @param list
-     *            the existing list, a delegate is created for the existing list
-     * @param state
-     *            state of the collection
-     */
-    public NabuccoList(List<E> list, NabuccoCollectionState state) {
-        super(list);
-        this.initState(state);
-        if (state != NabuccoCollectionState.LAZY) {
-            super.clean();
-        } else {
-            this.setManaged(true);
-        }
-    }
-
     @Override
     public NabuccoCollectionState getState() {
         return state;
@@ -126,7 +114,7 @@ public final class NabuccoList<E extends NType> extends ForwardingList<E> implem
         this.getAssignedList().clear();
         this.getUnassignedList().clear();
     }
-
+    
     @Override
     public boolean add(E element) {
         this.internalAdd(element);
@@ -191,11 +179,112 @@ public final class NabuccoList<E extends NType> extends ForwardingList<E> implem
     }
 
     @Override
+    public boolean contains(Object o) {
+        if (this.state == NabuccoCollectionState.LAZY) {
+            return false;
+        }
+        return super.contains(o);
+    }
+
+    @Override
+    public boolean containsAll(Collection<?> c) {
+        if (this.state == NabuccoCollectionState.LAZY) {
+            return false;
+        }
+        return super.containsAll(c);
+    }
+
+    @Override
     public boolean isEmpty() {
         if (this.state == NabuccoCollectionState.LAZY) {
             return true;
         }
         return super.isEmpty();
+    }
+
+    @Override
+    public int size() {
+        this.checkState(null);
+        return super.size();
+    }
+
+    @Override
+    public E get(int index) {
+        this.checkState(null);
+        return super.get(index);
+    }
+
+    @Override
+    public Iterator<E> iterator() {
+        this.checkState(null);
+        return super.iterator();
+    }
+
+    @Override
+    public Object[] toArray() {
+        this.checkState(null);
+        return super.toArray();
+    }
+
+    @Override
+    public int indexOf(Object o) {
+        this.checkState(o != null ? o.getClass() : null);
+        return super.indexOf(o);
+    }
+
+    @Override
+    public int lastIndexOf(Object o) {
+        this.checkState(o != null ? o.getClass() : null);
+        return super.lastIndexOf(o);
+    }
+
+    @Override
+    public <T extends Object> T[] toArray(T[] a) {
+        this.checkState(null);
+        return super.toArray(a);
+    }
+
+    @Override
+    public ListIterator<E> listIterator() {
+        this.checkState(null);
+        return super.listIterator();
+    }
+
+    @Override
+    public ListIterator<E> listIterator(int index) {
+        this.checkState(null);
+        return super.listIterator(index);
+    }
+
+    @Override
+    public List<E> subList(int fromIndex, int toIndex) {
+        this.checkState(null);
+        return super.subList(fromIndex, toIndex);
+    }
+
+    @Override
+    public List<E> getDelegate() {
+        return super.getDelegate();
+    }
+
+    @Override
+    public void setDelegate(List<E> delegate) {
+
+        if (this.state == NabuccoCollectionState.INITIALIZED) {
+
+            // Manually initialized collections are eager loaded after database synchronization!
+            this.state = NabuccoCollectionState.EAGER;
+
+            // Collections initialized manually are not managed!
+            this.setManaged(false);
+
+        } else {
+
+            // Collections initialized by JPA are always managed!
+            this.setManaged(true);
+        }
+
+        super.setDelegate(delegate);
     }
 
     /**
@@ -279,6 +368,14 @@ public final class NabuccoList<E extends NType> extends ForwardingList<E> implem
             state = NabuccoCollectionState.INITIALIZED;
         }
         this.state = state;
+
+        if (this.state == NabuccoCollectionState.INITIALIZED) {
+            // Collections initialized manually are not managed!
+            this.setManaged(false);
+        } else {
+            // Collections initialized by JPA are always managed!
+            this.setManaged(true);
+        }
     }
 
     /**
@@ -292,8 +389,13 @@ public final class NabuccoList<E extends NType> extends ForwardingList<E> implem
      */
     private void checkState(Class<?> type) throws LazyInitializationException {
         if (!this.managed && this.state == NabuccoCollectionState.LAZY) {
+            if (type == null) {
+                throw new LazyInitializationException();
+            }
             throw new LazyInitializationException(type);
         }
+
+        this.setState(NabuccoCollectionState.EAGER);
     }
 
     /**
@@ -347,15 +449,15 @@ public final class NabuccoList<E extends NType> extends ForwardingList<E> implem
                 change = true;
             }
         }
-        for (int index = 0; index < this.assignedList.size(); index++) {
-            if (this.assignedList.get(index).equals(oldElement)) {
-                this.assignedList.set(index, newElement);
+        for (int index = 0; index < this.getAssignedList().size(); index++) {
+            if (this.getAssignedList().get(index).equals(oldElement)) {
+                this.getAssignedList().set(index, newElement);
                 change = true;
             }
         }
-        for (int index = 0; index < this.unassignedList.size(); index++) {
-            if (this.unassignedList.get(index).equals(oldElement)) {
-                this.unassignedList.set(index, newElement);
+        for (int index = 0; index < this.getUnassignedList().size(); index++) {
+            if (this.getUnassignedList().get(index).equals(oldElement)) {
+                this.getUnassignedList().set(index, newElement);
                 change = true;
             }
         }
@@ -407,10 +509,13 @@ public final class NabuccoList<E extends NType> extends ForwardingList<E> implem
      * Replaces the lazy initialized collection implementation by empty lists. If the collection is
      * not LAZY, nothing changes.
      */
-    void removeLazyCollection() {
+    void detach() {
         if (this.state == NabuccoCollectionState.LAZY) {
             super.init();
+        } else {
+            super.clean();
         }
+        this.setManaged(false);
     }
 
     /**
@@ -465,9 +570,9 @@ public final class NabuccoList<E extends NType> extends ForwardingList<E> implem
     @Override
     public NabuccoList<E> cloneCollection() {
         NabuccoList<E> clone = new NabuccoList<E>();
-        clone.state = this.state;
 
         if (this.state == NabuccoCollectionState.LAZY) {
+            clone.state = NabuccoCollectionState.LAZY;
             return clone;
         }
 
@@ -476,6 +581,7 @@ public final class NabuccoList<E extends NType> extends ForwardingList<E> implem
             E cloneElement = (E) element.cloneObject();
             NabuccoCollectionAccessor.getInstance().addWithoutAssignment(clone, cloneElement);
         }
+        clone.state = this.state;
 
         return clone;
     }

@@ -27,11 +27,9 @@ import org.nabucco.framework.base.facade.datatype.logger.NabuccoLogger;
 import org.nabucco.framework.base.facade.datatype.logger.NabuccoLoggingFactory;
 
 /**
- * Provides utility methods to format Strings concerning parameters.
- * 
+ * MessageFormatter
  * <p/>
- * 
- * Thanks to Juergen Weissmueller (PRODYNA AG) for providing the solution.
+ * Provides utility methods to format Strings concerning parameters.
  * 
  * @author Michael Krausse PRODYNA AG
  */

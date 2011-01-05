@@ -6,41 +6,37 @@
 package org.nabucco.framework.base.facade.datatype.utils;
 
 import java.io.Serializable;
-import java.util.HashMap;
-import java.util.HashSet;
+import java.util.Collections;
+import java.util.LinkedList;
 import java.util.Locale;
 import java.util.Map;
-import java.util.MissingResourceException;
+import java.util.PriorityQueue;
 import java.util.Queue;
-import java.util.ResourceBundle;
-import java.util.Set;
-import java.util.concurrent.ConcurrentLinkedQueue;
 
-import org.nabucco.framework.base.facade.datatype.logger.NabuccoLogger;
-import org.nabucco.framework.base.facade.datatype.logger.NabuccoLoggingFactory;
 
 /**
- * Localizes a given string.
+ * I18N
+ * <p/>
+ * Message localisation.
  * 
  * @author Michael Krausse
  */
 public class I18N {
 
-    /** All handlers which are available for localizating a message. */
-    private static Queue<ResourceBundle> messageHandlers;
+    /* Static Fields */
 
-    private static Set<String> messageBundleNames = new HashSet<String>();
+    private static boolean initialized = false;
 
-    private static final String DEFAULT_LANGUAGE = "en";
+    private static Locale locale = Locale.US;
 
-    private static final String DEFAULT_COUNTRY = "US";
+    private static Queue<MessageBundle> bundleQueue = new PriorityQueue<MessageBundle>();
 
-    private static final String BUNDLE_NAME_BASE = "org.nabucco.framework.base.facade.datatype.localization.MessagesBundle";
+    /* Constants */
 
-    private static Locale currentLocale = new Locale(DEFAULT_LANGUAGE, DEFAULT_COUNTRY);
+    private static final String MISSING = "??";
 
-    private static NabuccoLogger logger = NabuccoLoggingFactory.getInstance().getLogger(I18N.class);
-    
+    private static final int DEFAULT_PRIORITY = 0;
+
     /**
      * Private constructor.
      */
@@ -57,14 +53,13 @@ public class I18N {
      * @return localized message
      */
     public static String i18n(String key) {
-        return i18n(key, new HashMap<String, String>());
+        return i18n(key, Collections.<String, String> emptyMap());
     }
 
     /**
      * Localizes a given key.
      * <p/>
-     * If key can not be resolved it will be returned with surrounding ?? (two questionmarks in
-     * front, two behind).
+     * If key can not be resolved it will be returned with surrounding by ??.
      * 
      * @param key
      *            key of the message to localize
@@ -73,47 +68,49 @@ public class I18N {
      * 
      * @return localized message
      */
-    public static String i18n(final String key, Map<String, ? extends Serializable> parameters) {
-        String result = "??";
-        if (key != null) {
-            try {
-                result = result + key + "??";
-                String plainMessage = null;
-                initializeMessageBundles();
-                int possibleBundles = messageHandlers.size();
-                while (plainMessage == null && possibleBundles > 0) {
-                    ResourceBundle currentBundle = messageHandlers.peek();
-                    if (currentBundle.containsKey(key)) {
-                        plainMessage = currentBundle.getString(key);
-                    }
-                    messageHandlers.offer(messageHandlers.poll());
-                    possibleBundles = possibleBundles - 1;
-                }
-                if (plainMessage != null) {
-                    result = MessageFormatter.format(plainMessage, parameters, currentLocale);
-                }
-            } catch (Exception e) {
-                logger.error(e, "Key ", key, " cannot be translated.");
+    public static String i18n(String key, Map<String, ? extends Serializable> parameters) {
+        if (key == null) {
+            return MISSING;
+        }
+
+        if (!initialized) {
+            initializeMessageBundles();
+        }
+
+        Queue<MessageBundle> bundles = new LinkedList<MessageBundle>(I18N.bundleQueue);
+
+        while (bundles.peek() != null) {
+            MessageBundle bundle = bundles.poll();
+
+            String plainMessage = bundle.localize(key);
+
+            if (plainMessage != null) {
+                return MessageFormatter.format(plainMessage, parameters, locale);
             }
         }
-        return result;
+
+        return MISSING + key + MISSING;
     }
 
     /**
-     * Checks whether localized messages should be reloaded and reloads them.
+     * Checks whether localized messages should be reloaded and reloads them if not.
      */
     private static void initializeMessageBundles() {
-        if (messageHandlers == null || messageHandlers.size() != messageBundleNames.size()) {
-            addRessource(BUNDLE_NAME_BASE);
-            messageHandlers = new ConcurrentLinkedQueue<ResourceBundle>();
-            for (String ressourceName : messageBundleNames) {
-                try {
-                    messageHandlers.add(ResourceBundle.getBundle(ressourceName, currentLocale));
-                } catch (MissingResourceException e) {
-                    logger.error("Resource: " + ressourceName + " cannot be loaded");
-                }
-            }
+        for (MessageBundle bundle : bundleQueue) {
+            bundle.init(locale);
         }
+
+        initialized = true;
+    }
+
+    /**
+     * Add a resourcebundle for localization with DEFAULT_PRIORITY = 0.
+     * 
+     * @param ressourceName
+     *            full qualified name of bundle
+     */
+    public static void addRessource(String ressourceName) {
+        I18N.addRessource(ressourceName, DEFAULT_PRIORITY);
     }
 
     /**
@@ -121,22 +118,33 @@ public class I18N {
      * 
      * @param ressourceName
      *            full qualified name of bundle
+     * @param priority
+     *            the resource priority, the higher the priority, the more probable is the use of
+     *            this bundle
      */
-    public static void addRessource(String ressourceName) {
+    public static void addRessource(String ressourceName, int priority) {
         if (ressourceName != null) {
-            messageBundleNames.add(ressourceName);
+            bundleQueue.offer(new MessageBundle(ressourceName, priority));
         }
     }
 
     /**
-     * Remove resourename for localization. This resource will not be used for localization anymore
-     * (it will be removed from lookupable resourcehandlers).
+     * Remove the resource from the localization bundles.
      * 
-     * @param ressourceName
+     * @param resourceName
      *            full qualified name of the bundle
      */
-    public static void remove(String ressourceName) {
-        messageBundleNames.remove(ressourceName);
+    public static void remove(String resourceName) {
+        MessageBundle removedBundle = null;
+        for (MessageBundle bundle : bundleQueue) {
+            if (bundle.getName().equalsIgnoreCase(resourceName)) {
+                removedBundle = bundle;
+            }
+        }
+
+        if (removedBundle != null) {
+            bundleQueue.remove(removedBundle);
+        }
     }
 
     /**
@@ -145,8 +153,9 @@ public class I18N {
      * @param currentLocale
      *            the current locale
      */
-    public static void setCurrentLocale(Locale currentLocale) {
-        I18N.currentLocale = currentLocale;
+    public static void setLocale(Locale currentLocale) {
+        locale = currentLocale;
+        initialized = false;
     }
 
 }

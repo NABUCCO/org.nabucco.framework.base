@@ -19,35 +19,44 @@ package org.nabucco.framework.base.facade.service.injection;
 import java.io.IOException;
 import java.io.InputStream;
 import java.lang.ref.SoftReference;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.Hashtable;
+import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 
 import org.nabucco.framework.base.facade.datatype.logger.NabuccoLogger;
 import org.nabucco.framework.base.facade.datatype.logger.NabuccoLoggingFactory;
+import org.nabucco.framework.base.facade.service.jmx.MBeanSupport;
 
 /**
  * InjectionProvider
  * 
  * @author Silas Schwarz PRODYNA AG
  */
-public class InjectionProvider {
+public class InjectionProvider implements InjectionProviderMBean {
 
-    // TODO: Change directory
-    private static final String META_INF_PATH = "META-INF/";
+    private String id;
 
-    private static final String PROPERTIES_SUFFIX = ".properties";
+    private String fileName;
 
-    /** Injector instances. */
-    private static final Map<String, SoftReference<InjectionProvider>> INJECTOR_MAP = Collections
-            .synchronizedMap(new HashMap<String, SoftReference<InjectionProvider>>());
+    private Properties properties;
 
     /** Logger */
     private static NabuccoLogger logger = NabuccoLoggingFactory.getInstance().getLogger(
             InjectionProvider.class);
 
-    private Properties properties;
+    /** PropertySupport Location. */
+    private static final String META_INF_PATH = "META-INF/";
+
+    /** File Suffix. */
+    private static final String PROPERTIES_SUFFIX = ".properties";
+
+    /** Injector instances. */
+    private static final Map<String, SoftReference<InjectionProvider>> INJECTOR_MAP = Collections
+            .synchronizedMap(new HashMap<String, SoftReference<InjectionProvider>>());
 
     /**
      * Private constructor.
@@ -56,12 +65,12 @@ public class InjectionProvider {
      *            the injection receiver
      */
     private InjectionProvider(String id) {
-
         if (id == null) {
             throw new InjectionException("No valid injection id defined [null].");
         }
 
-        String fileName = id.concat(PROPERTIES_SUFFIX);
+        this.id = id;
+        this.fileName = id.concat(PROPERTIES_SUFFIX);
         InputStream is = InjectionProvider.class.getClassLoader().getResourceAsStream(
                 META_INF_PATH + fileName);
 
@@ -93,21 +102,52 @@ public class InjectionProvider {
         }
 
         InjectionProvider injector = new InjectionProvider(id);
+
         INJECTOR_MAP.put(id, new SoftReference<InjectionProvider>(injector));
+
+        register(id, injector);
+
         return injector;
     }
 
     /**
-     * Injects an appropriate service handler implementation by a given
-     * {@link NabuccoServiceHandler} interface class. The service handler binding must be defined in
-     * META_INF/*.properties files.
+     * Registers the Injection Provider in the MBean registry.
+     * 
+     * @param id
+     *            the injection id
+     * @param injector
+     *            the injection provider
+     */
+    private static void register(String id, InjectionProvider injector) {
+        Hashtable<String, String> keys = createKeys(id);
+        MBeanSupport.register(injector, keys);
+    }
+
+    /**
+     * Create the MBean keys.
+     * 
+     * @param id
+     *            the injector ID
+     * 
+     * @return the injector keys
+     */
+    private static Hashtable<String, String> createKeys(String id) {
+        Hashtable<String, String> keys = new Hashtable<String, String>(2);
+        keys.put(MBeanSupport.TYPE, "InjectionProvider");
+        keys.put(MBeanSupport.NAME, id);
+        return keys;
+    }
+
+    /**
+     * Injects an appropriate injectable implementation by a given {@link Injectable} id. The
+     * injection binding must be defined in META_INF/*.properties files.
      * 
      * @param <T>
-     *            the service handler type
-     * @param superClass
-     *            the service handler interface
+     *            the injection type
+     * @param id
+     *            the injection id (key in properties file)
      * 
-     * @return the service handler implementation instance
+     * @return the injected instance
      */
     public <T extends Injectable> T inject(String id) {
 
@@ -119,19 +159,47 @@ public class InjectionProvider {
             String implName = this.resolveImplementationName(id);
 
             if (implName == null || implName.isEmpty()) {
-                logger.warning("Implementation not found for " + id + ".");
+                logger.warning("Implementation not found for injection " + id + ".");
                 return null;
             }
 
-            @SuppressWarnings("unchecked")
-            Class<T> handler = (Class<T>) Class.forName(implName);
+            ClassLoader classLoader = super.getClass().getClassLoader();
 
-            return handler.newInstance();
+            @SuppressWarnings("unchecked")
+            Class<T> injectable = (Class<T>) classLoader.loadClass(implName);
+
+            return injectable.newInstance();
 
         } catch (Exception e) {
-            logger.warning("Implementation not found for " + id + ".");
+            logger.warning("Implementation not found for injection " + id + ".");
             return null;
         }
+    }
+
+    /**
+     * Injects an appropriate injectable implementation by a given {@link Injectable} id. The
+     * injection binding must be defined in META_INF/*.properties files.
+     * 
+     * @param <T>
+     *            the injection type
+     * 
+     * @return a list of injected instance
+     */
+    public <T extends Injectable> List<T> injectAll() {
+
+        List<T> injections = new ArrayList<T>();
+
+        for (Object id : this.properties.keySet()) {
+            if (id instanceof String) {
+                T instance = this.<T> inject((String) id);
+ 
+                if (instance != null) {
+                    injections.add(instance);
+                }
+            }
+        }
+
+        return injections;
     }
 
     /**
@@ -144,5 +212,41 @@ public class InjectionProvider {
      */
     private String resolveImplementationName(String handlerName) {
         return this.properties.getProperty(handlerName);
+    }
+
+    /**
+     * Getter for the id.
+     * 
+     * @return Returns the id.
+     */
+    public String getId() {
+        return this.id;
+    }
+
+    /**
+     * Getter for the fileName.
+     * 
+     * @return Returns the fileName.
+     */
+    public String getFileName() {
+        return this.fileName;
+    }
+
+    @Override
+    public void reset() {
+        this.properties = null;
+        INJECTOR_MAP.remove(this.getId());
+
+        MBeanSupport.unregister(createKeys(this.getId()));
+    }
+
+    @Override
+    public String toString() {
+        StringBuilder result = new StringBuilder();
+        result.append(this.getId());
+        result.append(" (");
+        result.append(this.getFileName());
+        result.append(")");
+        return result.toString();
     }
 }

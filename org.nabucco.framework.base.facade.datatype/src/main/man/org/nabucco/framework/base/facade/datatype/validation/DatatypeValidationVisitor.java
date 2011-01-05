@@ -16,7 +16,10 @@
  */
 package org.nabucco.framework.base.facade.datatype.validation;
 
+import java.util.List;
+
 import org.nabucco.framework.base.facade.datatype.Datatype;
+import org.nabucco.framework.base.facade.datatype.property.NabuccoProperty;
 import org.nabucco.framework.base.facade.datatype.validation.constraint.parser.ConstraintContainer;
 import org.nabucco.framework.base.facade.datatype.validation.constraint.parser.ConstraintParser;
 import org.nabucco.framework.base.facade.datatype.visitor.DatatypeVisitor;
@@ -31,18 +34,23 @@ import org.nabucco.framework.base.facade.datatype.visitor.VisitorException;
 public class DatatypeValidationVisitor extends DatatypeVisitor implements Visitor {
 
     private ValidationResult result;
+    
+    private final ValidationType depth;
 
     /**
      * Creates a new {@link DatatypeValidationVisitor} instance.
      * 
      * @param result
      *            the validation result containing validation errors
+     * @param depth
+     *            the validation depth
      */
-    public DatatypeValidationVisitor(ValidationResult result) {
+    public DatatypeValidationVisitor(ValidationResult result, ValidationType depth) {
         if (result == null) {
             throw new IllegalArgumentException("ValidationResult [null] is not valid.");
         }
         this.result = result;
+        this.depth = depth;
     }
 
     @Override
@@ -51,13 +59,16 @@ public class DatatypeValidationVisitor extends DatatypeVisitor implements Visito
 
         if (container != null && !container.isEmpty()) {
 
-            Object[] children = datatype.getProperties();
-            for (int index = 0; index < children.length; index++) {
-                container.check(children[index], index, this.result);
+            List<NabuccoProperty<?>> properties = datatype.getProperties();
+            for (int index = 0; index < properties.size(); index++) {
+                NabuccoProperty<?> property = properties.get(index);
+                container.check(datatype, property.getInstance(), index, this.result);
             }
         }
 
-        super.visit(datatype);
+        if (depth != ValidationType.SHALLOW) {
+            super.visit(datatype);
+        }
     }
 
 }

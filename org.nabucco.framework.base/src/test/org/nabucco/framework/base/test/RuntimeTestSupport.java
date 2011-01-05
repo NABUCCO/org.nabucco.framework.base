@@ -57,7 +57,7 @@ public abstract class RuntimeTestSupport {
 
     private static final String PORT = "connection.port";
 
-    private static final String TEST = "Test";
+    private static final String TEST = "DummyInterceptor";
 
     public <C extends Component> C getComponent(ComponentLocator<C> locator)
             throws ConnectionException {

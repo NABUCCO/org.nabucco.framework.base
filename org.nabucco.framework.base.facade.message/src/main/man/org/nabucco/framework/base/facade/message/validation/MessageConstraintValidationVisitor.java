@@ -16,15 +16,18 @@
  */
 package org.nabucco.framework.base.facade.message.validation;
 
-import org.nabucco.framework.base.facade.message.ServiceMessage;
-import org.nabucco.framework.base.facade.message.visitor.ServiceMessageVisitor;
+import java.util.List;
 
 import org.nabucco.framework.base.facade.datatype.Datatype;
+import org.nabucco.framework.base.facade.datatype.property.NabuccoProperty;
 import org.nabucco.framework.base.facade.datatype.validation.ValidationResult;
+import org.nabucco.framework.base.facade.datatype.validation.ValidationType;
 import org.nabucco.framework.base.facade.datatype.validation.constraint.parser.ConstraintContainer;
 import org.nabucco.framework.base.facade.datatype.validation.constraint.parser.ConstraintParser;
 import org.nabucco.framework.base.facade.datatype.visitor.Visitor;
 import org.nabucco.framework.base.facade.datatype.visitor.VisitorException;
+import org.nabucco.framework.base.facade.message.ServiceMessage;
+import org.nabucco.framework.base.facade.message.visitor.ServiceMessageVisitor;
 
 /**
  * MessageConstraintValidationVisitor
@@ -34,18 +37,23 @@ import org.nabucco.framework.base.facade.datatype.visitor.VisitorException;
 public class MessageConstraintValidationVisitor extends ServiceMessageVisitor implements Visitor {
 
     private ValidationResult result;
+    
+    private final ValidationType depth;
 
     /**
      * Creates a new {@link MessageConstraintValidationVisitor} instance.
      * 
      * @param result
      *            the validation result containing validation errors
+     * @param depth
+     *            the validation depth
      */
-    public MessageConstraintValidationVisitor(ValidationResult result) {
+    public MessageConstraintValidationVisitor(ValidationResult result, ValidationType depth) {
         if (result == null) {
             throw new IllegalArgumentException("ValidationResult [null] is not valid.");
         }
         this.result = result;
+        this.depth = depth;
     }
 
     @Override
@@ -54,12 +62,16 @@ public class MessageConstraintValidationVisitor extends ServiceMessageVisitor im
 
         if (container != null && !container.isEmpty()) {
 
-            Object[] children = message.getProperties();
-            for (int index = 0; index < children.length; index++) {
-                container.check(children[index], index, this.result);
+            List<NabuccoProperty<?>> properties = message.getProperties();
+            for (int index = 0; index < properties.size(); index++) {
+                NabuccoProperty<?> property = properties.get(index);
+                container.check(message, property.getInstance(), index, this.result);
             }
         }
-        super.visit(message);
+        
+        if (this.depth != ValidationType.SHALLOW) {
+            super.visit(message);
+        }
     }
 
     @Override
@@ -68,12 +80,16 @@ public class MessageConstraintValidationVisitor extends ServiceMessageVisitor im
 
         if (container != null && !container.isEmpty()) {
 
-            Object[] children = datatype.getProperties();
-            for (int index = 0; index < children.length; index++) {
-                container.check(children[index], index, this.result);
+            List<NabuccoProperty<?>> properties = datatype.getProperties();
+            for (int index = 0; index < properties.size(); index++) {
+                NabuccoProperty<?> property = properties.get(index);
+                container.check(datatype, property.getInstance(), index, this.result);
             }
         }
-        super.visit(datatype);
+
+        if (this.depth != ValidationType.SHALLOW) {
+            super.visit(datatype);
+        }
     }
 
 }

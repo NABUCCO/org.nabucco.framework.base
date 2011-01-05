@@ -123,7 +123,9 @@ public abstract class NDate extends BasetypeSupport implements Basetype, Compara
      *            the cloned basetype
      */
     protected void cloneObject(NDate clone) {
-        clone.value = (Date) this.value.clone();
+        if (this.value != null) {
+            clone.value = (Date) this.value.clone();
+        }
     }
 
 }

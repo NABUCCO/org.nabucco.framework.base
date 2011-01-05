@@ -32,18 +32,21 @@ import org.nabucco.framework.base.facade.exception.persistence.PersistenceExcept
 
 /**
  * PersistenceHelper
+ * <p/>
+ * Utilty class holding persistence operations for synchronizing {@link NabuccoDatatype} instances
+ * with the database.
  * 
- * @author Jens Wurm, Nicolas Moser, PRODYNA AG
+ * @author Jens Wurm, Nicolas Moser, Oliver Teichmann PRODYNA AG
  */
 public class PersistenceHelper {
 
-    /** The Entity Manager */
+    /** The Entity Manager reference. */
     private EntityManager em;
 
-    /** Set of already persisted datatypes */
-    private Set<NabuccoDatatype> alreadyPersisted = new HashSet<NabuccoDatatype>();
+    /** Set of already persisted datatype hash codes. */
+    private Set<Integer> alreadyPersisted = new HashSet<Integer>();
 
-    /** The NABUCCO logger */
+    /** The NABUCCO logger. */
     private static NabuccoLogger logger = NabuccoLoggingFactory.getInstance().getLogger(
             PersistenceHelper.class);
 
@@ -55,7 +58,8 @@ public class PersistenceHelper {
      */
     public PersistenceHelper(EntityManager entityManager) {
         if (entityManager == null) {
-            throw new IllegalArgumentException("EntityManager must not be null.");
+            throw new IllegalArgumentException(
+                    "Cannot create PersistenceHelper for EntityManager [null].");
         }
         this.em = entityManager;
     }
@@ -95,8 +99,26 @@ public class PersistenceHelper {
             throw new EntityNotFoundException(msg);
         }
 
-        managedDatatype.setDatatypeState(DatatypeState.PERSISTENT);
+        // Cached entity instances should not be touched.
+        if (managedDatatype.getDatatypeState() == DatatypeState.CONSTRUCTED) {
+            managedDatatype.setDatatypeState(DatatypeState.PERSISTENT);
+        }
+        
         return managedDatatype;
+    }
+
+    /**
+     * Persists a bulk of {@link NabuccoDatatype} instances with its children.
+     * 
+     * @param datatypes
+     *            the datatypes
+     * 
+     * @throws PersistenceException
+     */
+    public void persist(Iterable<? extends NabuccoDatatype> datatypes) throws PersistenceException {
+        for (NabuccoDatatype datatype : datatypes) {
+            this.persist(datatype);
+        }
     }
 
     /**
@@ -107,12 +129,17 @@ public class PersistenceHelper {
      * 
      * @throws PersistenceException
      */
-    public void persist(NabuccoDatatype datatype) throws PersistenceException {
+    public <T extends NabuccoDatatype> T persist(T datatype) throws PersistenceException {
 
         if (datatype == null) {
             throw new PersistenceException("Cannot maintain datatype [null].");
         }
 
+        if (this.isAlreadyPersisted(datatype)) {
+            return datatype;
+        }
+
+        Long id = datatype.getId();
         String name = datatype.getClass().getName();
 
         try {
@@ -123,15 +150,18 @@ public class PersistenceHelper {
                 throw new PersistenceException("Datatype is not initialized '" + name + "'.");
             }
             case INITIALIZED: {
-                this.createDatatype(datatype);
+                datatype = this.createDatatype(datatype);
                 break;
             }
             case MODIFIED: {
-                this.modifyDatatype(datatype);
+                datatype = this.modifyDatatype(datatype);
                 break;
             }
             case DELETED: {
-                this.deleteDatatype(datatype);
+                datatype = this.deleteDatatype(datatype);
+                break;
+            }
+            case DESTROYED: {
                 break;
             }
             case PERSISTENT: {
@@ -145,13 +175,36 @@ public class PersistenceHelper {
                         + datatype.getDatatypeState() + "' is not valid for " + name + "'.");
             }
             }
-            this.alreadyPersisted.add(datatype);
+
+            return datatype;
+
         } catch (PersistenceException pe) {
             throw pe;
         } catch (Exception e) {
-            logger.error(e, "Error persisting datatype '", name, "'.");
-            throw PersistenceExceptionMapper.resolve(e, name, datatype.getId());
+            logger.error(e, "Error persisting datatype '", name, "' with id '", String.valueOf(id),
+                    "'.");
+            throw PersistenceExceptionMapper.resolve(e, name, id);
         }
+    }
+
+    /**
+     * Check whether the datatype has already been persisted.
+     * 
+     * @param datatype
+     *            the datatype to check
+     * 
+     * @return <b>true</b> if the datatype has alread been persisted, <b>false</b> if not
+     */
+    private boolean isAlreadyPersisted(NabuccoDatatype datatype) {
+        int identity = System.identityHashCode(datatype);
+        return !this.alreadyPersisted.add(identity);
+    }
+
+    /**
+     * Reset the already visited datatypes.
+     */
+    public void reset() {
+        this.alreadyPersisted.clear();
     }
 
     /**
@@ -159,22 +212,24 @@ public class PersistenceHelper {
      * 
      * @param datatype
      *            the datatype
+     * @param commit
      * 
      * @throws PersistenceException
      */
-    private void createDatatype(NabuccoDatatype datatype) throws PersistenceException {
+    private <T extends NabuccoDatatype> T createDatatype(T datatype) throws PersistenceException {
 
         String name = datatype.getClass().getName();
 
         try {
             this.em.persist(datatype);
-            this.em.flush();
-            this.em.clear();
             datatype.setDatatypeState(DatatypeState.PERSISTENT);
+
         } catch (Exception e) {
             logger.error(e, "Cannot create datatype '", name, "'.");
             throw PersistenceExceptionMapper.resolve(e, name, datatype.getId());
         }
+
+        return datatype;
     }
 
     /**
@@ -182,10 +237,11 @@ public class PersistenceHelper {
      * 
      * @param datatype
      *            the datatype to modify
+     * @param commit
      * 
      * @throws PersistenceException
      */
-    private void modifyDatatype(NabuccoDatatype datatype) throws PersistenceException {
+    private <T extends NabuccoDatatype> T modifyDatatype(T datatype) throws PersistenceException {
 
         String name = datatype.getClass().getName();
 
@@ -195,18 +251,15 @@ public class PersistenceHelper {
         }
 
         try {
-
-            NabuccoDatatype managedDatatype = this.em.merge(datatype);
-            this.em.flush();
-            this.em.clear();
-
-            // set the version id from the merged copy
-            datatype.setVersion(managedDatatype.getVersion());
+            datatype = this.em.merge(datatype);
             datatype.setDatatypeState(DatatypeState.PERSISTENT);
+
         } catch (Exception e) {
             logger.error(e, "Cannot modify datatype '", name, "'.");
             throw PersistenceExceptionMapper.resolve(e, name, datatype.getId());
         }
+
+        return datatype;
     }
 
     /**
@@ -214,10 +267,12 @@ public class PersistenceHelper {
      * 
      * @param datatype
      *            the datatype to delete.
+     * @param commit
+     * @return
      * 
      * @throws PersistenceException
      */
-    private void deleteDatatype(NabuccoDatatype datatype) throws PersistenceException {
+    private <T extends NabuccoDatatype> T deleteDatatype(T datatype) throws PersistenceException {
 
         String name = datatype.getClass().getName();
 
@@ -227,16 +282,17 @@ public class PersistenceHelper {
         }
 
         try {
+            datatype = this.em.merge(datatype);
+            this.em.remove(datatype);
 
-            NabuccoDatatype managedDatatype = this.findDatatype(datatype);
+            datatype.setDatatypeState(DatatypeState.DESTROYED);
 
-            this.em.remove(managedDatatype);
-            this.em.flush();
-            this.em.clear();
         } catch (Exception e) {
             logger.error(e, "Cannot delete datatype '", name, "'.");
             throw PersistenceExceptionMapper.resolve(e, name, datatype.getId());
         }
+
+        return datatype;
     }
 
     /**
@@ -249,6 +305,7 @@ public class PersistenceHelper {
      * 
      * @throws PersistenceException
      */
+    @SuppressWarnings("unused")
     private NabuccoDatatype findDatatype(NabuccoDatatype datatype) throws PersistenceException {
 
         String name = datatype.getClass().getName();
@@ -263,6 +320,18 @@ public class PersistenceHelper {
             throw new OptimisticLockException(msg);
         }
 
+        // Cached entity instances should not be touched.
+        if (managedDatatype.getDatatypeState() == DatatypeState.CONSTRUCTED) {
+            managedDatatype.setDatatypeState(DatatypeState.PERSISTENT);
+        }
+
         return managedDatatype;
+    }
+
+    /**
+     * Synchronize the persistence context to the underlying database.
+     */
+    public void flush() {
+        this.em.flush();
     }
 }

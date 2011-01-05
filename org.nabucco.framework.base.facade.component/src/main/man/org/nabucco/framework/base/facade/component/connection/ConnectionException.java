@@ -16,12 +16,16 @@
  */
 package org.nabucco.framework.base.facade.component.connection;
 
+import org.nabucco.framework.base.facade.exception.NabuccoException;
+
 /**
  * ConnectionException
  * 
  * @author Nicolas Moser, PRODYNA AG
  */
-public class ConnectionException extends Exception {
+public class ConnectionException extends NabuccoException {
+
+    // TODO: Generate!
 
     private static final long serialVersionUID = 1L;
 

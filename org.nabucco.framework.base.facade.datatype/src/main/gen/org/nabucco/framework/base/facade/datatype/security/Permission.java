@@ -1,31 +1,17 @@
 /*
-* Copyright 2010 PRODYNA AG
-*
-* Licensed under the Eclipse Public License (EPL), Version 1.0 (the "License");
-* you may not use this file except in compliance with the License.
-* You may obtain a copy of the License at
-*
-* http://www.opensource.org/licenses/eclipse-1.0.php or
-* http://www.nabucco-source.org/nabucco-license.html
-*
-* Unless required by applicable law or agreed to in writing, software
-* distributed under the License is distributed on an "AS IS" BASIS,
-* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-* See the License for the specific language governing permissions and
-* limitations under the License.
-*
-* Generated with NABUCCO Generator 
-*/
+ * NABUCCO Generator, Copyright (c) 2010, PRODYNA AG, Germany. All rights reserved.
+ */
 package org.nabucco.framework.base.facade.datatype.security;
 
+import java.util.List;
 import org.nabucco.framework.base.facade.datatype.Datatype;
 import org.nabucco.framework.base.facade.datatype.Description;
 import org.nabucco.framework.base.facade.datatype.NabuccoDatatype;
 import org.nabucco.framework.base.facade.datatype.Name;
 import org.nabucco.framework.base.facade.datatype.Owner;
 import org.nabucco.framework.base.facade.datatype.code.CodeType;
-import org.nabucco.framework.base.facade.datatype.visitor.VisitorUtility;
-
+import org.nabucco.framework.base.facade.datatype.property.BasetypeProperty;
+import org.nabucco.framework.base.facade.datatype.property.NabuccoProperty;
 
 /**
  * Permission<p/>A Permission, assigned to a Role, User or Group<p/>
@@ -35,10 +21,13 @@ import org.nabucco.framework.base.facade.datatype.visitor.VisitorUtility;
  */
 public class Permission extends NabuccoDatatype implements Datatype {
 
-    private static final String[] CONSTRAINTS = { "l0,n;m1,1;", "l0,n;m1,1;", "l0,n;m1,1;",
-            "l0,n;m1,1;" };
-
     private static final long serialVersionUID = 1L;
+
+    private static final String[] PROPERTY_NAMES = { "permissionname", "owner", "description",
+            "permissionType" };
+
+    private static final String[] PROPERTY_CONSTRAINTS = { "l0,n;m1,1;", "l0,n;m1,1;",
+            "l0,n;m1,1;", "l0,n;m1,1;" };
 
     /** Name of the permission */
     private Name permissionname;
@@ -58,6 +47,10 @@ public class Permission extends NabuccoDatatype implements Datatype {
         this.initDefaults();
     }
 
+    /** InitDefaults. */
+    private void initDefaults() {
+    }
+
     /**
      * CloneObject.
      *
@@ -65,29 +58,18 @@ public class Permission extends NabuccoDatatype implements Datatype {
      */
     protected void cloneObject(Permission clone) {
         super.cloneObject(clone);
-        if ((this.permissionname != null)) {
-            clone.permissionname = this.permissionname.cloneObject();
+        if ((this.getPermissionname() != null)) {
+            clone.setPermissionname(this.getPermissionname().cloneObject());
         }
-        if ((this.owner != null)) {
-            clone.owner = this.owner.cloneObject();
+        if ((this.getOwner() != null)) {
+            clone.setOwner(this.getOwner().cloneObject());
         }
-        if ((this.description != null)) {
-            clone.description = this.description.cloneObject();
+        if ((this.getDescription() != null)) {
+            clone.setDescription(this.getDescription().cloneObject());
         }
-        if ((this.permissionType != null)) {
-            clone.permissionType = this.permissionType.cloneObject();
+        if ((this.getPermissionType() != null)) {
+            clone.setPermissionType(this.getPermissionType().cloneObject());
         }
-    }
-
-    /** InitDefaults. */
-    private void initDefaults() {
-    }
-
-    @Override
-    public Permission cloneObject() {
-        Permission clone = new Permission();
-        this.cloneObject(clone);
-        return clone;
     }
 
     @Override
@@ -96,8 +78,17 @@ public class Permission extends NabuccoDatatype implements Datatype {
     }
 
     @Override
-    public String[] getConstraints() {
-        return CONSTRAINTS.clone();
+    public List<NabuccoProperty<?>> getProperties() {
+        List<NabuccoProperty<?>> properties = super.getProperties();
+        properties.add(new BasetypeProperty<Name>(PROPERTY_NAMES[0], Name.class,
+                PROPERTY_CONSTRAINTS[0], this.permissionname));
+        properties.add(new BasetypeProperty<Owner>(PROPERTY_NAMES[1], Owner.class,
+                PROPERTY_CONSTRAINTS[1], this.owner));
+        properties.add(new BasetypeProperty<Description>(PROPERTY_NAMES[2], Description.class,
+                PROPERTY_CONSTRAINTS[2], this.description));
+        properties.add(new BasetypeProperty<CodeType>(PROPERTY_NAMES[3], CodeType.class,
+                PROPERTY_CONSTRAINTS[3], this.permissionType));
+        return properties;
     }
 
     @Override
@@ -139,18 +130,6 @@ public class Permission extends NabuccoDatatype implements Datatype {
     }
 
     @Override
-    public String[] getPropertyNames() {
-        return VisitorUtility.merge(super.getPropertyNames(), new String[] { "permissionname",
-                "owner", "description", "permissionType" });
-    }
-
-    @Override
-    public Object[] getProperties() {
-        return VisitorUtility.merge(super.getProperties(), new Object[] { this.getPermissionname(),
-                this.getOwner(), this.getDescription(), this.getPermissionType() });
-    }
-
-    @Override
     public int hashCode() {
         final int PRIME = 31;
         int result = super.hashCode();
@@ -174,6 +153,13 @@ public class Permission extends NabuccoDatatype implements Datatype {
         appendable.append((("<permissionType>" + this.permissionType) + "</permissionType>\n"));
         appendable.append("</Permission>\n");
         return appendable.toString();
+    }
+
+    @Override
+    public Permission cloneObject() {
+        Permission clone = new Permission();
+        this.cloneObject(clone);
+        return clone;
     }
 
     /**

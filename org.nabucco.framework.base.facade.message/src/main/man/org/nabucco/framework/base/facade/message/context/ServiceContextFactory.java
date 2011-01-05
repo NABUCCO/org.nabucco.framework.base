@@ -16,10 +16,9 @@
  */
 package org.nabucco.framework.base.facade.message.context;
 
+import org.nabucco.framework.base.facade.datatype.security.Subject;
 import org.nabucco.framework.base.facade.message.tracing.InvocationIdentifier;
 import org.nabucco.framework.base.facade.message.tracing.InvocationIdentifierFactory;
-
-import org.nabucco.framework.base.facade.datatype.security.Subject;
 
 /**
  * ServiceContextFactory

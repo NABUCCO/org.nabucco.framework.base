@@ -10,9 +10,10 @@
 	<classpathentry combineaccessrules="false" kind="src" path="/org.nabucco.framework.base.facade.exception"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/org.nabucco.framework.base.facade.message"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/org.nabucco.framework.base.facade.service"/>
-	<classpathentry kind="lib" path="/org.nabucco.framework.base/lib/javax.servlet.jar"/>
-	<classpathentry kind="lib" path="/org.nabucco.framework.base/lib/javax.servlet.jsp.jar"/>
-	<classpathentry kind="lib" path="/org.nabucco.framework.base/lib/javax.servlet.jsp.jstl.jar"/>
-	<classpathentry kind="lib" path="/org.nabucco.framework.base/lib/jsf-api.jar"/>
+	<classpathentry kind="lib" path="/org.nabucco.framework.base/lib/web/vaadin.jar"/>
+	<classpathentry kind="lib" path="/org.nabucco.framework.base/lib/web/jsp-api.jar"/>
+	<classpathentry kind="lib" path="/org.nabucco.framework.base/lib/web/log4j.jar"/>
+	<classpathentry kind="lib" path="/org.nabucco.framework.base/lib/web/servlet-api.jar"/>
+	<classpathentry kind="lib" path="/org.nabucco.framework.base/lib/web/jsf-api.jar"/>
 	<classpathentry kind="output" path="out"/>
 </classpath>

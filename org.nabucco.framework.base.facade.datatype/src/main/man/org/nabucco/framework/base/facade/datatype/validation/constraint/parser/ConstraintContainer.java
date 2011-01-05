@@ -36,34 +36,13 @@ import org.nabucco.framework.base.facade.datatype.validation.constraint.element.
  */
 public class ConstraintContainer {
 
-    /** The validatable owning this constraints. */
-    private Validatable owner;
-
     /** All constraints mapped by the related fields index. */
     private Map<Integer, List<Constraint>> constraintMap = new HashMap<Integer, List<Constraint>>();
 
     /**
      * Creates a new {@link ConstraintContainer} instance.
-     * 
-     * @param owner
-     *            the constraint owner
-     * @param type
-     *            type of the constraint owner
      */
-    ConstraintContainer(Validatable owner) {
-        if (owner == null) {
-            throw new IllegalArgumentException("Owning validatable [null] is not valid.");
-        }
-        this.owner = owner;
-    }
-
-    /**
-     * Getter for the owner validatable.
-     * 
-     * @return Returns the owner.
-     */
-    public Validatable getOwner() {
-        return this.owner;
+    ConstraintContainer() {
     }
 
     /**
@@ -78,6 +57,8 @@ public class ConstraintContainer {
     /**
      * Checks the given property against the constraint container.
      * 
+     * @param owner
+     *            owner of the property
      * @param property
      *            the property to validate
      * @param index
@@ -85,19 +66,19 @@ public class ConstraintContainer {
      * @param result
      *            the validation result containing validation errors
      */
-    public void check(Object property, Integer index, ValidationResult result) {
+    public void check(Validatable owner, Object property, Integer index, ValidationResult result) {
         List<Constraint> constraintList = this.getConstraints(index);
 
         if (property instanceof Basetype) {
-            constraintList.addAll(this.extractBasetypeConstraints((Basetype) property));
+            this.addBasetypeConstraints((Basetype) property, constraintList);
         }
 
         // Each constraint type must only be visited once.
         Set<ConstraintType> validated = new HashSet<ConstraintType>();
         for (Constraint constraint : constraintList) {
             if (validated.add(constraint.getType())) {
-                String propertyName = getPropertyName(index);
-                constraint.check(this.owner, property, propertyName, result);
+                String propertyName = this.getPropertyName(owner, index);
+                constraint.check(owner, property, propertyName, result);
             }
         }
     }
@@ -124,32 +105,50 @@ public class ConstraintContainer {
      * 
      * @param basetype
      *            the property
+     * @param constraintList
+     *            the list to add the constraints
      * 
      * @return the extracted basetype constraints
      */
-    private List<Constraint> extractBasetypeConstraints(Basetype basetype) {
+    private void addBasetypeConstraints(Basetype basetype, List<Constraint> constraintList) {
         ConstraintContainer container = ConstraintParser.getInstance().parseConstraint(basetype);
-        return container.getConstraints(0);
+        List<Constraint> basetypeConstraints = container.getConstraints(0);
+
+        List<Constraint> newConstraints = new ArrayList<Constraint>();
+
+        for (Constraint basetypeConstraint : basetypeConstraints) {
+
+            boolean contains = false;
+            for (Constraint constraint : constraintList) {
+                if (basetypeConstraint.getType() == constraint.getType()) {
+                    contains = true;
+                }
+            }
+
+            if (!contains) {
+                newConstraints.add(basetypeConstraint);
+            }
+        }
+
+        constraintList.addAll(newConstraints);
     }
 
     /**
      * Extracts the name of the property to validate.
      * 
+     * @param owner
+     *            owner of the validation
      * @param index
      *            index of the property
      * 
      * @return the name of the property
      */
-    private String getPropertyName(Integer index) {
+    private String getPropertyName(Validatable owner, Integer index) {
         String propertyName;
-        if (this.owner instanceof Basetype) {
-            propertyName = "value";
-        } else if (this.owner == null
-                || this.owner.getPropertyNames() == null
-                || this.owner.getPropertyNames().length <= index) {
+        if (owner == null) {
             propertyName = "undefined";
         } else {
-            propertyName = this.owner.getPropertyNames()[index];
+            propertyName = owner.getProperties().get(index).getName();
         }
         return propertyName;
     }
@@ -169,6 +168,7 @@ public class ConstraintContainer {
     @Override
     public String toString() {
         StringBuilder result = new StringBuilder();
+        result.append("Constraints:\n");
         for (int i = 0; i < this.constraintMap.size(); i++) {
             List<Constraint> constraintList = this.constraintMap.get(i);
 

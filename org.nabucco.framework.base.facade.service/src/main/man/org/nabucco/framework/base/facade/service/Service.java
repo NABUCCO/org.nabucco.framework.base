@@ -27,4 +27,11 @@ import org.nabucco.framework.base.facade.service.injection.Injectable;
  */
 public interface Service extends Injectable, Serializable {
 
+    /**
+     * Returns the name of the service.
+     * 
+     * @return the service name
+     */
+    String getName();
+
 }

@@ -16,11 +16,6 @@
  */
 package org.nabucco.framework.base.facade.exception.persistence;
 
-import org.nabucco.framework.base.facade.exception.persistence.EntityExistsException;
-import org.nabucco.framework.base.facade.exception.persistence.EntityNotFoundException;
-import org.nabucco.framework.base.facade.exception.persistence.NonUniqueResultException;
-import org.nabucco.framework.base.facade.exception.persistence.OptimisticLockException;
-import org.nabucco.framework.base.facade.exception.persistence.PersistenceException;
 
 /**
  * PersistenceExceptionMapper
@@ -57,24 +52,32 @@ public class PersistenceExceptionMapper {
 
         PersistenceException out = null;
 
+        StringBuilder resultMessage = new StringBuilder();
+        resultMessage.append("Error during persistence of entity ");
+        resultMessage.append(entityName);
+        resultMessage.append(" with id [");
+        resultMessage.append(id);
+        resultMessage.append("]. ");
+        resultMessage.append(exception.getMessage());
+        
         if (exception instanceof PersistenceException) {
             return (PersistenceException) exception;
         } else if (exception instanceof javax.persistence.EntityExistsException) {
-            out = new EntityExistsException(exception);
+            out = new EntityExistsException(resultMessage.toString());
         } else if (exception instanceof javax.persistence.EntityNotFoundException) {
-            out = new EntityNotFoundException(exception);
+            out = new EntityNotFoundException(resultMessage.toString());
         } else if (exception instanceof javax.persistence.NonUniqueResultException) {
-            out = new NonUniqueResultException(exception);
+            out = new NonUniqueResultException(resultMessage.toString());
         } else if (exception instanceof javax.persistence.NoResultException) {
-            out = new EntityNotFoundException(exception);
+            out = new EntityNotFoundException(resultMessage.toString());
         } else if (exception instanceof javax.persistence.OptimisticLockException) {
-            out = new OptimisticLockException(exception);
+            out = new OptimisticLockException(resultMessage.toString());
         } else if (exception instanceof javax.persistence.RollbackException) {
-            out = new PersistenceException(exception);
+            out = new PersistenceException(resultMessage.toString());
         } else if (exception instanceof javax.persistence.TransactionRequiredException) {
-            out = new PersistenceException(exception);
+            out = new PersistenceException(resultMessage.toString());
         } else {
-            out = new PersistenceException(exception.getMessage());
+            out = new PersistenceException(resultMessage.toString());
         }
 
         return out;

@@ -30,17 +30,11 @@ public interface Validatable extends Visitable {
      * 
      * @param result
      *            the result to append with errors/warnings
+     * @param depth
+     *            the depth of a validation
      * 
      * @throws ValidationException
      */
-    void validate(ValidationResult result) throws ValidationException;
-
-    /**
-     * Getter for the datatype constraints as string representation. Each array index represents a
-     * field of the datatype.
-     * 
-     * @return the constraint array
-     */
-    String[] getConstraints();
+    void validate(ValidationResult result, ValidationType depth) throws ValidationException;
 
 }

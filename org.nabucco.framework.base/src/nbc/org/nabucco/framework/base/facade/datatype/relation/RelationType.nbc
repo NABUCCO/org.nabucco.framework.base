@@ -1,0 +1,19 @@
+/*
+ *	PRODYNA NABUCCO SKM
+ *  Copyright 2010, PRODYNA AG
+ */
+package org.nabucco.framework.base.facade.datatype.relation;
+
+@Author			Dominic Trumpfheller
+@Company		PRODYNA AG
+@Date			2010-11-30
+@Version		1.0
+public Enumeration RelationType {
+
+	@LiteralId is a
+	IS_A
+	
+	@LiteralId has a
+	HAS_A
+	
+}

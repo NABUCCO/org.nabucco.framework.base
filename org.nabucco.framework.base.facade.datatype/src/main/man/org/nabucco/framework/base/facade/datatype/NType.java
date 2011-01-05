@@ -26,9 +26,9 @@ import java.io.Serializable;
 public interface NType extends Serializable {
 
     /**
-     * Clones the type deep.
+     * Clones this instance and all its relations recursively.
      * 
-     * @return a clone of the NType.
+     * @return a clone of the {@link NType} instance.
      */
     NType cloneObject();
 

@@ -33,93 +33,114 @@ class Log4JNabuccoLogger implements NabuccoLogger {
 
     @Override
     public void debug(Throwable e, String... message) {
-        if (logger.isDebugEnabled()) {
-            logger.debug(appendMessages(message), e);
+        if (this.logger.isDebugEnabled()) {
+            this.logger.debug(appendMessages(message), e);
         }
     }
 
     @Override
     public void debug(String... message) {
-        if (logger.isDebugEnabled()) {
-            logger.debug(appendMessages(message));
+        if (this.logger.isDebugEnabled()) {
+            this.logger.debug(appendMessages(message));
         }
     }
 
     @Override
     public void error(Throwable e, String... message) {
-        logger.error(appendMessages(message), e);
+        this.logger.error(appendMessages(message), e);
     }
 
     @Override
     public void error(String... message) {
-        logger.error(appendMessages(message));
+        this.logger.error(appendMessages(message));
 
     }
 
     @Override
     public void fatal(Throwable e, String... message) {
-        logger.fatal(appendMessages(message), e);
+        this.logger.fatal(appendMessages(message), e);
 
     }
 
     @Override
     public void fatal(String... message) {
-        logger.fatal(appendMessages(message));
+        this.logger.fatal(appendMessages(message));
 
     }
 
     @Override
     public void info(Throwable e, String... message) {
-        if (logger.isInfoEnabled()) {
-            logger.error(appendMessages(message), e);
+        if (this.logger.isInfoEnabled()) {
+            this.logger.error(appendMessages(message), e);
         }
     }
 
     @Override
     public void info(String... message) {
-        if (logger.isInfoEnabled()) {
-            logger.info(appendMessages(message));
+        if (this.logger.isInfoEnabled()) {
+            this.logger.info(appendMessages(message));
         }
     }
 
     @Override
     public void trace(String... message) {
-        if (logger.isTraceEnabled()) {
-            logger.trace(appendMessages(message));
+        if (this.logger.isTraceEnabled()) {
+            this.logger.trace(appendMessages(message));
         }
     }
 
     @Override
     public void warning(Throwable e, String... message) {
-        logger.warn(appendMessages(message), e);
+        this.logger.warn(appendMessages(message), e);
     }
 
     @Override
     public void warning(String... message) {
-        logger.warn(appendMessages(message));
+        this.logger.warn(appendMessages(message));
 
     }
 
     @Override
     public boolean isDebugEnabled() {
-        return logger.isDebugEnabled();
+        return this.logger.isDebugEnabled();
     }
 
     @Override
     public boolean isTraceEnabled() {
-        return logger.isTraceEnabled();
+        return this.logger.isTraceEnabled();
     }
 
-    private String appendMessages(String... message) {
-        int size = message.length;
+    /**
+     * Append the message fragments into a common string.
+     * 
+     * @param messages
+     *            the message tokens
+     * 
+     * @return the resulting message
+     */
+    private String appendMessages(String... messages) {
+        if (messages == null) {
+            return "";
+        }
+
         int msgLength = 0;
+        int size = messages.length;
+
         for (int i = 0; i < size; i++) {
-            msgLength += message[i].length();
+            String message = messages[i];
+            if (message != null) {
+                msgLength += message.length();
+            }
         }
-        StringBuilder sb = new StringBuilder(msgLength);
+
+        StringBuilder result = new StringBuilder(msgLength);
         for (int i = 0; i < size; i++) {
-            sb.append(message[i]);
+            String message = messages[i];
+            if (message != null) {
+                result.append(messages[i]);
+            }
         }
-        return sb.toString();
+
+        return result.toString();
     }
 }

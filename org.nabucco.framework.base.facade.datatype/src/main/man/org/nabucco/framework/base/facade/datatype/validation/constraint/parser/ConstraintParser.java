@@ -22,6 +22,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.nabucco.framework.base.facade.datatype.property.NabuccoProperty;
 import org.nabucco.framework.base.facade.datatype.validation.Validatable;
 import org.nabucco.framework.base.facade.datatype.validation.constraint.element.Constraint;
 import org.nabucco.framework.base.facade.datatype.validation.constraint.element.ConstraintFactory;
@@ -102,10 +103,11 @@ public class ConstraintParser {
      */
     private ConstraintContainer parseAllConstraints(Validatable validatable) {
 
-        String[] constraints = validatable.getConstraints();
-        ConstraintContainer container = new ConstraintContainer(validatable);
-        for (int i = 0; i < constraints.length; i++) {
-            container.put(i, this.parseConstraintsForIndex(constraints[i]));
+        List<NabuccoProperty<?>> properties = validatable.getProperties();
+        ConstraintContainer container = new ConstraintContainer();
+        for (int i = 0; i < properties.size(); i++) {
+            NabuccoProperty<?> property = properties.get(i);
+            container.put(i, this.parseConstraintsForIndex(property.getConstraints()));
         }
         return container;
     }

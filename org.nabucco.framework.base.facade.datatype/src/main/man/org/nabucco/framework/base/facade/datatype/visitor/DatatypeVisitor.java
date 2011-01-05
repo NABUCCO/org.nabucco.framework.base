@@ -17,18 +17,17 @@
 package org.nabucco.framework.base.facade.datatype.visitor;
 
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 
 import org.nabucco.framework.base.facade.datatype.Basetype;
 import org.nabucco.framework.base.facade.datatype.Datatype;
-import org.nabucco.framework.base.facade.datatype.collection.NabuccoCollectionState;
-import org.nabucco.framework.base.facade.datatype.collection.NabuccoList;
+import org.nabucco.framework.base.facade.datatype.property.NabuccoProperty;
 
 /**
  * DatatypeVisitor
  * <p/>
- * Datatype Visitor that visits children last.
+ * Datatype Visitor that visits children last. Each instance is only visited once, when calling the
+ * <code>reset()</code> Method the cache will be cleaned.
  * 
  * @author Nicolas Moser, PRODYNA AG
  */
@@ -38,7 +37,7 @@ public class DatatypeVisitor implements Visitor {
     private Set<Integer> visited = new HashSet<Integer>();
 
     @Override
-    public boolean hasVisited(Visitable visitable) {
+    public final boolean hasVisited(Visitable visitable) {
         int identity = System.identityHashCode(visitable);
         return !visited.add(identity);
     }
@@ -85,49 +84,16 @@ public class DatatypeVisitor implements Visitor {
      * @throws VisitorException
      */
     protected void visitChildren(Visitable visitable) throws VisitorException {
-        for (Object property : visitable.getProperties()) {
-            this.visitProperty(property);
+        for (NabuccoProperty<?> property : visitable.getProperties()) {
+            property.accept(this);
         }
     }
 
     /**
-     * Visits a property of a datatype
-     * 
-     * @param property
-     *            the property to visit
-     * 
-     * @throws VisitorException
+     * Cleans the cache of already visited instances.
      */
-    private void visitProperty(Object property) throws VisitorException {
-        if (property instanceof Visitable) {
-            Visitable visitable = (Visitable) property;
-            visitable.accept(this);
-        } else if (property instanceof List<?>) {
-            this.visitPropertyList((List<?>) property);
-        }
-    }
-
-    /**
-     * Visits a propertylist of a datatype.
-     * 
-     * @param propertyList
-     *            the property list
-     * 
-     * @throws VisitorException
-     */
-    private void visitPropertyList(List<?> propertyList) throws VisitorException {
-        if (propertyList instanceof NabuccoList<?>) {
-            NabuccoList<?> nabuccoList = (NabuccoList<?>) propertyList;
-            if (nabuccoList.getState() != NabuccoCollectionState.LAZY) {
-                for (Object listProperty : nabuccoList) {
-                    this.visitProperty(listProperty);
-                }
-            }
-        } else {
-            for (Object listProperty : propertyList) {
-                this.visitProperty(listProperty);
-            }
-        }
+    public void reset() {
+        this.visited.clear();
     }
 
 }

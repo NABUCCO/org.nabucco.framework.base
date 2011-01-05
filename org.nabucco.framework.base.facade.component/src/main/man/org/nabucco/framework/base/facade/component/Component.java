@@ -18,11 +18,29 @@ package org.nabucco.framework.base.facade.component;
 
 import java.io.Serializable;
 
+import org.nabucco.framework.base.facade.exception.service.ServiceException;
+import org.nabucco.framework.base.facade.service.componentrelation.ComponentRelationService;
+
 /**
  * Component
+ * <p/>
+ * Base interaface for all component facades. Holding all services that are offered by the
+ * component.
  * 
  * @author Frank Ratschinski, PRODYNA AG
+ * @author Nicolas Moser, PRODYNA AG
+ * @author Dominic Trumpfheller, PRODYNA AG
  */
 public interface Component extends Serializable {
 
+    /**
+     * Getter for the component relation service containing business operations about inter
+     * component relations.
+     * 
+     * @return the service for component relations
+     * 
+     * @throws ServiceException
+     *             when the service cannot be obtained
+     */
+     ComponentRelationService getComponentRelationService() throws ServiceException;;
 }

@@ -17,7 +17,6 @@
 package org.nabucco.framework.base.facade.datatype.validation;
 
 import java.io.Serializable;
-import java.text.MessageFormat;
 
 /**
  * ValidationError
@@ -28,18 +27,44 @@ public class ValidationError implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
+    private Validatable parent;
+
+    private String propertyName;
+
     private String message;
 
     /**
      * Creates a new {@link ValidationError} instance.
      * 
+     * @param parent
+     *            the validated parent
+     * @param propertyName
+     *            name of the invalid property
      * @param message
      *            the error message
-     * @param arguments
-     *            the message arguments
      */
-    public ValidationError(String message, Object[] arguments) {
-        this.message = MessageFormat.format(message, arguments);
+    public ValidationError(Validatable parent, String propertyName, String message) {
+        this.parent = parent;
+        this.propertyName = propertyName;
+        this.message = message;
+    }
+
+    /**
+     * Getter for the parent.
+     * 
+     * @return Returns the parent.
+     */
+    public Validatable getParent() {
+        return this.parent;
+    }
+
+    /**
+     * Getter for the propertyName.
+     * 
+     * @return Returns the propertyName.
+     */
+    public String getPropertyName() {
+        return this.propertyName;
     }
 
     /**

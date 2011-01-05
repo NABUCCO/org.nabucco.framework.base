@@ -20,7 +20,6 @@ import org.junit.Assert;
 import org.junit.Test;
 import org.nabucco.framework.base.facade.datatype.Name;
 import org.nabucco.framework.base.facade.datatype.Owner;
-import org.nabucco.framework.base.facade.datatype.validation.ValidationResult;
 
 
 /**
@@ -37,14 +36,18 @@ public class BasetypeValidatorTest {
         name.setValue("Dummy");
         
         ValidationResult result = new ValidationResult();
-        name.validate(result);
+        name.validate(result, ValidationType.DEEP);
         
+        System.out.println(result);
         Assert.assertNotNull(result.getErrorList());
         Assert.assertEquals(0, result.getErrorList().size());
 
+        System.out.println();
+        
         Owner owner = new Owner("");
-        owner.validate(result);
+        owner.validate(result, ValidationType.DEEP);
      
+        System.out.println(result);
         Assert.assertEquals(1, result.getErrorList().size());
     }
 

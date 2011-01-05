@@ -18,9 +18,6 @@ package org.nabucco.framework.base.impl.service.handler;
 
 import javax.persistence.EntityManager;
 
-import org.nabucco.framework.base.impl.service.maintain.NabuccoMaintainHandler;
-import org.nabucco.framework.base.impl.service.maintain.PersistenceCleaner;
-
 import org.nabucco.framework.base.facade.datatype.Datatype;
 import org.nabucco.framework.base.facade.datatype.logger.NabuccoLogger;
 import org.nabucco.framework.base.facade.datatype.logger.NabuccoLoggingFactory;
@@ -31,6 +28,9 @@ import org.nabucco.framework.base.facade.message.ServiceMessage;
 import org.nabucco.framework.base.facade.message.ServiceMessageSupport;
 import org.nabucco.framework.base.facade.message.ServiceRequest;
 import org.nabucco.framework.base.facade.message.context.ServiceMessageContext;
+import org.nabucco.framework.base.impl.service.maintain.NabuccoMaintainHandler;
+import org.nabucco.framework.base.impl.service.maintain.PersistenceCleaner;
+import org.nabucco.framework.base.impl.service.maintain.PersistenceHelper;
 
 /**
  * ServiceHandlerSupport
@@ -43,7 +43,7 @@ public abstract class ServiceHandlerSupport implements ServiceHandler {
 
     private EntityManager em;
 
-    private ServiceMessageContext ctx;
+    private ServiceMessageContext context;
 
     private NabuccoLogger logger;
 
@@ -67,7 +67,7 @@ public abstract class ServiceHandlerSupport implements ServiceHandler {
 
     @Override
     public void setContext(ServiceMessageContext context) {
-        this.ctx = context;
+        this.context = context;
     }
 
     /**
@@ -97,10 +97,10 @@ public abstract class ServiceHandlerSupport implements ServiceHandler {
      * @return the service context
      */
     protected ServiceMessageContext getContext() {
-        if (this.ctx == null) {
+        if (this.context == null) {
             this.getLogger().warning("No service context defined.");
         }
-        return this.ctx;
+        return this.context;
     }
 
     /**
@@ -112,7 +112,10 @@ public abstract class ServiceHandlerSupport implements ServiceHandler {
      *            the class of this datatype
      * 
      * @return the maintain handler
+     * 
+     * @deprecated Use {@link PersistenceHelper} instead.
      */
+    @Deprecated
     protected <T extends Datatype> NabuccoMaintainHandler<T> getMaintainHandler(
             Class<T> datatypeClass) {
         return new NabuccoMaintainHandler<T>(datatypeClass, this.em);
@@ -127,7 +130,7 @@ public abstract class ServiceHandlerSupport implements ServiceHandler {
      * @return the servicerequest
      */
     protected <T extends ServiceMessageSupport> ServiceRequest<T> createRequest(T message) {
-        ServiceRequest<T> serviceRequest = new ServiceRequest<T>(this.ctx);
+        ServiceRequest<T> serviceRequest = new ServiceRequest<T>(this.context);
         serviceRequest.setRequestMessage(message);
         return serviceRequest;
     }
@@ -149,6 +152,7 @@ public abstract class ServiceHandlerSupport implements ServiceHandler {
         }
 
         if (this.em != null) {
+            this.em.flush();
             this.em.clear();
         }
 

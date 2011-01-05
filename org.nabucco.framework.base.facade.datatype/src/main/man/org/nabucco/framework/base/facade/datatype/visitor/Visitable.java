@@ -16,7 +16,9 @@
  */
 package org.nabucco.framework.base.facade.datatype.visitor;
 
-import org.nabucco.framework.base.facade.datatype.NType;
+import java.util.List;
+
+import org.nabucco.framework.base.facade.datatype.property.NabuccoProperty;
 
 /**
  * Visitable
@@ -25,7 +27,7 @@ import org.nabucco.framework.base.facade.datatype.NType;
  * 
  * @author Nicolas Moser, PRODYNA AG
  */
-public interface Visitable extends NType {
+public interface Visitable {
 
     /**
      * Accepts a {@link Visitor} instance.
@@ -39,16 +41,10 @@ public interface Visitable extends NType {
     void accept(Visitor visitor) throws VisitorException;
 
     /**
-     * Returns the visitable properties of a Visitable.
+     * Returns the properties of a {@link Visitable} instance.
      * 
-     * @return all visitable properties
+     * @return all properties
      */
-    Object[] getProperties();
+    List<NabuccoProperty<?>> getProperties();
 
-    /**
-     * Returns the property names of a Visitable according to {@link Visitable#getProperties()}.
-     * 
-     * @return all visitable property names
-     */
-    String[] getPropertyNames();
 }

@@ -16,6 +16,8 @@
  */
 package org.nabucco.framework.base.facade.exception.persistence;
 
+import  org.nabucco.framework.base.facade.exception.persistence.PersistenceException;
+
 @Author			Nicolas Moser
 @Company		PRODYNA AG
 @Date			2010-04-20

@@ -16,11 +16,15 @@
  */
 package org.nabucco.framework.base.facade.datatype;
 
-import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.List;
 
+import org.nabucco.framework.base.facade.datatype.componentrelation.ComponentRelationContainer;
+import org.nabucco.framework.base.facade.datatype.property.NabuccoProperty;
 import org.nabucco.framework.base.facade.datatype.validation.DatatypeValidationVisitor;
 import org.nabucco.framework.base.facade.datatype.validation.ValidationException;
 import org.nabucco.framework.base.facade.datatype.validation.ValidationResult;
+import org.nabucco.framework.base.facade.datatype.validation.ValidationType;
 import org.nabucco.framework.base.facade.datatype.visitor.Visitor;
 import org.nabucco.framework.base.facade.datatype.visitor.VisitorException;
 
@@ -29,78 +33,57 @@ import org.nabucco.framework.base.facade.datatype.visitor.VisitorException;
  * 
  * @author Frank Ratschinski, Nicolas Moser, PRODYNA AG
  */
-public abstract class DatatypeSupport implements Serializable, Datatype {
+public abstract class DatatypeSupport implements Datatype {
 
     private static final long serialVersionUID = 1L;
 
-    private DatatypeState datatypeState;
+    /** State of the Datatype. */
+    private DatatypeState state;
 
+    /** Container for inter-component relations. */
+    private ComponentRelationContainer componentRelationContainer;
+
+    /**
+     * Creates a new {@link DatatypeSupport} instance.
+     */
     public DatatypeSupport() {
-        this.datatypeState = DatatypeState.CONSTRUCTED;
+        this.state = DatatypeState.CONSTRUCTED;
     }
 
     @Override
-    public DatatypeState getDatatypeState() {
-        return this.datatypeState;
+    public final DatatypeState getDatatypeState() {
+        return this.state;
     }
 
     @Override
-    public void setDatatypeState(DatatypeState newState) {
-
-        switch (this.datatypeState) {
-
-        case CONSTRUCTED: {
-            if (newState == DatatypeState.INITIALIZED) {
-                this.datatypeState = newState;
-            }
-            break;
-        }
-
-        case INITIALIZED: {
-            if (newState == DatatypeState.PERSISTENT || newState == DatatypeState.TRANSIENT) {
-                this.datatypeState = newState;
-            }
-            break;
-        }
-
-        case PERSISTENT: {
-            if (newState == DatatypeState.DELETED || newState == DatatypeState.TRANSIENT) {
-                this.datatypeState = newState;
-            }
-            break;
-        }
-        case TRANSIENT: {
-            if (newState == DatatypeState.PERSISTENT || newState == DatatypeState.DELETED) {
-                this.datatypeState = newState;
-            }
-            break;
-        }
-        case DELETED: {
-            break;
-        }
-        }
+    public final void setDatatypeState(DatatypeState newState) {
 
         // TODO check state transitions
-        this.datatypeState = newState;
+
+        if (newState != null) {
+            this.state = newState;
+        }
     }
 
     @Override
     public String toString() {
         StringBuilder appendable = new StringBuilder();
-        appendable.append("<datatypeState>").append(this.datatypeState.toString())
-                .append("</datatypeState>\n");
+        appendable.append("<state>").append(this.state.toString()).append("</state>\n");
         return appendable.toString();
 
     }
 
     @Override
-    public void validate(ValidationResult result) throws ValidationException {
+    public void validate(ValidationResult result, ValidationType depth) throws ValidationException {
         if (result == null) {
             throw new IllegalArgumentException("Validation result is not valid [null].");
         }
+        if (depth == null) {
+            depth = ValidationType.DEEP;
+        }
 
         try {
-            DatatypeValidationVisitor visitor = new DatatypeValidationVisitor(result);
+            DatatypeValidationVisitor visitor = new DatatypeValidationVisitor(result, depth);
             this.accept(visitor);
         } catch (VisitorException e) {
             throw new ValidationException("Error visiting datatype for validation.", e);
@@ -108,18 +91,8 @@ public abstract class DatatypeSupport implements Serializable, Datatype {
     }
 
     @Override
-    public String[] getConstraints() {
-        return null;
-    }
-
-    @Override
-    public Object[] getProperties() {
-        return null;
-    }
-
-    @Override
-    public String[] getPropertyNames() {
-        return null;
+    public List<NabuccoProperty<?>> getProperties() {
+        return new ArrayList<NabuccoProperty<?>>();
     }
 
     @Override
@@ -133,8 +106,7 @@ public abstract class DatatypeSupport implements Serializable, Datatype {
     public int hashCode() {
         final int prime = 31;
         int result = 1;
-        result = prime
-                * result + ((this.datatypeState == null) ? 0 : this.datatypeState.hashCode());
+        result = prime * result + ((this.state == null) ? 0 : this.state.hashCode());
         return result;
     }
 
@@ -147,10 +119,10 @@ public abstract class DatatypeSupport implements Serializable, Datatype {
         if (!(obj instanceof DatatypeSupport))
             return false;
         DatatypeSupport other = (DatatypeSupport) obj;
-        if (this.datatypeState == null) {
-            if (other.datatypeState != null)
+        if (this.state == null) {
+            if (other.state != null)
                 return false;
-        } else if (!this.datatypeState.equals(other.datatypeState))
+        } else if (!this.state.equals(other.state))
             return false;
         return true;
     }
@@ -162,6 +134,22 @@ public abstract class DatatypeSupport implements Serializable, Datatype {
      *            the datatype clone
      */
     protected void cloneObject(DatatypeSupport clone) {
-        clone.datatypeState = this.datatypeState;
+        clone.state = this.state;
+
+        if (this.componentRelationContainer != null) {
+            clone.componentRelationContainer = this.componentRelationContainer.cloneObject();
+        }
+    }
+
+    /**
+     * Getter for the container of inter-component relations.
+     * 
+     * @return the component relation conteiner
+     */
+    final ComponentRelationContainer getComponentRelationContainer() {
+        if (this.componentRelationContainer == null) {
+            this.componentRelationContainer = new ComponentRelationContainer();
+        }
+        return this.componentRelationContainer;
     }
 }

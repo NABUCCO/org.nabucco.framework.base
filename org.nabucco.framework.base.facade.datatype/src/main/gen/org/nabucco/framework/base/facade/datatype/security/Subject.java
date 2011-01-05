@@ -1,32 +1,19 @@
 /*
-* Copyright 2010 PRODYNA AG
-*
-* Licensed under the Eclipse Public License (EPL), Version 1.0 (the "License");
-* you may not use this file except in compliance with the License.
-* You may obtain a copy of the License at
-*
-* http://www.opensource.org/licenses/eclipse-1.0.php or
-* http://www.nabucco-source.org/nabucco-license.html
-*
-* Unless required by applicable law or agreed to in writing, software
-* distributed under the License is distributed on an "AS IS" BASIS,
-* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-* See the License for the specific language governing permissions and
-* limitations under the License.
-*
-* Generated with NABUCCO Generator 
-*/
+ * NABUCCO Generator, Copyright (c) 2010, PRODYNA AG, Germany. All rights reserved.
+ */
 package org.nabucco.framework.base.facade.datatype.security;
 
+import java.util.List;
 import org.nabucco.framework.base.facade.datatype.Datatype;
 import org.nabucco.framework.base.facade.datatype.DatatypeSupport;
 import org.nabucco.framework.base.facade.datatype.DateTime;
 import org.nabucco.framework.base.facade.datatype.Owner;
+import org.nabucco.framework.base.facade.datatype.property.BasetypeProperty;
+import org.nabucco.framework.base.facade.datatype.property.DatatypeProperty;
+import org.nabucco.framework.base.facade.datatype.property.NabuccoProperty;
 import org.nabucco.framework.base.facade.datatype.security.User;
 import org.nabucco.framework.base.facade.datatype.security.UserId;
 import org.nabucco.framework.base.facade.datatype.security.credential.Token;
-import org.nabucco.framework.base.facade.datatype.visitor.VisitorUtility;
-
 
 /**
  * Subject<p/>A Subject represents an authenticated user.<p/>
@@ -36,10 +23,13 @@ import org.nabucco.framework.base.facade.datatype.visitor.VisitorUtility;
  */
 public class Subject extends DatatypeSupport implements Datatype {
 
-    private static final String[] CONSTRAINTS = { "l0,n;m1,1;", "l0,n;m1,1;", "l0,n;m1,1;",
-            "l0,n;m1,1;", "m0,1;" };
-
     private static final long serialVersionUID = 1L;
+
+    private static final String[] PROPERTY_NAMES = { "userId", "owner", "token", "loginTime",
+            "user" };
+
+    private static final String[] PROPERTY_CONSTRAINTS = { "l0,n;m1,1;", "l0,n;m1,1;",
+            "l0,n;m1,1;", "l0,n;m1,1;", "m0,1;" };
 
     /** ID/Name of the user */
     private UserId userId;
@@ -56,10 +46,16 @@ public class Subject extends DatatypeSupport implements Datatype {
     /** The actual user object */
     private User user;
 
+    private Long userRefId;
+
     /** Constructs a new Subject instance. */
     public Subject() {
         super();
         this.initDefaults();
+    }
+
+    /** InitDefaults. */
+    private void initDefaults() {
     }
 
     /**
@@ -69,32 +65,21 @@ public class Subject extends DatatypeSupport implements Datatype {
      */
     protected void cloneObject(Subject clone) {
         super.cloneObject(clone);
-        if ((this.userId != null)) {
-            clone.userId = this.userId.cloneObject();
+        if ((this.getUserId() != null)) {
+            clone.setUserId(this.getUserId().cloneObject());
         }
-        if ((this.owner != null)) {
-            clone.owner = this.owner.cloneObject();
+        if ((this.getOwner() != null)) {
+            clone.setOwner(this.getOwner().cloneObject());
         }
-        if ((this.token != null)) {
-            clone.token = this.token.cloneObject();
+        if ((this.getToken() != null)) {
+            clone.setToken(this.getToken().cloneObject());
         }
-        if ((this.loginTime != null)) {
-            clone.loginTime = this.loginTime.cloneObject();
+        if ((this.getLoginTime() != null)) {
+            clone.setLoginTime(this.getLoginTime().cloneObject());
         }
-        if ((this.user != null)) {
-            clone.user = this.user.cloneObject();
+        if ((this.getUser() != null)) {
+            clone.setUser(this.getUser().cloneObject());
         }
-    }
-
-    /** InitDefaults. */
-    private void initDefaults() {
-    }
-
-    @Override
-    public Subject cloneObject() {
-        Subject clone = new Subject();
-        this.cloneObject(clone);
-        return clone;
     }
 
     @Override
@@ -103,8 +88,19 @@ public class Subject extends DatatypeSupport implements Datatype {
     }
 
     @Override
-    public String[] getConstraints() {
-        return CONSTRAINTS.clone();
+    public List<NabuccoProperty<?>> getProperties() {
+        List<NabuccoProperty<?>> properties = super.getProperties();
+        properties.add(new BasetypeProperty<UserId>(PROPERTY_NAMES[0], UserId.class,
+                PROPERTY_CONSTRAINTS[0], this.userId));
+        properties.add(new BasetypeProperty<Owner>(PROPERTY_NAMES[1], Owner.class,
+                PROPERTY_CONSTRAINTS[1], this.owner));
+        properties.add(new BasetypeProperty<Token>(PROPERTY_NAMES[2], Token.class,
+                PROPERTY_CONSTRAINTS[2], this.token));
+        properties.add(new BasetypeProperty<DateTime>(PROPERTY_NAMES[3], DateTime.class,
+                PROPERTY_CONSTRAINTS[3], this.loginTime));
+        properties.add(new DatatypeProperty<User>(PROPERTY_NAMES[4], User.class,
+                PROPERTY_CONSTRAINTS[4], this.user));
+        return properties;
     }
 
     @Override
@@ -147,21 +143,12 @@ public class Subject extends DatatypeSupport implements Datatype {
                 return false;
         } else if ((!this.user.equals(other.user)))
             return false;
+        if ((this.userRefId == null)) {
+            if ((other.userRefId != null))
+                return false;
+        } else if ((!this.userRefId.equals(other.userRefId)))
+            return false;
         return true;
-    }
-
-    @Override
-    public String[] getPropertyNames() {
-        return VisitorUtility.merge(super.getPropertyNames(), new String[] { "userId", "owner",
-                "token", "loginTime", "user" });
-    }
-
-    @Override
-    public Object[] getProperties() {
-        return VisitorUtility.merge(
-                super.getProperties(),
-                new Object[] { this.getUserId(), this.getOwner(), this.getToken(),
-                        this.getLoginTime(), this.getUser() });
     }
 
     @Override
@@ -173,6 +160,7 @@ public class Subject extends DatatypeSupport implements Datatype {
         result = ((PRIME * result) + ((this.token == null) ? 0 : this.token.hashCode()));
         result = ((PRIME * result) + ((this.loginTime == null) ? 0 : this.loginTime.hashCode()));
         result = ((PRIME * result) + ((this.user == null) ? 0 : this.user.hashCode()));
+        result = ((PRIME * result) + ((this.userRefId == null) ? 0 : this.userRefId.hashCode()));
         return result;
     }
 
@@ -186,8 +174,16 @@ public class Subject extends DatatypeSupport implements Datatype {
         appendable.append((("<token>" + this.token) + "</token>\n"));
         appendable.append((("<loginTime>" + this.loginTime) + "</loginTime>\n"));
         appendable.append((("<user>" + this.user) + "</user>\n"));
+        appendable.append((("<userRefId>" + this.userRefId) + "</userRefId>\n"));
         appendable.append("</Subject>\n");
         return appendable.toString();
+    }
+
+    @Override
+    public Subject cloneObject() {
+        Subject clone = new Subject();
+        this.cloneObject(clone);
+        return clone;
     }
 
     /**
@@ -313,6 +309,20 @@ public class Subject extends DatatypeSupport implements Datatype {
     /**
      * The actual user object
      *
+     * @param user the User.
+     */
+    public void setUser(User user) {
+        this.user = user;
+        if ((user != null)) {
+            this.setUserRefId(user.getId());
+        } else {
+            this.setUserRefId(null);
+        }
+    }
+
+    /**
+     * The actual user object
+     *
      * @return the User.
      */
     public User getUser() {
@@ -320,11 +330,20 @@ public class Subject extends DatatypeSupport implements Datatype {
     }
 
     /**
-     * The actual user object
+     * Getter for the UserRefId.
      *
-     * @param user the User.
+     * @return the Long.
      */
-    public void setUser(User user) {
-        this.user = user;
+    public Long getUserRefId() {
+        return this.userRefId;
+    }
+
+    /**
+     * Setter for the UserRefId.
+     *
+     * @param userRefId the Long.
+     */
+    public void setUserRefId(Long userRefId) {
+        this.userRefId = userRefId;
     }
 }

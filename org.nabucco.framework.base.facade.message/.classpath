@@ -7,5 +7,6 @@
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.junit.JUNIT_CONTAINER/4"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/org.nabucco.framework.base.facade.datatype"/>
+	<classpathentry kind="lib" path="/org.nabucco.framework.base/lib/facade/log4j.jar"/>
 	<classpathentry kind="output" path="out"/>
 </classpath>

@@ -16,8 +16,6 @@
  */
 package org.nabucco.framework.base.facade.datatype;
 
-import org.nabucco.framework.base.facade.datatype.NabuccoDatatype;
-
 @Author			Michael Krausse
 @Company		PRODYNA AG
 @Date			2010-04-07

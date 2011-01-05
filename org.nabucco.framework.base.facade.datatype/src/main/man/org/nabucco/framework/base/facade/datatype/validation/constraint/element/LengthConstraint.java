@@ -16,6 +16,7 @@
  */
 package org.nabucco.framework.base.facade.datatype.validation.constraint.element;
 
+import java.text.MessageFormat;
 import java.util.List;
 import java.util.regex.Pattern;
 
@@ -116,8 +117,6 @@ public class LengthConstraint extends Constraint {
             return;
         }
 
-        String ownerName = owner.getClass().getSimpleName();
-
         if (property instanceof Basetype) {
             Object value = ((Basetype) property).getValue();
 
@@ -126,9 +125,9 @@ public class LengthConstraint extends Constraint {
             }
 
             if (value instanceof String) {
-                checkString((String) value, propertyName, ownerName, result);
+                checkString((String) value, propertyName, owner, result);
             } else if (value instanceof Number) {
-                checkString(value.toString(), propertyName, ownerName, result);
+                checkString(value.toString(), propertyName, owner, result);
             }
 
         } else if (property instanceof List<?>) {
@@ -138,14 +137,11 @@ public class LengthConstraint extends Constraint {
 
             // TODO: Do not validate other types than basetypes.
         } else if (property instanceof String) {
-            checkString((String) property, propertyName, ownerName, result);
+            checkString((String) property, propertyName, owner, result);
         } else if (property instanceof Number) {
-            checkString(property.toString(), propertyName, ownerName, result);
+            checkString(property.toString(), propertyName, owner, result);
         } else {
-            throw new IllegalArgumentException(
-                    "Can only validate a LengthConstraint against a Basetype, given type was "
-                            + property.getClass() + " in type " + ownerName + ", property "
-                            + propertyName + ".");
+            raiseException(owner, property, propertyName);
         }
     }
 
@@ -159,19 +155,47 @@ public class LengthConstraint extends Constraint {
      * @param result
      *            the validation result
      */
-    private void checkString(String propertyValue, String propertyName, String parent,
+    private void checkString(String propertyValue, String propertyName, Validatable parent,
             ValidationResult result) {
 
         int length = propertyValue.length();
+        String parentName = parent.getClass().getSimpleName();
 
         if (length < minLength) {
-            Object[] arguments = new Object[] { parent, propertyName, length, MIN_LENGTH, minLength };
-            result.getErrorList().add(new ValidationError(MESSAGE, arguments));
+            Object[] arguments = new Object[] { parentName, propertyName, length, MIN_LENGTH,
+                    minLength };
+
+            String message = MessageFormat.format(MESSAGE, arguments);
+            result.getErrorList().add(new ValidationError(parent, propertyName, message));
         }
         if (length > maxLength) {
-            Object[] arguments = new Object[] { parent, propertyName, length, MAX_LENGTH, maxLength };
-            result.getErrorList().add(new ValidationError(MESSAGE, arguments));
+            Object[] arguments = new Object[] { parentName, propertyName, length, MAX_LENGTH,
+                    maxLength };
+            String message = MessageFormat.format(MESSAGE, arguments);
+            result.getErrorList().add(new ValidationError(parent, propertyName, message));
         }
+    }
+
+    /**
+     * Raise an {@link IllegalArgumentException}.
+     * 
+     * @param owner
+     *            the validation owner
+     * @param property
+     *            the property
+     * @param propertyName
+     *            the property name
+     */
+    private void raiseException(Validatable owner, Object property, String propertyName) {
+        StringBuilder message = new StringBuilder();
+        message.append("Can only validate a LengthConstraint against a Basetype. Given type was ");
+        message.append(property.getClass());
+        message.append(" in type ");
+        message.append(owner.getClass().getSimpleName());
+        message.append(", property ");
+        message.append(propertyName);
+        message.append(".");
+        throw new IllegalArgumentException(message.toString());
     }
 
     @Override

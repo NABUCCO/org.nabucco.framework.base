@@ -19,10 +19,9 @@ package org.nabucco.framework.base.facade.exception.validation;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.nabucco.framework.base.facade.exception.NabuccoException;
-
 import org.nabucco.framework.base.facade.datatype.validation.ValidationError;
 import org.nabucco.framework.base.facade.datatype.validation.ValidationResult;
+import org.nabucco.framework.base.facade.exception.NabuccoException;
 
 /**
  * ValidationException

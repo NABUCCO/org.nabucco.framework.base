@@ -16,17 +16,20 @@
  */
 package org.nabucco.framework.base.facade.message;
 
-import org.nabucco.framework.base.facade.message.validation.MessageConstraintValidationVisitor;
+import java.util.ArrayList;
+import java.util.List;
 
+import org.nabucco.framework.base.facade.datatype.property.NabuccoProperty;
 import org.nabucco.framework.base.facade.datatype.validation.ValidationException;
 import org.nabucco.framework.base.facade.datatype.validation.ValidationResult;
+import org.nabucco.framework.base.facade.datatype.validation.ValidationType;
 import org.nabucco.framework.base.facade.datatype.visitor.Visitor;
 import org.nabucco.framework.base.facade.datatype.visitor.VisitorException;
+import org.nabucco.framework.base.facade.message.validation.MessageConstraintValidationVisitor;
 
 /**
  * ServiceMessageSupport
  * 
- * @author Frank Ratschinski, PRODYNA AG
  * @author Nicolas Moser, PRODYNA AG
  */
 public abstract class ServiceMessageSupport implements ServiceMessage {
@@ -39,23 +42,21 @@ public abstract class ServiceMessageSupport implements ServiceMessage {
     }
 
     @Override
-    public void validate(ValidationResult result) throws ValidationException {
+    public void validate(ValidationResult result, ValidationType depth) throws ValidationException {
         if (result == null) {
             throw new IllegalArgumentException("Validation result is not valid [null].");
+        }
+        if (depth == null) {
+            depth = ValidationType.DEEP;
         }
 
         try {
             MessageConstraintValidationVisitor visitor = new MessageConstraintValidationVisitor(
-                    result);
+                    result, depth);
             this.accept(visitor);
         } catch (VisitorException e) {
             throw new ValidationException("Error visiting message for validation.", e);
         }
-    }
-
-    @Override
-    public String[] getConstraints() {
-        return null;
     }
 
     @Override
@@ -64,13 +65,8 @@ public abstract class ServiceMessageSupport implements ServiceMessage {
     }
 
     @Override
-    public Object[] getProperties() {
-        return null;
-    }
-
-    @Override
-    public String[] getPropertyNames() {
-        return null;
+    public List<NabuccoProperty<?>> getProperties() {
+        return new ArrayList<NabuccoProperty<?>>();
     }
 
     @Override

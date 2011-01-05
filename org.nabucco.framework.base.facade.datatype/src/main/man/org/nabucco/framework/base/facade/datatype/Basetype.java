@@ -22,7 +22,7 @@ import org.nabucco.framework.base.facade.datatype.visitor.Visitable;
 /**
  * Basetype
  * 
- * @author Frank Ratschinski, PRODYNA AG
+ * @author Nicolas Moser, PRODYNA AG
  */
 public interface Basetype extends NType, Validatable, Visitable {
 
@@ -33,11 +33,7 @@ public interface Basetype extends NType, Validatable, Visitable {
      */
     Object getValue();
 
-    /**
-     * Clones the basetype.
-     * 
-     * @return a clone of the basetype.
-     */
     @Override
     Basetype cloneObject();
+
 }

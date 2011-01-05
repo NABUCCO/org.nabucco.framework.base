@@ -22,7 +22,7 @@ import org.nabucco.framework.base.facade.datatype.visitor.Visitable;
 /**
  * Datatype
  * 
- * @author Frank Ratschinski, Nicolas Moser, PRODYNA AG
+ * @author Nicolas Moser, PRODYNA AG
  */
 public interface Datatype extends NType, Validatable, Visitable {
 
@@ -46,11 +46,6 @@ public interface Datatype extends NType, Validatable, Visitable {
      */
     public void setDatatypeState(DatatypeState newState);
 
-    /**
-     * Clones the datatype.
-     * 
-     * @return a clone of the datatype.
-     */
     @Override
     public Datatype cloneObject();
 

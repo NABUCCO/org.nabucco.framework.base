@@ -1,32 +1,20 @@
 /*
-* Copyright 2010 PRODYNA AG
-*
-* Licensed under the Eclipse Public License (EPL), Version 1.0 (the "License");
-* you may not use this file except in compliance with the License.
-* You may obtain a copy of the License at
-*
-* http://www.opensource.org/licenses/eclipse-1.0.php or
-* http://www.nabucco-source.org/nabucco-license.html
-*
-* Unless required by applicable law or agreed to in writing, software
-* distributed under the License is distributed on an "AS IS" BASIS,
-* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-* See the License for the specific language governing permissions and
-* limitations under the License.
-*
-* Generated with NABUCCO Generator 
-*/
+ * NABUCCO Generator, Copyright (c) 2010, PRODYNA AG, Germany. All rights reserved.
+ */
 package org.nabucco.framework.base.facade.datatype.message;
 
 import java.util.List;
-
 import org.nabucco.framework.base.facade.datatype.Datatype;
 import org.nabucco.framework.base.facade.datatype.NabuccoDatatype;
 import org.nabucco.framework.base.facade.datatype.Owner;
 import org.nabucco.framework.base.facade.datatype.collection.NabuccoCollectionState;
 import org.nabucco.framework.base.facade.datatype.collection.NabuccoList;
-import org.nabucco.framework.base.facade.datatype.visitor.VisitorUtility;
-
+import org.nabucco.framework.base.facade.datatype.message.CodeNumber;
+import org.nabucco.framework.base.facade.datatype.message.MessageMappingBase;
+import org.nabucco.framework.base.facade.datatype.message.MessageProperty;
+import org.nabucco.framework.base.facade.datatype.property.BasetypeProperty;
+import org.nabucco.framework.base.facade.datatype.property.ListProperty;
+import org.nabucco.framework.base.facade.datatype.property.NabuccoProperty;
 
 /**
  * MessageMappingBase<p/>TODO<p/>
@@ -35,9 +23,13 @@ import org.nabucco.framework.base.facade.datatype.visitor.VisitorUtility;
  */
 public class MessageMappingBase extends NabuccoDatatype implements Datatype {
 
-    private static final String[] CONSTRAINTS = { "l0,n;m1,1;", "l0,n;m1,1;", "m0,n;", "m0,n;" };
-
     private static final long serialVersionUID = 1L;
+
+    private static final String[] PROPERTY_NAMES = { "owner", "codeNumber", "messagePropertiyList",
+            "children" };
+
+    private static final String[] PROPERTY_CONSTRAINTS = { "l0,n;m1,1;", "l0,n;m1,1;", "m0,n;",
+            "m0,n;" };
 
     private Owner owner;
 
@@ -45,12 +37,20 @@ public class MessageMappingBase extends NabuccoDatatype implements Datatype {
 
     private List<MessageProperty> messagePropertiyList;
 
+    private Long messagePropertiyListRefId;
+
     private List<MessageMappingBase> children;
+
+    private Long childrenRefId;
 
     /** Constructs a new MessageMappingBase instance. */
     public MessageMappingBase() {
         super();
         this.initDefaults();
+    }
+
+    /** InitDefaults. */
+    private void initDefaults() {
     }
 
     /**
@@ -60,11 +60,11 @@ public class MessageMappingBase extends NabuccoDatatype implements Datatype {
      */
     protected void cloneObject(MessageMappingBase clone) {
         super.cloneObject(clone);
-        if ((this.owner != null)) {
-            clone.owner = this.owner.cloneObject();
+        if ((this.getOwner() != null)) {
+            clone.setOwner(this.getOwner().cloneObject());
         }
-        if ((this.codeNumber != null)) {
-            clone.codeNumber = this.codeNumber.cloneObject();
+        if ((this.getCodeNumber() != null)) {
+            clone.setCodeNumber(this.getCodeNumber().cloneObject());
         }
         if ((this.messagePropertiyList instanceof NabuccoList<?>)) {
             clone.messagePropertiyList = ((NabuccoList<MessageProperty>) this.messagePropertiyList)
@@ -75,34 +75,55 @@ public class MessageMappingBase extends NabuccoDatatype implements Datatype {
         }
     }
 
-    /** InitDefaults. */
-    private void initDefaults() {
+    /**
+     * Getter for the MessagePropertiyListJPA.
+     *
+     * @return the List<MessageProperty>.
+     */
+    List<MessageProperty> getMessagePropertiyListJPA() {
+        if ((this.messagePropertiyList == null)) {
+            this.messagePropertiyList = new NabuccoList<MessageProperty>(
+                    NabuccoCollectionState.LAZY);
+        }
+        return ((NabuccoList<MessageProperty>) this.messagePropertiyList).getDelegate();
     }
 
     /**
-     * Missing description at method setMessagePropertiyList.
+     * Setter for the MessagePropertiyListJPA.
      *
      * @param messagePropertiyList the List<MessageProperty>.
      */
-    void setMessagePropertiyList(List<MessageProperty> messagePropertiyList) {
-        this.messagePropertiyList = new NabuccoList<MessageProperty>(messagePropertiyList,
-                NabuccoCollectionState.LAZY);
+    void setMessagePropertiyListJPA(List<MessageProperty> messagePropertiyList) {
+        if ((this.messagePropertiyList == null)) {
+            this.messagePropertiyList = new NabuccoList<MessageProperty>(
+                    NabuccoCollectionState.LAZY);
+        }
+        ((NabuccoList<MessageProperty>) this.messagePropertiyList)
+                .setDelegate(messagePropertiyList);
     }
 
     /**
-     * Missing description at method setChildren.
+     * Getter for the ChildrenJPA.
+     *
+     * @return the List<MessageMappingBase>.
+     */
+    List<MessageMappingBase> getChildrenJPA() {
+        if ((this.children == null)) {
+            this.children = new NabuccoList<MessageMappingBase>(NabuccoCollectionState.LAZY);
+        }
+        return ((NabuccoList<MessageMappingBase>) this.children).getDelegate();
+    }
+
+    /**
+     * Setter for the ChildrenJPA.
      *
      * @param children the List<MessageMappingBase>.
      */
-    void setChildren(List<MessageMappingBase> children) {
-        this.children = new NabuccoList<MessageMappingBase>(children, NabuccoCollectionState.LAZY);
-    }
-
-    @Override
-    public MessageMappingBase cloneObject() {
-        MessageMappingBase clone = new MessageMappingBase();
-        this.cloneObject(clone);
-        return clone;
+    void setChildrenJPA(List<MessageMappingBase> children) {
+        if ((this.children == null)) {
+            this.children = new NabuccoList<MessageMappingBase>(NabuccoCollectionState.LAZY);
+        }
+        ((NabuccoList<MessageMappingBase>) this.children).setDelegate(children);
     }
 
     @Override
@@ -111,8 +132,17 @@ public class MessageMappingBase extends NabuccoDatatype implements Datatype {
     }
 
     @Override
-    public String[] getConstraints() {
-        return CONSTRAINTS.clone();
+    public List<NabuccoProperty<?>> getProperties() {
+        List<NabuccoProperty<?>> properties = super.getProperties();
+        properties.add(new BasetypeProperty<Owner>(PROPERTY_NAMES[0], Owner.class,
+                PROPERTY_CONSTRAINTS[0], this.owner));
+        properties.add(new BasetypeProperty<CodeNumber>(PROPERTY_NAMES[1], CodeNumber.class,
+                PROPERTY_CONSTRAINTS[1], this.codeNumber));
+        properties.add(new ListProperty<MessageProperty>(PROPERTY_NAMES[2], MessageProperty.class,
+                PROPERTY_CONSTRAINTS[2], this.messagePropertiyList));
+        properties.add(new ListProperty<MessageMappingBase>(PROPERTY_NAMES[3],
+                MessageMappingBase.class, PROPERTY_CONSTRAINTS[3], this.children));
+        return properties;
     }
 
     @Override
@@ -140,21 +170,17 @@ public class MessageMappingBase extends NabuccoDatatype implements Datatype {
                 return false;
         } else if ((!this.codeNumber.equals(other.codeNumber)))
             return false;
+        if ((this.messagePropertiyListRefId == null)) {
+            if ((other.messagePropertiyListRefId != null))
+                return false;
+        } else if ((!this.messagePropertiyListRefId.equals(other.messagePropertiyListRefId)))
+            return false;
+        if ((this.childrenRefId == null)) {
+            if ((other.childrenRefId != null))
+                return false;
+        } else if ((!this.childrenRefId.equals(other.childrenRefId)))
+            return false;
         return true;
-    }
-
-    @Override
-    public String[] getPropertyNames() {
-        return VisitorUtility.merge(super.getPropertyNames(), new String[] { "owner", "codeNumber",
-                "messagePropertiyList", "children" });
-    }
-
-    @Override
-    public Object[] getProperties() {
-        return VisitorUtility.merge(
-                super.getProperties(),
-                new Object[] { this.getOwner(), this.getCodeNumber(),
-                        this.getMessagePropertiyList(), this.getChildren() });
     }
 
     @Override
@@ -163,6 +189,10 @@ public class MessageMappingBase extends NabuccoDatatype implements Datatype {
         int result = super.hashCode();
         result = ((PRIME * result) + ((this.owner == null) ? 0 : this.owner.hashCode()));
         result = ((PRIME * result) + ((this.codeNumber == null) ? 0 : this.codeNumber.hashCode()));
+        result = ((PRIME * result) + ((this.messagePropertiyListRefId == null) ? 0
+                : this.messagePropertiyListRefId.hashCode()));
+        result = ((PRIME * result) + ((this.childrenRefId == null) ? 0 : this.childrenRefId
+                .hashCode()));
         return result;
     }
 
@@ -173,8 +203,18 @@ public class MessageMappingBase extends NabuccoDatatype implements Datatype {
         appendable.append(super.toString());
         appendable.append((("<owner>" + this.owner) + "</owner>\n"));
         appendable.append((("<codeNumber>" + this.codeNumber) + "</codeNumber>\n"));
+        appendable
+                .append((("<messagePropertiyListRefId>" + this.messagePropertiyListRefId) + "</messagePropertiyListRefId>\n"));
+        appendable.append((("<childrenRefId>" + this.childrenRefId) + "</childrenRefId>\n"));
         appendable.append("</MessageMappingBase>\n");
         return appendable.toString();
+    }
+
+    @Override
+    public MessageMappingBase cloneObject() {
+        MessageMappingBase clone = new MessageMappingBase();
+        this.cloneObject(clone);
+        return clone;
     }
 
     /**
@@ -251,6 +291,24 @@ public class MessageMappingBase extends NabuccoDatatype implements Datatype {
     }
 
     /**
+     * Getter for the MessagePropertiyListRefId.
+     *
+     * @return the Long.
+     */
+    public Long getMessagePropertiyListRefId() {
+        return this.messagePropertiyListRefId;
+    }
+
+    /**
+     * Setter for the MessagePropertiyListRefId.
+     *
+     * @param messagePropertiyListRefId the Long.
+     */
+    public void setMessagePropertiyListRefId(Long messagePropertiyListRefId) {
+        this.messagePropertiyListRefId = messagePropertiyListRefId;
+    }
+
+    /**
      * Missing description at method getChildren.
      *
      * @return the List<MessageMappingBase>.
@@ -260,5 +318,23 @@ public class MessageMappingBase extends NabuccoDatatype implements Datatype {
             this.children = new NabuccoList<MessageMappingBase>(NabuccoCollectionState.INITIALIZED);
         }
         return this.children;
+    }
+
+    /**
+     * Getter for the ChildrenRefId.
+     *
+     * @return the Long.
+     */
+    public Long getChildrenRefId() {
+        return this.childrenRefId;
+    }
+
+    /**
+     * Setter for the ChildrenRefId.
+     *
+     * @param childrenRefId the Long.
+     */
+    public void setChildrenRefId(Long childrenRefId) {
+        this.childrenRefId = childrenRefId;
     }
 }

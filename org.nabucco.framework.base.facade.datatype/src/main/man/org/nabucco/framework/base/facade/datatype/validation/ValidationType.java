@@ -18,13 +18,21 @@ package org.nabucco.framework.base.facade.datatype.validation;
 
 /**
  * ValidationType
+ * <p/>
+ * Defines the depth of the datatype validation (deep or shallow).
  * 
  * @author Nicolas Moser, PRODYNA AG
  */
 public enum ValidationType {
 
+    /**
+     * Validates the whole datatype tree.
+     */
     DEEP,
 
+    /**
+     * Validates only the first datatype in the tree.
+     */
     SHALLOW
 
 }

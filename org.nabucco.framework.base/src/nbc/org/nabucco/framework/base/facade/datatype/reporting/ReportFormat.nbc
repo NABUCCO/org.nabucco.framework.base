@@ -1,0 +1,41 @@
+/*
+ *	PRODYNA NABUCCO SKM
+ *  Copyright 2010, PRODYNA AG
+ */
+package org.nabucco.framework.base.facade.datatype.reporting;
+
+@Author			Dominic Trumpfheller
+@Company		PRODYNA AG
+@Date			2010-11-10
+@Version		1.0
+@Description	Format of a Report
+public Enumeration ReportFormat {
+
+	@LiteralId html
+	HTML
+	
+	@LiteralId pdf
+	PDF
+	
+	@LiteralId rtf
+	RTF
+	
+	@LiteralId doc
+	DOC
+	
+	@LiteralId docx
+	DOCX
+	
+	@LiteralId png
+	PNG
+	
+	@LiteralId cvs
+	CSV
+	
+	@LiteralId xls
+	XLS
+	
+	@LiteralId xlsx
+	XLSX
+	
+}

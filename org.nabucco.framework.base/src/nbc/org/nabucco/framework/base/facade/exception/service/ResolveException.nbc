@@ -16,6 +16,8 @@
  */
 package org.nabucco.framework.base.facade.exception.service;
 
+import org.nabucco.framework.base.facade.exception.service.ServiceException;
+
 @Author			Jens Wurm
 @Company		PRODYNA AG
 @Date			2010-05-10

@@ -1,26 +1,15 @@
 /*
-* Copyright 2010 PRODYNA AG
-*
-* Licensed under the Eclipse Public License (EPL), Version 1.0 (the "License");
-* you may not use this file except in compliance with the License.
-* You may obtain a copy of the License at
-*
-* http://www.opensource.org/licenses/eclipse-1.0.php or
-* http://www.nabucco-source.org/nabucco-license.html
-*
-* Unless required by applicable law or agreed to in writing, software
-* distributed under the License is distributed on an "AS IS" BASIS,
-* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-* See the License for the specific language governing permissions and
-* limitations under the License.
-*
-* Generated with NABUCCO Generator 
-*/
+ * NABUCCO Generator, Copyright (c) 2010, PRODYNA AG, Germany. All rights reserved.
+ */
 package org.nabucco.framework.base.facade.datatype;
 
+import java.util.List;
 import org.nabucco.framework.base.facade.datatype.Datatype;
 import org.nabucco.framework.base.facade.datatype.DatatypeSupport;
-import org.nabucco.framework.base.facade.datatype.visitor.VisitorUtility;
+import org.nabucco.framework.base.facade.datatype.Identifier;
+import org.nabucco.framework.base.facade.datatype.Version;
+import org.nabucco.framework.base.facade.datatype.property.BasetypeProperty;
+import org.nabucco.framework.base.facade.datatype.property.NabuccoProperty;
 
 /**
  * NabuccoDatatype<p/>Common datatype for all NABUCCO datatypes, defines id and version<p/>
@@ -30,9 +19,11 @@ import org.nabucco.framework.base.facade.datatype.visitor.VisitorUtility;
  */
 public abstract class NabuccoDatatype extends DatatypeSupport implements Datatype {
 
-    private static final String[] CONSTRAINTS = { "l0,n;m0,1;", "l0,n;m0,1;" };
-
     private static final long serialVersionUID = 1L;
+
+    private static final String[] PROPERTY_NAMES = { "id", "version" };
+
+    private static final String[] PROPERTY_CONSTRAINTS = { "l0,n;m0,1;", "l0,n;m0,1;" };
 
     /** Identifier for all datatypes, represents DB foreign key column */
     private Identifier id;
@@ -46,6 +37,10 @@ public abstract class NabuccoDatatype extends DatatypeSupport implements Datatyp
         this.initDefaults();
     }
 
+    /** InitDefaults. */
+    private void initDefaults() {
+    }
+
     /**
      * CloneObject.
      *
@@ -53,20 +48,9 @@ public abstract class NabuccoDatatype extends DatatypeSupport implements Datatyp
      */
     protected void cloneObject(NabuccoDatatype clone) {
         super.cloneObject(clone);
-        if ((this.id != null)) {
-            clone.id = this.id.cloneObject();
-        }
-        if ((this.version != null)) {
-            clone.version = this.version.cloneObject();
-        }
+        clone.setId(this.getId());
+        clone.setVersion(this.getVersion());
     }
-
-    /** InitDefaults. */
-    private void initDefaults() {
-    }
-
-    @Override
-    public abstract NabuccoDatatype cloneObject();
 
     @Override
     public void init() {
@@ -74,8 +58,13 @@ public abstract class NabuccoDatatype extends DatatypeSupport implements Datatyp
     }
 
     @Override
-    public String[] getConstraints() {
-        return VisitorUtility.merge(super.getConstraints(), CONSTRAINTS);
+    public List<NabuccoProperty<?>> getProperties() {
+        List<NabuccoProperty<?>> properties = super.getProperties();
+        properties.add(new BasetypeProperty<Identifier>(PROPERTY_NAMES[0], Identifier.class,
+                PROPERTY_CONSTRAINTS[0], this.id));
+        properties.add(new BasetypeProperty<Version>(PROPERTY_NAMES[1], Version.class,
+                PROPERTY_CONSTRAINTS[1], this.version));
+        return properties;
     }
 
     @Override
@@ -107,17 +96,6 @@ public abstract class NabuccoDatatype extends DatatypeSupport implements Datatyp
     }
 
     @Override
-    public String[] getPropertyNames() {
-        return VisitorUtility.merge(super.getPropertyNames(), new String[] { "id", "version" });
-    }
-
-    @Override
-    public Object[] getProperties() {
-        return VisitorUtility.merge(super.getProperties(),
-                new Object[] { this.getId(), this.getVersion() });
-    }
-
-    @Override
     public int hashCode() {
         final int PRIME = 31;
         int result = super.hashCode();
@@ -136,6 +114,9 @@ public abstract class NabuccoDatatype extends DatatypeSupport implements Datatyp
         appendable.append("</NabuccoDatatype>\n");
         return appendable.toString();
     }
+
+    @Override
+    public abstract NabuccoDatatype cloneObject();
 
     /**
      * Identifier for all datatypes, represents DB foreign key column
