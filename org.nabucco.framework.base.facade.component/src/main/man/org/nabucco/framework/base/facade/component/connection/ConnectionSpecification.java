@@ -1,12 +1,12 @@
 /*
- * Copyright 2010 PRODYNA AG
+ * Copyright 2012 PRODYNA AG
  *
  * Licensed under the Eclipse Public License (EPL), Version 1.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
  * http://www.opensource.org/licenses/eclipse-1.0.php or
- * http://www.nabucco-source.org/nabucco-license.html
+ * http://www.nabucco.org/License.html
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -17,10 +17,14 @@
 package org.nabucco.framework.base.facade.component.connection;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Properties;
 
 import javax.naming.Context;
+
+import org.nabucco.framework.base.facade.datatype.logger.NabuccoLogger;
+import org.nabucco.framework.base.facade.datatype.logger.NabuccoLoggingFactory;
 
 /**
  * ConnectionSpecification
@@ -36,6 +40,8 @@ public class ConnectionSpecification implements ConnectionConstants {
 
     private ConnectionType connectionType;
 
+    private String name;
+
     private String environment;
 
     private String protocol;
@@ -46,6 +52,9 @@ public class ConnectionSpecification implements ConnectionConstants {
 
     private Properties properties;
 
+    /** Logger */
+    private static NabuccoLogger logger = NabuccoLoggingFactory.getInstance().getLogger(ConnectionSpecification.class);
+
     /**
      * Creates a new {@link ConnectionSpecification} instance using default URL information.
      * 
@@ -53,7 +62,49 @@ public class ConnectionSpecification implements ConnectionConstants {
      *            the connection type specifying the default values
      */
     public ConnectionSpecification(ConnectionType type) {
-        this(type, null, null, null);
+        this(type, (String) null);
+    }
+
+    /**
+     * Creates a new {@link ConnectionSpecification} instance using default URL information.
+     * 
+     * @param type
+     *            the connection type specifying the default values
+     * @param environment
+     *            the connection environment
+     */
+    public ConnectionSpecification(ConnectionType type, String environment) {
+        this(type, environment, null, null, null);
+    }
+
+    /**
+     * Creates a new {@link ConnectionSpecification} instance using default URL information.
+     * 
+     * @param type
+     *            the connection type specifying the default values
+     * @param environment
+     *            the connection environment
+     * @param host
+     *            the connection host (default=localhost)
+     */
+    public ConnectionSpecification(ConnectionType type, String environment, String host) {
+        this(type, environment, host, null, null);
+    }
+
+    /**
+     * Creates a new {@link ConnectionSpecification} instance using default URL information.
+     * 
+     * @param type
+     *            the connection type specifying the default values
+     * @param environment
+     *            the connection environment
+     * @param host
+     *            the connection host (default=localhost)
+     * @param port
+     *            the connection port
+     */
+    public ConnectionSpecification(ConnectionType type, String environment, String host, String port) {
+        this(type, environment, host, port, null);
     }
 
     /**
@@ -67,13 +118,16 @@ public class ConnectionSpecification implements ConnectionConstants {
      *            the connection host (default=localhost)
      * @param port
      *            the connection port
+     * @param name
+     *            the connection name
      */
-    public ConnectionSpecification(ConnectionType type, String environment, String host, String port) {
+    public ConnectionSpecification(ConnectionType type, String environment, String host, String port, String name) {
         if (type == null) {
             throw new IllegalArgumentException("ConnectionType must be defined.");
         }
 
         this.connectionType = type;
+        this.name = name;
         this.environment = environment != null ? environment : type.name();
         this.protocol = type.getDefaultProtocol();
         this.host = host != null ? host : LOCALHOST;
@@ -132,12 +186,63 @@ public class ConnectionSpecification implements ConnectionConstants {
     }
 
     /**
+     * Parses properties for the connection specifications.
+     * 
+     * @param properties
+     *            the properties to parse
+     * 
+     * @return the configured connections
+     */
+    public static List<ConnectionSpecification> parse(Properties properties) {
+        if (properties == null) {
+            return Collections.emptyList();
+        }
+
+        List<ConnectionSpecification> specifications = new ArrayList<ConnectionSpecification>();
+
+        for (int i = 0; i < 10; i++) {
+
+            final String INDEX = "[" + i + "]";
+
+            String type = properties.getProperty(CONNECTION_TYPE + INDEX);
+            String name = properties.getProperty(CONNECTION_NAME + INDEX);
+            String env = properties.getProperty(CONNECTION_ENVIRONMENT + INDEX);
+            String host = properties.getProperty(CONNECTION_HOST + INDEX);
+            String port = properties.getProperty(CONNECTION_PORT + INDEX);
+
+            if (type == null || env == null || host == null || port == null) {
+                logger.debug("Skipping configuration of connection '" + env + "'.");
+                continue;
+            }
+
+            try {
+                ConnectionType target = ConnectionType.valueOf(type);
+                specifications.add(new ConnectionSpecification(target, env, host, port, name));
+            } catch (Exception e) {
+                // Skip Connection!
+                logger.debug(e, "Skipping configuration of connection '" + env + "'.");
+            }
+        }
+
+        return specifications;
+    }
+
+    /**
      * Getter for the connection type.
      * 
      * @return Returns the connectionType.
      */
     public ConnectionType getConnectionType() {
         return this.connectionType;
+    }
+
+    /**
+     * Getter for the name.
+     * 
+     * @return Returns the name.
+     */
+    public String getName() {
+        return this.name;
     }
 
     /**
@@ -205,8 +310,7 @@ public class ConnectionSpecification implements ConnectionConstants {
     public int hashCode() {
         final int prime = 31;
         int result = 1;
-        result = prime
-                * result + ((this.connectionType == null) ? 0 : this.connectionType.hashCode());
+        result = prime * result + ((this.connectionType == null) ? 0 : this.connectionType.hashCode());
         result = prime * result + ((this.environment == null) ? 0 : this.environment.hashCode());
         result = prime * result + ((this.properties == null) ? 0 : this.properties.hashCode());
         return result;

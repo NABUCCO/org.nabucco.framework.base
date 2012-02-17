@@ -1,12 +1,12 @@
 /*
- * Copyright 2010 PRODYNA AG
+ * Copyright 2012 PRODYNA AG
  *
  * Licensed under the Eclipse Public License (EPL), Version 1.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
  * http://www.opensource.org/licenses/eclipse-1.0.php or
- * http://www.nabucco-source.org/nabucco-license.html
+ * http://www.nabucco.org/License.html
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -34,6 +34,7 @@ public abstract class NFloat extends BasetypeSupport implements Basetype, Compar
      * Default constructor
      */
     public NFloat() {
+        this(null);
     }
 
     /**
@@ -43,7 +44,16 @@ public abstract class NFloat extends BasetypeSupport implements Basetype, Compar
      *            the value to initialize
      */
     public NFloat(Float value) {
+        super(BasetypeType.FLOAT);
         this.value = value;
+    }
+
+    @Override
+    public void setValue(Object value) throws IllegalArgumentException {
+        if (value != null && !(value instanceof Float)) {
+            throw new IllegalArgumentException("Cannot set value '" + value + "' to NFloat.");
+        }
+        this.setValue((Float) value);
     }
 
     @Override
@@ -123,7 +133,7 @@ public abstract class NFloat extends BasetypeSupport implements Basetype, Compar
     /**
      * Clones the properties of this basetype into the given basetype.
      * 
-     * @param basetype
+     * @param clone
      *            the cloned basetype
      */
     protected void cloneObject(NFloat clone) {

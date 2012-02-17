@@ -1,0 +1,51 @@
+/*
+ * Copyright 2011 PRODYNA AG
+ *
+ * Licensed under the Eclipse Public License (EPL), Version 1.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.opensource.org/licenses/eclipse-1.0.php or
+ * http://nabuccosource.org/License.html
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+package org.nabucco.framework.base.facade.datatype.security.acl;
+
+import org.nabucco.framework.base.facade.datatype.Description;
+import org.nabucco.framework.base.facade.datatype.NabuccoDatatype;
+import org.nabucco.framework.base.facade.datatype.Name;
+import org.nabucco.framework.base.facade.datatype.code.Code;
+import org.nabucco.framework.base.facade.datatype.security.acl.AccessControlEntryType;
+import org.nabucco.framework.base.facade.datatype.security.acl.AccessControlGrantType;
+
+@Author			Nicolas Moser
+@Company		PRODYNA AG
+@Date			2011-06-28
+@Version		1.0
+@Description	A single entry in the ACL
+public Datatype AccessControlEntry extends NabuccoDatatype {
+	
+	@Description		Name of the access control object.
+	private Basetype Name[1] name;
+	
+	@Description		The security element which the access control element validates for.
+	private Enumeration AccessControlEntryType[1] type;
+	
+	@Default			GRANT
+	@Description		The grant type of access control, whether the control type is granted or denied.
+	private Enumeration AccessControlGrantType[1] grantType;
+	
+	@CodePath			org.nabucco.ace
+	@Description		The type of access control.
+	private Datatype Code[1] controlType;
+	
+	@Description		Description of the access control object.
+	private Basetype Description[0..1] description;
+
+}
+

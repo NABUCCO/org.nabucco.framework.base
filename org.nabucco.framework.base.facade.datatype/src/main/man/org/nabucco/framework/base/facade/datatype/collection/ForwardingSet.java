@@ -1,5 +1,18 @@
 /*
- * Copyright (c) 2010, PRODYNA AG, Germany. All rights reserved. Created 16.12.2010
+ * Copyright 2012 PRODYNA AG
+ *
+ * Licensed under the Eclipse Public License (EPL), Version 1.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.opensource.org/licenses/eclipse-1.0.php or
+ * http://www.nabucco.org/License.html
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 package org.nabucco.framework.base.facade.datatype.collection;
 
@@ -13,9 +26,12 @@ import org.nabucco.framework.base.facade.datatype.NType;
 /**
  * ForwardingSet
  * 
+ * @param <E>
+ *            the set element type
+ * 
  * @author Nicolas Moser, PRODYNA AG
  */
-abstract class ForwardingSet<E extends NType> implements Set<E>, NabuccoCollection<E> {
+abstract class ForwardingSet<E extends NType> implements Set<E>, ForwardingCollection<E> {
 
     private static final long serialVersionUID = 1L;
 
@@ -125,6 +141,25 @@ abstract class ForwardingSet<E extends NType> implements Set<E>, NabuccoCollecti
     @Override
     public int hashCode() {
         return this.delegate.hashCode();
+    }
+
+    /**
+     * Get the delegating set of this instance of {@link ForwardingSet}.
+     * 
+     * @return The delegate set.
+     */
+    public Set<E> getDelegate() {
+        return this.delegate;
+    }
+
+    /**
+     * Set the delegating set of this instance of {@link ForwardingSet}.
+     * 
+     * @param newDelegate
+     *            The new set to set.
+     */
+    public void setDelegate(Set<E> newDelegate) {
+        this.delegate = newDelegate;
     }
 
     /**

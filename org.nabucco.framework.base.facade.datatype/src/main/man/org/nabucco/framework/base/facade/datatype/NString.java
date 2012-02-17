@@ -1,12 +1,12 @@
 /*
- * Copyright 2010 PRODYNA AG
+ * Copyright 2012 PRODYNA AG
  *
  * Licensed under the Eclipse Public License (EPL), Version 1.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
  * http://www.opensource.org/licenses/eclipse-1.0.php or
- * http://www.nabucco-source.org/nabucco-license.html
+ * http://www.nabucco.org/License.html
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -31,6 +31,7 @@ public abstract class NString extends BasetypeSupport implements Basetype, Compa
      * Default constructor
      */
     public NString() {
+        this(null);
     }
 
     /**
@@ -40,12 +41,21 @@ public abstract class NString extends BasetypeSupport implements Basetype, Compa
      *            the value to initialize
      */
     public NString(String value) {
+        super(BasetypeType.STRING);
         this.value = value;
     }
 
     @Override
     public String getValue() {
         return value;
+    }
+
+    @Override
+    public void setValue(Object value) throws IllegalArgumentException {
+        if (value != null && !(value instanceof String)) {
+            throw new IllegalArgumentException("Cannot set value '" + value + "' to NString.");
+        }
+        this.setValue((String) value);
     }
 
     /**
@@ -117,7 +127,7 @@ public abstract class NString extends BasetypeSupport implements Basetype, Compa
     /**
      * Clones the properties of this NString into the given NString.
      * 
-     * @param basetype
+     * @param clone
      *            the cloned NString
      */
     protected void cloneObject(NString clone) {

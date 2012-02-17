@@ -1,0 +1,17 @@
+/*
+ *  PRODYNA NABUCCO
+ *  Copyright 2011, PRODYNA AG
+ */
+package org.nabucco.framework.base.facade.datatype.extension.schema.template.fields; 
+
+import org.nabucco.framework.base.facade.datatype.extension.schema.template.TemplateComposite;
+
+
+@Author         Holger Librenz
+@Company        PRODYNA AG
+@Date           2011-03-29
+@Version        1.1
+@Description    This is our template root - or better: The <template> tag. 
+public Datatype TemplateRootComposite extends TemplateComposite {
+
+}

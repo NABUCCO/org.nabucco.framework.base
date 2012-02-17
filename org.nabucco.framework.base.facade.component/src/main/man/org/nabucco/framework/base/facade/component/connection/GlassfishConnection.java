@@ -1,12 +1,12 @@
 /*
- * Copyright 2010 PRODYNA AG
+ * Copyright 2012 PRODYNA AG
  *
  * Licensed under the Eclipse Public License (EPL), Version 1.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
  * http://www.opensource.org/licenses/eclipse-1.0.php or
- * http://www.nabucco-source.org/nabucco-license.html
+ * http://www.nabucco.org/License.html
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -44,11 +44,9 @@ class GlassfishConnection extends Connection {
     Context initContext(Properties properties) throws ConnectionException {
         try {
             Properties env = new Properties();
-            env.put(Context.INITIAL_CONTEXT_FACTORY,
-                    "com.sun.enterprise.naming.SerialInitContextFactory");
+            env.put(Context.INITIAL_CONTEXT_FACTORY, "com.sun.enterprise.naming.SerialInitContextFactory");
             env.put(Context.URL_PKG_PREFIXES, "com.sun.enterprise.naming");
-            env.put(Context.STATE_FACTORIES,
-                    "com.sun.corba.ee.impl.presentation.rmi.JNDIStateFactoryImpl");
+            env.put(Context.STATE_FACTORIES, "com.sun.corba.ee.impl.presentation.rmi.JNDIStateFactoryImpl");
 
             if (properties != null && !properties.isEmpty()) {
                 env.putAll(properties);

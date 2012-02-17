@@ -11,11 +11,8 @@
 	<classpathentry combineaccessrules="false" kind="src" path="/org.nabucco.framework.base.facade.message"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/org.nabucco.framework.base.facade.service"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/org.nabucco.framework.base.ui.web"/>
-	<classpathentry kind="lib" path="/org.nabucco.framework.base/lib/portal/jsf-api.jar"/>
-	<classpathentry kind="lib" path="/org.nabucco.framework.base/lib/portal/jsp-api.jar"/>
 	<classpathentry kind="lib" path="/org.nabucco.framework.base/lib/portal/log4j.jar"/>
 	<classpathentry kind="lib" path="/org.nabucco.framework.base/lib/portal/servlet-api.jar"/>
-	<classpathentry kind="lib" path="/org.nabucco.framework.base/lib/portal/vaadin.jar"/>
 	<classpathentry kind="lib" path="/org.nabucco.framework.base/lib/portal/portlet.jar"/>
 	<classpathentry kind="output" path="out/ide"/>
 </classpath>

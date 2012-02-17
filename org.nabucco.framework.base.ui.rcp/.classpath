@@ -10,5 +10,5 @@
 	<classpathentry combineaccessrules="false" kind="src" path="/org.nabucco.framework.base.facade.exception"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/org.nabucco.framework.base.facade.message"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/org.nabucco.framework.base.facade.service"/>
-	<classpathentry kind="output" path="out"/>
+	<classpathentry kind="output" path="out/ide"/>
 </classpath>

@@ -1,0 +1,34 @@
+/*
+ *  PRODYNA NABUCCO
+ *  Copyright 2011, PRODYNA AG
+ */
+package org.nabucco.framework.base.facade.datatype.extension.schema.template.fields; 
+
+import org.nabucco.framework.base.facade.datatype.Flag;
+import org.nabucco.framework.base.facade.datatype.Name;
+import org.nabucco.framework.base.facade.datatype.extension.schema.template.TemplateElement;
+
+
+@Author         Holger Librenz
+@Company        PRODYNA AG
+@Date           2011-03-29
+@Version        1.0
+@Description    References dynamic values 
+public Datatype DynamicElement extends TemplateElement {
+	
+	@Description	If true, the value is not persisted, only viewed (use it e.g. for references)
+	private Basetype Flag[1] isTransient;
+
+	@Description	If true, the value can be edited in "Edit Mode" 
+	private Basetype Flag[1] isInput;
+
+	@Description	Just a description for the element
+	private Basetype Name[0..1] label;
+
+	@Description	Type hint for the value
+	private Basetype Name[0..1] type;
+
+	@Description	Pre-defined value or reference to context value (indicated by '$')
+	private Basetype Name[1] value;
+
+}

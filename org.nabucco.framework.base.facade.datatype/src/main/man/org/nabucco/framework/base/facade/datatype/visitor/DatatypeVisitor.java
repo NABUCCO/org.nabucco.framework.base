@@ -1,12 +1,12 @@
 /*
- * Copyright 2010 PRODYNA AG
+ * Copyright 2012 PRODYNA AG
  *
  * Licensed under the Eclipse Public License (EPL), Version 1.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
  * http://www.opensource.org/licenses/eclipse-1.0.php or
- * http://www.nabucco-source.org/nabucco-license.html
+ * http://www.nabucco.org/License.html
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -21,7 +21,10 @@ import java.util.Set;
 
 import org.nabucco.framework.base.facade.datatype.Basetype;
 import org.nabucco.framework.base.facade.datatype.Datatype;
+import org.nabucco.framework.base.facade.datatype.property.CollectionProperty;
+import org.nabucco.framework.base.facade.datatype.property.DatatypeProperty;
 import org.nabucco.framework.base.facade.datatype.property.NabuccoProperty;
+import org.nabucco.framework.base.facade.datatype.property.PropertyAssociationType;
 
 /**
  * DatatypeVisitor
@@ -33,8 +36,30 @@ import org.nabucco.framework.base.facade.datatype.property.NabuccoProperty;
  */
 public class DatatypeVisitor implements Visitor {
 
+    /** Traverse over component borders. */
+    private boolean traverseComponents;
+
     /** Set of visited object ids. */
     private Set<Integer> visited = new HashSet<Integer>();
+
+    /**
+     * Creates a new {@link DatatypeVisitor} instance that traverses over component borders.
+     * <p/>
+     * This constructor is equivalent to {@link DatatypeVisitor#DatatypeVisitor(boolean)}.
+     */
+    public DatatypeVisitor() {
+        this(true);
+    }
+
+    /**
+     * Creates a new {@link DatatypeVisitor} instance.
+     * 
+     * @param traverseComponents
+     *            <b>true</b> when component borders should be traversed, <b>false</b> if not
+     */
+    public DatatypeVisitor(boolean traverseComponents) {
+        this.traverseComponents = traverseComponents;
+    }
 
     @Override
     public final boolean hasVisited(Visitable visitable) {
@@ -84,8 +109,29 @@ public class DatatypeVisitor implements Visitor {
      * @throws VisitorException
      */
     protected void visitChildren(Visitable visitable) throws VisitorException {
-        for (NabuccoProperty<?> property : visitable.getProperties()) {
-            property.accept(this);
+        for (NabuccoProperty property : visitable.getProperties()) {
+
+            switch (property.getPropertyType()) {
+            case DATATYPE:
+                DatatypeProperty datatypeProperty = (DatatypeProperty) property;
+                if (datatypeProperty.getAssociationType() != PropertyAssociationType.COMPONENT
+                        || this.traverseComponents) {
+                    datatypeProperty.accept(this);
+                }
+
+                break;
+
+            case COLLECTION:
+                CollectionProperty listProperty = (CollectionProperty) property;
+                if (listProperty.getAssociationType() != PropertyAssociationType.COMPONENT || this.traverseComponents) {
+                    listProperty.accept(this);
+                }
+                break;
+
+            default:
+                property.accept(this);
+            }
+
         }
     }
 

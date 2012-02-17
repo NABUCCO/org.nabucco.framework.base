@@ -1,0 +1,55 @@
+/*
+* Copyright 2011 PRODYNA AG
+*
+* Licensed under the Eclipse Public License (EPL), Version 1.0 (the "License");
+* you may not use this file except in compliance with the License.
+* You may obtain a copy of the License at
+*
+* http://www.opensource.org/licenses/eclipse-1.0.php or
+* http://nabuccosource.org/License.html
+*
+* Unless required by applicable law or agreed to in writing, software
+* distributed under the License is distributed on an "AS IS" BASIS,
+* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+* See the License for the specific language governing permissions and
+* limitations under the License.
+*/
+package org.nabucco.framework.base.facade.datatype.geo;
+
+@Author			Frank Ratschinski
+@Company		PRODYNA AG
+@Date			2010-05-04
+@Version		1.0
+@Description	Enumeration of all supported types of a geo location.
+public Enumeration LocationType {
+
+
+	@Description Continent Geo Location
+	@LiteralId CN
+    CONTINENT
+    
+    @Description State Geo Location
+	@LiteralId ST
+    STATE
+    
+	@Description ZipCode Geo Location
+	@LiteralId ZC
+    ZIP
+    
+	@Description City Geo Location
+	@LiteralId CI
+    CITY
+
+	@Description Country Geo Location
+	@LiteralId CO
+    COUNTRY
+    
+    @Description Street Geo Location
+	@LiteralId SR
+    STREET
+    
+    @Description Point of interrest Geo Location
+	@LiteralId PO
+    POINT_OF_INTERREST
+	
+}

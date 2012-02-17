@@ -1,12 +1,12 @@
 /*
- * Copyright 2010 PRODYNA AG
+ * Copyright 2012 PRODYNA AG
  *
  * Licensed under the Eclipse Public License (EPL), Version 1.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
  * http://www.opensource.org/licenses/eclipse-1.0.php or
- * http://www.nabucco-source.org/nabucco-license.html
+ * http://www.nabucco.org/License.html
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -20,12 +20,12 @@ import java.util.List;
 
 import org.nabucco.framework.base.facade.component.Component;
 import org.nabucco.framework.base.facade.datatype.DatatypeAccessor;
+import org.nabucco.framework.base.facade.datatype.DatatypeState;
 import org.nabucco.framework.base.facade.datatype.Identifier;
 import org.nabucco.framework.base.facade.datatype.NabuccoDatatype;
 import org.nabucco.framework.base.facade.datatype.Name;
 import org.nabucco.framework.base.facade.datatype.componentrelation.ComponentRelation;
 import org.nabucco.framework.base.facade.datatype.componentrelation.ComponentRelationContainer;
-import org.nabucco.framework.base.facade.datatype.componentrelation.ComponentRelationState;
 import org.nabucco.framework.base.facade.datatype.componentrelation.ComponentRelationType;
 import org.nabucco.framework.base.facade.datatype.logger.NabuccoLogger;
 import org.nabucco.framework.base.facade.datatype.logger.NabuccoLoggingFactory;
@@ -42,8 +42,7 @@ import org.nabucco.framework.base.facade.service.componentrelation.ComponentRela
  * 
  * @author Nicolas Moser, PRODYNA AG
  */
-public abstract class DatatypeConnectorSupport extends ConnectorSupport implements
-        DatatypeConnector {
+public abstract class DatatypeConnectorSupport extends ConnectorSupport implements DatatypeConnector {
 
     private static final long serialVersionUID = 1L;
 
@@ -51,8 +50,7 @@ public abstract class DatatypeConnectorSupport extends ConnectorSupport implemen
 
     private NabuccoDatatype target;
 
-    private static NabuccoLogger logger = NabuccoLoggingFactory.getInstance().getLogger(
-            DatatypeConnectorSupport.class);
+    private static NabuccoLogger logger = NabuccoLoggingFactory.getInstance().getLogger(DatatypeConnectorSupport.class);
 
     /**
      * Creates a new {@link DatatypeConnectorSupport} instance.
@@ -87,6 +85,8 @@ public abstract class DatatypeConnectorSupport extends ConnectorSupport implemen
     /**
      * Setter for the target datatype instance.
      * 
+     * @param <T>
+     *            type of the target datatype
      * @param datatype
      *            the target datatype
      */
@@ -98,17 +98,48 @@ public abstract class DatatypeConnectorSupport extends ConnectorSupport implemen
     @SuppressWarnings({ "unchecked", "rawtypes" })
     public final void maintain() throws ConnectorException {
 
-        ComponentRelationContainer relationContainer = DatatypeAccessor.getInstance()
-                .getComponentRelation(this.getSourceDatatype());
+        ComponentRelationContainer relationContainer = DatatypeAccessor.getInstance().getComponentRelation(
+                this.getSourceDatatype());
 
         for (ComponentRelation relation : relationContainer.getAllComponentRelations()) {
 
-            ComponentRelationType relationType = relation.getRelationType();
+            ComponentRelationType relationType = relation.getFunctionalType();
 
             try {
-                if (relation.getRelationState() != ComponentRelationState.PERSISTENT) {
+
+                if (relation.getDatatypeState() == DatatypeState.DELETED) {
 
                     this.target = relation.getTarget();
+
+                    ComponentRelationMsg requestMessage = new ComponentRelationMsg();
+                    requestMessage.setComponentRelation(relation);
+
+                    Component component = this.lookupTargetComponent(relationType);
+
+                    if (component == null) {
+                        logger.error("Cannot maintain Component Relation '", relationType.toString(),
+                                "'. Target component lookup failed.");
+                    } else {
+
+                        logger.debug("Maintain component relation:\t" + relationType.toString());
+                        ComponentRelationMsg response = this.invokeMaintainRelation(component, requestMessage);
+
+                        relationContainer.getComponentRelations(relationType).set(
+                                relationContainer.getComponentRelations(relationType).indexOf(relation),
+                                response.getComponentRelation());
+                    }
+
+                    logger.debug("Maintain datatype:\t" + target.getClass().getSimpleName());
+                    this.internalMaintain(relation);
+
+                    relation.setTarget(this.target);
+
+                } else if (relation.getDatatypeState() != DatatypeState.PERSISTENT
+                        || relation.getTarget().getDatatypeState() != DatatypeState.PERSISTENT) {
+
+                    this.target = relation.getTarget();
+
+                    logger.debug("Maintain datatype:\t" + target.getClass().getSimpleName());
                     this.internalMaintain(relation);
 
                     relation.setTarget(this.target);
@@ -121,12 +152,17 @@ public abstract class DatatypeConnectorSupport extends ConnectorSupport implemen
                     Component component = this.lookupTargetComponent(relationType);
 
                     if (component == null) {
-                        logger.error("Cannot maintain Component Relation '",
-                                relationType.toString(), "'. Target component lookup failed.");
+                        logger.error("Cannot maintain Component Relation '", relationType.toString(),
+                                "'. Target component lookup failed.");
                     } else {
-                        this.invokeMaintainRelation(component, requestMessage);
-                    }
 
+                        logger.debug("Maintain component relation:\t" + relationType.toString());
+                        ComponentRelationMsg response = this.invokeMaintainRelation(component, requestMessage);
+
+                        relationContainer.getComponentRelations(relationType).set(
+                                relationContainer.getComponentRelations(relationType).indexOf(relation),
+                                response.getComponentRelation());
+                    }
                 }
 
             } catch (NabuccoException e) {
@@ -157,8 +193,7 @@ public abstract class DatatypeConnectorSupport extends ConnectorSupport implemen
                     logger.error("Cannot resolving Component Relation '", relationType.toString(),
                             "'. Target component lookup failed.");
                 } else {
-                    ComponentRelationListMsg responseMessage = this.invokeResolveRelation(
-                            component, requestMessage);
+                    ComponentRelationListMsg responseMessage = this.invokeResolveRelation(component, requestMessage);
 
                     for (ComponentRelation relation : responseMessage.getComponentRelationList()) {
 
@@ -166,8 +201,8 @@ public abstract class DatatypeConnectorSupport extends ConnectorSupport implemen
                         this.internalResolve(relation);
                         relation.setTarget(this.target);
 
-                        ComponentRelationContainer relationContainer = DatatypeAccessor
-                                .getInstance().getComponentRelation(this.getSourceDatatype());
+                        ComponentRelationContainer relationContainer = DatatypeAccessor.getInstance()
+                                .getComponentRelation(this.getSourceDatatype());
 
                         relationContainer.putComponentRelation(relation);
                     }
@@ -194,9 +229,11 @@ public abstract class DatatypeConnectorSupport extends ConnectorSupport implemen
      *            the relation type
      * 
      * @return the target component
+     * 
+     * @throws NabuccoException
+     *             when the target component cannot be located
      */
-    protected abstract Component lookupTargetComponent(ComponentRelationType relationType)
-            throws NabuccoException;
+    protected abstract Component lookupTargetComponent(ComponentRelationType relationType) throws NabuccoException;
 
     /**
      * Maintains the target of the component relation.
@@ -232,8 +269,8 @@ public abstract class DatatypeConnectorSupport extends ConnectorSupport implemen
      * 
      * @throws NabuccoException
      */
-    private ComponentRelationMsg invokeMaintainRelation(Component component,
-            ComponentRelationMsg requestMessage) throws NabuccoException {
+    private ComponentRelationMsg invokeMaintainRelation(Component component, ComponentRelationMsg requestMessage)
+            throws NabuccoException {
 
         ComponentRelationService service = component.getComponentRelationService();
 
@@ -259,8 +296,8 @@ public abstract class DatatypeConnectorSupport extends ConnectorSupport implemen
      * 
      * @throws NabuccoException
      */
-    private ComponentRelationListMsg invokeResolveRelation(Component component,
-            ComponentRelationSearchRq requestMessage) throws NabuccoException {
+    private ComponentRelationListMsg invokeResolveRelation(Component component, ComponentRelationSearchRq requestMessage)
+            throws NabuccoException {
 
         ComponentRelationService service = component.getComponentRelationService();
 
@@ -269,8 +306,7 @@ public abstract class DatatypeConnectorSupport extends ConnectorSupport implemen
 
         request.setRequestMessage(requestMessage);
 
-        ServiceResponse<ComponentRelationListMsg> response = service
-                .searchComponentRelation(request);
+        ServiceResponse<ComponentRelationListMsg> response = service.searchComponentRelation(request);
 
         return response.getResponseMessage();
     }

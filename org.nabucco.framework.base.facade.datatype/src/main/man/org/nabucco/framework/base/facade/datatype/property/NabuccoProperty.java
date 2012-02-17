@@ -1,51 +1,39 @@
 /*
- * Copyright (c) 2010, PRODYNA AG, Germany. All rights reserved. Created 21.12.2010
+ * Copyright 2012 PRODYNA AG
+ *
+ * Licensed under the Eclipse Public License (EPL), Version 1.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.opensource.org/licenses/eclipse-1.0.php or
+ * http://www.nabucco.org/License.html
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 package org.nabucco.framework.base.facade.datatype.property;
 
-import org.nabucco.framework.base.facade.datatype.Basetype;
-import org.nabucco.framework.base.facade.datatype.Datatype;
 import org.nabucco.framework.base.facade.datatype.visitor.Visitable;
-
-import com.sun.corba.se.impl.protocol.giopmsgheaders.Message;
 
 /**
  * NabuccoProperty
  * <p/>
- * A property defines reflective information about {@link Datatype}, {@link Basetype} and
- * {@link Message} attributes.
+ * A property defines dynamic reflective information about Basetype, Enumeration, Datatype and
+ * ServiceMessage attributes.
  * 
  * @author Nicolas Moser, PRODYNA AG
  */
-public interface NabuccoProperty<N extends Object> extends Visitable {
+public interface NabuccoProperty extends NabuccoPropertyDescriptor, Visitable {
 
     /**
-     * Getter for the name of the property.
+     * Getter for the parent datatype which is holding this property.
      * 
-     * @return Returns the name.
+     * @return the parent datatype
      */
-    String getName();
-
-    /**
-     * Getter for the type of the property.
-     * 
-     * @return Returns the type.
-     */
-    Class<N> getType();
-
-    /**
-     * Getter for the constraints of the property.
-     * 
-     * @return Returns the constraints.
-     */
-    String getConstraints();
-
-    /**
-     * Getter for the property type.
-     * 
-     * @return Returns the propertyType.
-     */
-    PropertyType getPropertyType();
+    PropertyOwner getParent();
 
     /**
      * Getter for the concrete property instance.
@@ -53,5 +41,22 @@ public interface NabuccoProperty<N extends Object> extends Visitable {
      * @return Returns the instance.
      */
     Object getInstance();
+
+    /**
+     * Getter for the refId.
+     * 
+     * @return Returns the refId.
+     */
+    Long getReferenceId();
+
+    /**
+     * Creates the related property for the given instance.
+     * 
+     * @param instance
+     *            the dynamic property instance
+     * 
+     * @return the new property instance
+     */
+    NabuccoProperty createProperty(Object instance);
 
 }

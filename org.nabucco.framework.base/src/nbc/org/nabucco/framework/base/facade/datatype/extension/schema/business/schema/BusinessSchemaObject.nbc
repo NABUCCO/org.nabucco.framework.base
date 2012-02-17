@@ -1,0 +1,43 @@
+/*
+* Copyright 2011 PRODYNA AG
+*
+* Licensed under the Eclipse Public License (EPL), Version 1.0 (the "License");
+* you may not use this file except in compliance with the License.
+* You may obtain a copy of the License at
+*
+* http://www.opensource.org/licenses/eclipse-1.0.php or
+* http://nabuccosource.org/License.html
+*
+* Unless required by applicable law or agreed to in writing, software
+* distributed under the License is distributed on an "AS IS" BASIS,
+* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+* See the License for the specific language governing permissions and
+* limitations under the License.
+*/
+package org.nabucco.framework.base.facade.datatype.extension.schema.business.schema; 
+
+import org.nabucco.framework.base.facade.datatype.extension.NabuccoExtensionComposite;
+import org.nabucco.framework.base.facade.datatype.extension.property.ClassProperty;
+import org.nabucco.framework.base.facade.datatype.extension.property.StringProperty;
+
+@Author         Nicolas Moser
+@Company        PRODYNA AG
+@Date           2011-06-26
+@Version        1.0
+@Description    Configuration for business schema objects.
+public Datatype BusinessSchemaObject extends NabuccoExtensionComposite {
+	
+	@Description		The business object id.
+	private Datatype StringProperty[1] id;
+	
+	@Description		The business object class.
+	private Datatype ClassProperty[1] businessClass;
+	
+	@Description		The business object component.
+	private Datatype ClassProperty[1] component;
+	
+	@Description		An optional description of the business object.
+	private Datatype StringProperty[0..1] description;
+	
+}
+

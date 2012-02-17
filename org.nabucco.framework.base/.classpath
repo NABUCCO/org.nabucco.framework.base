@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <classpath>
-	<classpathentry kind="src" output="out/ide/nbc" path="src/nbc"/>
+	<classpathentry excluding="**/*.nbc|*.nbc" kind="src" output="out/ide/nbc" path="src/nbc"/>
 	<classpathentry kind="src" output="out/ide/test" path="src/test"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.junit.JUNIT_CONTAINER/4"/>
@@ -13,8 +13,30 @@
 	<classpathentry combineaccessrules="false" kind="src" path="/org.nabucco.framework.base.impl.service"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/org.nabucco.framework.base.ui.rcp"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/org.nabucco.framework.base.ui.web"/>
-	<classpathentry combineaccessrules="false" kind="src" path="/org.nabucco.framework.base.ui.portal"/>
-	<classpathentry kind="lib" path="lib/impl/ejb3-persistence.jar"/>
-	<classpathentry kind="lib" path="lib/impl/log4j.jar"/>
+	<classpathentry kind="lib" path="lib/test/jetty-ajp.jar"/>
+	<classpathentry kind="lib" path="lib/test/jetty-annotations.jar"/>
+	<classpathentry kind="lib" path="lib/test/jetty-client.jar"/>
+	<classpathentry kind="lib" path="lib/test/jetty-continuation.jar"/>
+	<classpathentry kind="lib" path="lib/test/jetty-deploy.jar"/>
+	<classpathentry kind="lib" path="lib/test/jetty-http.jar"/>
+	<classpathentry kind="lib" path="lib/test/jetty-io.jar"/>
+	<classpathentry kind="lib" path="lib/test/jetty-jmx.jar"/>
+	<classpathentry kind="lib" path="lib/test/jetty-jndi.jar"/>
+	<classpathentry kind="lib" path="lib/test/jetty-plus.jar"/>
+	<classpathentry kind="lib" path="lib/test/jetty-policy.jar"/>
+	<classpathentry kind="lib" path="lib/test/jetty-rewrite.jar" sourcepath="D:/Tools/jetty-distribution-7.3.1.v20110307/jetty-distribution-7.3.1.v20110307/jetty-all-7.3.0.v20110203-sources.jar"/>
+	<classpathentry kind="lib" path="lib/test/jetty-security.jar"/>
+	<classpathentry kind="lib" path="lib/test/jetty-server.jar" sourcepath="D:/Tools/jetty-distribution-7.3.1.v20110307/jetty-distribution-7.3.1.v20110307/jetty-all-7.3.0.v20110203-sources.jar"/>
+	<classpathentry kind="lib" path="lib/test/jetty-servlet.jar" sourcepath="D:/Tools/jetty-distribution-7.3.1.v20110307/jetty-distribution-7.3.1.v20110307/jetty-all-7.3.0.v20110203-sources.jar"/>
+	<classpathentry kind="lib" path="lib/test/jetty-servlets.jar"/>
+	<classpathentry kind="lib" path="lib/test/jetty-util.jar"/>
+	<classpathentry kind="lib" path="lib/test/jetty-webapp.jar"/>
+	<classpathentry kind="lib" path="lib/test/jetty-websocket.jar"/>
+	<classpathentry kind="lib" path="lib/test/jetty-xml.jar"/>
+	<classpathentry kind="lib" path="lib/test/junit.jar"/>
+	<classpathentry kind="lib" path="lib/test/log4j.jar"/>
+	<classpathentry kind="lib" path="lib/test/org.nabucco.common.cache.jar"/>
+	<classpathentry kind="lib" path="lib/test/org.nabucco.common.extension.jar"/>
+	<classpathentry kind="lib" path="lib/test/servlet-api.jar"/>
 	<classpathentry kind="output" path="out/ide"/>
 </classpath>

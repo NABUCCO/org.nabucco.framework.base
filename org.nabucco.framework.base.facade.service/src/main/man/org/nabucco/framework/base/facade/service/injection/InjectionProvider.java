@@ -1,12 +1,12 @@
 /*
- * Copyright 2010 PRODYNA AG
+ * Copyright 2012 PRODYNA AG
  *
  * Licensed under the Eclipse Public License (EPL), Version 1.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
  * http://www.opensource.org/licenses/eclipse-1.0.php or
- * http://www.nabucco-source.org/nabucco-license.html
+ * http://www.nabucco.org/License.html
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -34,9 +34,17 @@ import org.nabucco.framework.base.facade.service.jmx.MBeanSupport;
 /**
  * InjectionProvider
  * 
- * @author Silas Schwarz PRODYNA AG
+ * @author Nicolas Moser, PRODYNA AG
  */
 public class InjectionProvider implements InjectionProviderMBean {
+
+    private static final String TYPE = "InjectionProvider";
+
+    private static final String DEFAULT = "default";
+
+    private static final String DEFAULT_SUFFIX = "Impl";
+
+    private static final String SUBDOMAIN = "inject";
 
     private String id;
 
@@ -45,8 +53,7 @@ public class InjectionProvider implements InjectionProviderMBean {
     private Properties properties;
 
     /** Logger */
-    private static NabuccoLogger logger = NabuccoLoggingFactory.getInstance().getLogger(
-            InjectionProvider.class);
+    private static NabuccoLogger logger = NabuccoLoggingFactory.getInstance().getLogger(InjectionProvider.class);
 
     /** PropertySupport Location. */
     private static final String META_INF_PATH = "META-INF/";
@@ -63,16 +70,18 @@ public class InjectionProvider implements InjectionProviderMBean {
      * 
      * @param receiver
      *            the injection receiver
+     * 
+     * @throws InjectionException
+     *             when the injection ID is not valid
      */
-    private InjectionProvider(String id) {
+    private InjectionProvider(String id) throws InjectionException {
         if (id == null) {
             throw new InjectionException("No valid injection id defined [null].");
         }
 
         this.id = id;
         this.fileName = id.concat(PROPERTIES_SUFFIX);
-        InputStream is = InjectionProvider.class.getClassLoader().getResourceAsStream(
-                META_INF_PATH + fileName);
+        InputStream is = InjectionProvider.class.getClassLoader().getResourceAsStream(META_INF_PATH + fileName);
 
         this.properties = new Properties();
 
@@ -80,7 +89,7 @@ public class InjectionProvider implements InjectionProviderMBean {
             if (is != null) {
                 this.properties.load(is);
             } else {
-                logger.warning("Cannot load injection properties for '" + fileName + "'.");
+                logger.warning("Cannot load injection properties for '", this.fileName, "'.");
             }
         } catch (IOException e) {
             throw new InjectionException("Error reading injection properties for " + id + ".", e);
@@ -94,6 +103,9 @@ public class InjectionProvider implements InjectionProviderMBean {
      *            the injector id
      * 
      * @return the NabuccoServiceHandlerInjector instance.
+     * 
+     * @throws InjectionException
+     *             when the injection ID is not valid or an unexpected error occurs
      */
     public static synchronized InjectionProvider getInstance(String id) {
 
@@ -120,7 +132,7 @@ public class InjectionProvider implements InjectionProviderMBean {
      */
     private static void register(String id, InjectionProvider injector) {
         Hashtable<String, String> keys = createKeys(id);
-        MBeanSupport.register(injector, keys);
+        MBeanSupport.register(SUBDOMAIN, injector, keys);
     }
 
     /**
@@ -133,7 +145,7 @@ public class InjectionProvider implements InjectionProviderMBean {
      */
     private static Hashtable<String, String> createKeys(String id) {
         Hashtable<String, String> keys = new Hashtable<String, String>(2);
-        keys.put(MBeanSupport.TYPE, "InjectionProvider");
+        keys.put(MBeanSupport.TYPE, TYPE);
         keys.put(MBeanSupport.NAME, id);
         return keys;
     }
@@ -155,8 +167,9 @@ public class InjectionProvider implements InjectionProviderMBean {
             throw new InjectionException("No valid injection ID defined [null].");
         }
 
+        String implName = this.resolveImplementationName(id);
+
         try {
-            String implName = this.resolveImplementationName(id);
 
             if (implName == null || implName.isEmpty()) {
                 logger.warning("Implementation not found for injection " + id + ".");
@@ -170,8 +183,20 @@ public class InjectionProvider implements InjectionProviderMBean {
 
             return injectable.newInstance();
 
+        } catch (ClassNotFoundException cnfe) {
+            logger.warning("Implementation class not found for injection id ", id, ".");
+            return null;
+        } catch (IllegalAccessException iae) {
+            logger.warning("Implementation class cannot be instantiated ", implName, ".");
+            return null;
+        } catch (InstantiationException ie) {
+            logger.warning("Implementation class cannot be instantiated ", implName, ".");
+            return null;
+        } catch (SecurityException ie) {
+            logger.warning("Implementation class cannot be instantiated ", implName, ".");
+            return null;
         } catch (Exception e) {
-            logger.warning("Implementation not found for injection " + id + ".");
+            logger.error(e, "Unexpected error during injection of " + id + ".");
             return null;
         }
     }
@@ -192,7 +217,7 @@ public class InjectionProvider implements InjectionProviderMBean {
         for (Object id : this.properties.keySet()) {
             if (id instanceof String) {
                 T instance = this.<T> inject((String) id);
- 
+
                 if (instance != null) {
                     injections.add(instance);
                 }
@@ -203,33 +228,76 @@ public class InjectionProvider implements InjectionProviderMBean {
     }
 
     /**
-     * Loads the stream as XML and extracts the appropriate service-handler-implementation.
+     * Loads the stream as XML and extracts the appropriate injection-handler-implementation.
      * 
-     * @param handlerName
-     *            name of the service handler
+     * @param interfaceName
+     *            name of the injection handler
      * 
      * @return name of the implementation
      */
-    private String resolveImplementationName(String handlerName) {
-        return this.properties.getProperty(handlerName);
+    private String resolveImplementationName(String interfaceName) {
+        String implName = this.properties.getProperty(interfaceName);
+
+        if (implName == null) {
+            return null;
+        }
+
+        implName = implName.trim();
+
+        if (implName.equalsIgnoreCase(DEFAULT)) {
+            implName = interfaceName + DEFAULT_SUFFIX;
+        }
+
+        return implName;
     }
 
     /**
-     * Getter for the id.
+     * Getter for the properties.
      * 
-     * @return Returns the id.
+     * @return Returns the properties.
      */
+    public Properties getProperties() {
+        return new Properties(this.properties);
+    }
+
+    @Override
     public String getId() {
         return this.id;
     }
 
-    /**
-     * Getter for the fileName.
-     * 
-     * @return Returns the fileName.
-     */
+    @Override
     public String getFileName() {
         return this.fileName;
+    }
+
+    @Override
+    public String getInjection(String injectionId) {
+        if (injectionId == null) {
+            return null;
+        }
+
+        return this.properties.getProperty(injectionId);
+    }
+
+    @Override
+    public void addInjection(String injectionId, String implementation) {
+        if (injectionId == null || implementation == null) {
+            return;
+        }
+
+        this.properties.setProperty(injectionId, implementation);
+    }
+
+    @Override
+    public String listInjections() {
+        StringBuilder result = new StringBuilder();
+        for (String key : this.properties.stringPropertyNames()) {
+            result.append(key);
+            result.append(" = ");
+            result.append(this.properties.getProperty(key));
+            result.append('\n');
+        }
+        return result.toString();
     }
 
     @Override

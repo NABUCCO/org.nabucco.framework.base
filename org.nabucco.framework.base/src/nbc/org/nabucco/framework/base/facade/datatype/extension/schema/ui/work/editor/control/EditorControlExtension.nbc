@@ -1,0 +1,56 @@
+/*
+* Copyright 2011 PRODYNA AG
+*
+* Licensed under the Eclipse Public License (EPL), Version 1.0 (the "License");
+* you may not use this file except in compliance with the License.
+* You may obtain a copy of the License at
+*
+* http://www.opensource.org/licenses/eclipse-1.0.php or
+* http://nabuccosource.org/License.html
+*
+* Unless required by applicable law or agreed to in writing, software
+* distributed under the License is distributed on an "AS IS" BASIS,
+* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+* See the License for the specific language governing permissions and
+* limitations under the License.
+*/
+package org.nabucco.framework.base.facade.datatype.extension.schema.ui.work.editor.control;
+
+import org.nabucco.framework.base.facade.datatype.extension.property.BooleanProperty;
+import org.nabucco.framework.base.facade.datatype.extension.property.EnumerationProperty;
+import org.nabucco.framework.base.facade.datatype.extension.property.StringProperty;
+import org.nabucco.framework.base.facade.datatype.extension.schema.ui.UiExtension;
+import org.nabucco.framework.base.facade.datatype.extension.schema.ui.work.editor.dependency.DependencySetExtension;
+
+@Author			Nicolas Moser
+@Version		1.0
+@Date			2011-07-28
+@Company		PRODYNA AG
+@Description	NABUCCO User Interface Editor Entry extension.
+public Datatype EditorControlExtension extends UiExtension {
+
+	@Description		The path to the binded property.
+	private Datatype StringProperty[1] property;
+
+	@Description		The Control label.
+	private Datatype StringProperty[1] label;
+	
+	@Description		The Control tooltip.
+	private Datatype StringProperty[1] tooltip;
+
+	@Description		The Control position in the grid.
+	private Datatype StringProperty[1] position;
+
+	@Description		The Control positioning hint.
+	private Datatype StringProperty[1] hint;
+	
+	@Description		Is the control editable
+	private Datatype BooleanProperty[1] editable;
+	
+	@Description 		the type of the control
+	private Datatype EnumerationProperty[1] type;    
+	
+	@Description		The set of the dependencies of the control
+	private Datatype DependencySetExtension[0..1] dependencySet;
+	
+}

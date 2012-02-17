@@ -6,7 +6,7 @@
  * You may obtain a copy of the License at
  *
  * http://www.opensource.org/licenses/eclipse-1.0.php or
- * http://www.nabucco-source.org/nabucco-license.html
+ * http://nabuccosource.org/License.html
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -16,15 +16,17 @@
  */
 package org.nabucco.framework.base.facade.datatype.issuetracking;
 
-import org.nabucco.framework.base.facade.datatype.issuetracking.Project;
-import org.nabucco.framework.base.facade.datatype.issuetracking.IssueType;
-import org.nabucco.framework.base.facade.datatype.issuetracking.ProjectComponent;
-
+import org.nabucco.framework.base.facade.datatype.DateTime;
+import org.nabucco.framework.base.facade.datatype.Description;
+import org.nabucco.framework.base.facade.datatype.Identifier;
+import org.nabucco.framework.base.facade.datatype.Key;
 import org.nabucco.framework.base.facade.datatype.NabuccoDatatype;
 import org.nabucco.framework.base.facade.datatype.Name;
-import org.nabucco.framework.base.facade.datatype.Description;
-import org.nabucco.framework.base.facade.datatype.DateTime;
-import org.nabucco.framework.base.facade.datatype.Key;
+import org.nabucco.framework.base.facade.datatype.documentation.Documentation;
+import org.nabucco.framework.base.facade.datatype.issuetracking.IssueType;
+import org.nabucco.framework.base.facade.datatype.issuetracking.Priority;
+import org.nabucco.framework.base.facade.datatype.issuetracking.Project;
+import org.nabucco.framework.base.facade.datatype.issuetracking.ProjectComponent;
 
 @Author			Markus Jorroch
 @Company		PRODYNA AG
@@ -33,21 +35,31 @@ import org.nabucco.framework.base.facade.datatype.Key;
 @Description	An Issue
 public Datatype Issue extends NabuccoDatatype {
 
-	private Basetype Name[1] name;
-	
-	private Datatype Project[1] project;
-	
-	private Datatype IssueType[1] issueType;
-	
-	private Datatype ProjectComponent[1] component;
+	private Basetype Identifier[0..1] issueId;
 
-	private Basetype Description[1] summary;
+	private Basetype Name[0..1] name;
 	
-	private Basetype DateTime[1] dueDate;
+	private Datatype Project[0..1] project;
 	
-	private Basetype Key[1] key;  
+	private Datatype IssueType[0..1] issueType;
+	
+	private Datatype ProjectComponent[0..*] components;
 
-	private Basetype Description[1] description;
+	private Datatype Priority[0..1] priority;
+
+	private Basetype Description[0..1] summary;
+	
+	private Basetype DateTime[0..1] dueDate;
+	
+	private Basetype Key[0..1] key;  
+
+	private Basetype Documentation[0..1] description;
+	
+	private Datatype ScreenshotAttachment[0..*] screenshotAttachments;
+	
+	private Datatype FileAttachment[0..*] fileAttachments;
+	
+	private Datatype Version[0..*] affectedVersions;
 	
 }
 

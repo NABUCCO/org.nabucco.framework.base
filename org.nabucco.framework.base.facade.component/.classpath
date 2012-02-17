@@ -9,7 +9,9 @@
 	<classpathentry combineaccessrules="false" kind="src" path="/org.nabucco.framework.base.facade.exception"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/org.nabucco.framework.base.facade.datatype"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/org.nabucco.framework.base.facade.service"/>
-	<classpathentry combineaccessrules="false" kind="src" path="/org.nabucco.framework.base.facade.message"/>
 	<classpathentry kind="lib" path="/org.nabucco.framework.base/lib/facade/log4j.jar"/>
-	<classpathentry kind="output" path="out"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/org.nabucco.framework.base.facade.message"/>
+	<classpathentry kind="lib" path="/org.nabucco.framework.base/lib/facade/org.nabucco.common.cache.jar"/>
+	<classpathentry kind="lib" path="/org.nabucco.framework.base/lib/facade/org.nabucco.common.extension.jar" sourcepath="/org.nabucco.common.extension"/>
+	<classpathentry kind="output" path="out/ide"/>
 </classpath>

@@ -1,0 +1,45 @@
+/*
+* Copyright 2011 PRODYNA AG
+*
+* Licensed under the Eclipse Public License (EPL), Version 1.0 (the "License");
+* you may not use this file except in compliance with the License.
+* You may obtain a copy of the License at
+*
+* http://www.opensource.org/licenses/eclipse-1.0.php or
+* http://nabuccosource.org/License.html
+*
+* Unless required by applicable law or agreed to in writing, software
+* distributed under the License is distributed on an "AS IS" BASIS,
+* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+* See the License for the specific language governing permissions and
+* limitations under the License.
+*/
+
+package org.nabucco.framework.base.facade.datatype.extension.schema.ui.common;
+
+import org.nabucco.framework.base.facade.datatype.extension.property.StringProperty;
+import org.nabucco.framework.base.facade.datatype.extension.schema.ui.UiExtension;
+
+@Author			Nicolas Moser
+@Version		1.0
+@Date			2011-07-20
+@Company		PRODYNA AG
+@Description	NABUCCO User Interface Action Reference extension.
+public Datatype ButtonExtension extends UiExtension {
+
+	@Description		The Action Reference ID.
+	private Datatype StringProperty[1] actionId;
+	
+	@Description		The optional parameter that can be set to the button (url etc.) The parameter is action specifical
+	private Datatype StringProperty[0..1] parameter; 
+
+	@Description		The Action Reference Label.
+	private Datatype StringProperty[1] label;
+	
+	@Description		The Action Reference Tooltip.
+	private Datatype StringProperty[0..1] tooltip; 
+	
+	@Description		The Action Reference Icon.
+	private Datatype StringProperty[0..1] icon;	
+}
+

@@ -1,12 +1,12 @@
 /*
- * Copyright 2010 PRODYNA AG
+ * Copyright 2012 PRODYNA AG
  *
  * Licensed under the Eclipse Public License (EPL), Version 1.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
  * http://www.opensource.org/licenses/eclipse-1.0.php or
- * http://www.nabucco-source.org/nabucco-license.html
+ * http://www.nabucco.org/License.html
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -19,6 +19,7 @@ package org.nabucco.framework.base.facade.service.decorator;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 
+import org.nabucco.framework.base.facade.datatype.NabuccoSystem;
 import org.nabucco.framework.base.facade.datatype.logger.NabuccoLogger;
 import org.nabucco.framework.base.facade.datatype.logger.NabuccoLoggingFactory;
 import org.nabucco.framework.base.facade.service.Service;
@@ -43,7 +44,7 @@ class TracingServiceInvocationHandler implements ServiceDelegate {
     @Override
     public Object invoke(Object proxy, Method method, Object[] parameters) throws Throwable {
 
-        long start = System.currentTimeMillis();
+        long start = NabuccoSystem.getCurrentTimeMillis();
 
         logger.info("Invoking: ", formatMethodSignature(method, parameters));
 
@@ -52,10 +53,9 @@ class TracingServiceInvocationHandler implements ServiceDelegate {
             Method targetMethod = getMethodForTarget(method, method.getParameterTypes());
             Object returnVal = targetMethod.invoke(target, parameters);
 
-            long end = System.currentTimeMillis();
+            long end = NabuccoSystem.getCurrentTimeMillis();
 
-            logger.info(method.getName(), " returns: ", returnVal + " performed in: ",
-                    (end - start) / 1000.0 + "s.");
+            logger.info(method.getName(), " returns: ", returnVal + " performed in: ", (end - start) / 1000.0 + "s.");
 
             return returnVal;
 
@@ -66,8 +66,7 @@ class TracingServiceInvocationHandler implements ServiceDelegate {
         }
     }
 
-    private Method getMethodForTarget(Method method, Class<?>[] parameterTypes)
-            throws SecurityException {
+    private Method getMethodForTarget(Method method, Class<?>[] parameterTypes) throws SecurityException {
         String name = method.getName();
         try {
             return this.target.getClass().getMethod(name, parameterTypes);

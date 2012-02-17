@@ -1,12 +1,12 @@
 /*
- * Copyright 2010 PRODYNA AG
+ * Copyright 2012 PRODYNA AG
  *
  * Licensed under the Eclipse Public License (EPL), Version 1.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
  * http://www.opensource.org/licenses/eclipse-1.0.php or
- * http://www.nabucco-source.org/nabucco-license.html
+ * http://www.nabucco.org/License.html
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -16,14 +16,20 @@
  */
 package org.nabucco.framework.base.ui.web.communication;
 
-import javax.faces.context.FacesContext;
-import javax.servlet.http.HttpSession;
-
-import org.nabucco.framework.base.facade.datatype.security.Subject;
+import org.nabucco.framework.base.facade.datatype.context.ServiceSubContext;
+import org.nabucco.framework.base.facade.datatype.context.ServiceSubContextType;
+import org.nabucco.framework.base.facade.datatype.logger.NabuccoLogger;
+import org.nabucco.framework.base.facade.datatype.logger.NabuccoLoggingFactory;
+import org.nabucco.framework.base.facade.datatype.session.NabuccoSession;
+import org.nabucco.framework.base.facade.message.ServiceRequest;
+import org.nabucco.framework.base.facade.message.ServiceResponse;
 import org.nabucco.framework.base.facade.message.context.ServiceContextFactory;
 import org.nabucco.framework.base.facade.message.context.ServiceMessageContext;
 import org.nabucco.framework.base.facade.message.tracing.InvocationIdentifier;
 import org.nabucco.framework.base.facade.message.tracing.InvocationIdentifierFactory;
+import org.nabucco.framework.base.facade.service.Service;
+import org.nabucco.framework.base.ui.web.component.error.ErrorLogContainer;
+import org.nabucco.framework.base.ui.web.servlet.util.NabuccoServletUtil;
 
 /**
  * ServiceDelegateSupport
@@ -35,70 +41,112 @@ import org.nabucco.framework.base.facade.message.tracing.InvocationIdentifierFac
  */
 public abstract class ServiceDelegateSupport {
 
-    /** The subject session name. */
-    private static final String NABUCCO_SUBJECT = "NABUCCO_SUBJECT";
+    private static NabuccoLogger logger = NabuccoLoggingFactory.getInstance().getLogger(ServiceDelegateSupport.class);
+
+    private InvocationIdentifier identifier;
 
     /**
-     * Creates a new service context for the current user.
-     * 
-     * @return the service context
-     */
-    protected ServiceMessageContext createServiceContext() {
-
-        InvocationIdentifier identifier = InvocationIdentifierFactory.getInstance()
-                .createInvocationIdentifier();
-
-        Subject subject = this.retrieveSubject();
-
-        ServiceMessageContext context = ServiceContextFactory.getInstance()
-                .newServiceMessageContext(identifier, subject);
-
-        return context;
-    }
-
-    /**
-     * Creates a new service context for the current user (identified by the subject). If the
-     * subject is null the subject is retrieved from HTTP Session.
+     * Creates a new service context for the current user (identified by the session).
      * 
      * @param the
      *            current security subject
      * 
      * @return the service context
      */
-    protected ServiceMessageContext createServiceContext(Subject subject) {
-
-        InvocationIdentifier identifier = InvocationIdentifierFactory.getInstance()
-                .createInvocationIdentifier();
-
-        if (subject == null) {
-            subject = this.retrieveSubject();
+    protected ServiceMessageContext createServiceContext(NabuccoSession session, ServiceSubContext... subContexts) {
+        if (session == null) {
+            throw new IllegalArgumentException("Cannot create service context for session [null].");
         }
 
-        ServiceMessageContext context = ServiceContextFactory.getInstance()
-                .newServiceMessageContext(identifier, subject);
+        this.identifier = InvocationIdentifierFactory.getInstance().createInvocationIdentifier();
+
+        ServiceMessageContext context = ServiceContextFactory.getInstance().newServiceMessageContext(identifier,
+                session.getSecurityContext().getSubject());
+
+        if (subContexts != null) {
+            for (ServiceSubContext current : subContexts) {
+                if (current != null) {
+                    context.put(current.getContextType(), current);
+                }
+            }
+        }
 
         return context;
     }
 
     /**
-     * Retrieves the NABUCCO subject from the HTTP session.
+     * Monitor the service execution result.
      * 
-     * @return the authorization subject
+     * @param serviceInterface
+     *            interface of the executed service
+     * @param operationName
+     *            name of the executed service operation
+     * @param duration
+     *            duration of the execution
+     * @param exception
+     *            raised exception, if any
      */
-    private Subject retrieveSubject() {
-        FacesContext context = FacesContext.getCurrentInstance();
+    protected final <S extends Service> void monitorResult(Class<S> serviceInterface, String operationName,
+            long duration, Exception exception) {
 
-        if (context == null || context.getExternalContext() == null) {
-            throw new IllegalStateException("Cannot create a connection without a FacesContext.");
+        String serviceName = (serviceInterface != null) ? serviceInterface.getSimpleName() : "undefined";
+        logger.info("Service: ", serviceName, ".", operationName, " (Time: ", duration, "ms)");
+
+        if (serviceInterface == null || operationName == null) {
+            logger.error(exception, "Error monitoring service operation result.");
+            return;
         }
 
-        HttpSession session = (HttpSession) context.getExternalContext().getSession(false);
+        if (exception != null) {
+            ErrorLogContainer errorContainer = NabuccoServletUtil.getErrorContainer();
 
-        if (session == null) {
-            throw new IllegalStateException("Cannot create a connection without an HTTP session.");
+            if (errorContainer != null) {
+                errorContainer.getModel().addError(serviceInterface.getCanonicalName(), operationName, this.identifier,
+                        exception);
+            }
         }
+    }
 
-        return (Subject) session.getAttribute(NABUCCO_SUBJECT);
+    /**
+     * Prepare the service request.
+     * 
+     * @param rq
+     *            the service request to handle
+     * @param session
+     *            the nabucco session
+     */
+    protected final void handleRequest(ServiceRequest<?> rq, NabuccoSession session) {
+        for (ServiceSubContextType type : ServiceSubContextType.values()) {
+            ServiceSubContext subContext = session.getServiceContext().getRequestContext(type);
+
+            if (subContext == null) {
+                rq.getContext().remove(type);
+            } else {
+                rq.getContext().put(type, subContext);
+            }
+        }
+    }
+
+    /**
+     * Prepare the service response.
+     * 
+     * @param rs
+     *            the service response to handle
+     * @param session
+     *            the nabucco session
+     */
+    protected final void handleResponse(ServiceResponse<?> rs, NabuccoSession session) {
+        ServiceMessageContext context = rs.getContext();
+
+        session.getServiceContext().clear();
+
+        for (ServiceSubContextType type : ServiceSubContextType.values()) {
+            ServiceSubContext subContext = context.get(type);
+
+            if (subContext != null) {
+                session.getServiceContext().putResponseContext(subContext);
+            }
+        }
     }
 
 }

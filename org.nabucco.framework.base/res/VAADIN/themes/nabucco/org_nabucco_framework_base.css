@@ -1,0 +1,66 @@
+.nbc-editor-tab-action-bar {
+   text-align:right;   
+}
+
+.v-filterselect-error .v-filterselect-input,
+.v-select-error .v-select-option,
+.v-select-error .v-select-select,
+.v-select-error .v-select-twincol-selections,
+.v-select-error .v-select-twincol-options {
+	background: #ffe0e0 !important;
+}
+
+.v-filterselect-required .v-filterselect-input,
+.v-select-required .v-select-option,
+.v-select-required .v-select-select,
+.v-select-required .v-select-twincol-selections,
+.v-select-required .v-select-twincol-options {
+	background:transparent;
+	background: #FFFFB2;
+}
+
+.v-datefield-error .v-textfield,
+.v-datefield-error .v-datefield-calendarpanel {
+	background: #ffe0e0 !important;
+}
+
+.v-datefield-required .v-textfield,
+.v-datefield-required .v-datefield-calendarpanel {
+	background:transparent;
+	background-color: #FFFFB2;
+}
+
+.v-textarea-error,
+.v-textfield-error,
+.v-richtextarea-error iframe.gwt-RichTextArea {
+	background: #FFE0E0 !important;	
+}
+
+.v-textarea-required,
+.v-textfield-required,
+.v-richtextarea-required iframe.gwt-RichTextArea {
+	background: #FFFFB2;	
+}
+
+.v-checkbox-error {
+	background: #ffe0e0 !important;
+}
+
+.v-checkbox-required {
+	background: #FFFFB2;
+}
+
+.nbc-grouped-list-header {
+    border-width: 1px;
+    border-color: #BBBBBB;
+    border-style: outset;
+    background-color:#DDDDDD;   
+}
+
+.nbc-grouped-list-panel {
+    margin: 1ex 0;
+}
+
+.nbc-grouped-list-entry:hover {
+    background-color:#CCCCCC;
+}

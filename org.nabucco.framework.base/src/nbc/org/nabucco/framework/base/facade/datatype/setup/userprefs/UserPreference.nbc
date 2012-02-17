@@ -1,0 +1,44 @@
+/*
+* Copyright 2011 PRODYNA AG
+*
+* Licensed under the Eclipse Public License (EPL), Version 1.0 (the "License");
+* you may not use this file except in compliance with the License.
+* You may obtain a copy of the License at
+*
+* http://www.opensource.org/licenses/eclipse-1.0.php or
+* http://nabuccosource.org/License.html
+*
+* Unless required by applicable law or agreed to in writing, software
+* distributed under the License is distributed on an "AS IS" BASIS,
+* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+* See the License for the specific language governing permissions and
+* limitations under the License.
+*/
+package org.nabucco.framework.base.facade.datatype.setup.userprefs;
+
+import org.nabucco.framework.base.facade.datatype.security.UserId;
+import org.nabucco.framework.base.facade.datatype.setup.userprefs.PreferenceType;
+
+
+
+
+@Author			Frank Ratschinski
+@Version		1.0
+@Date			2011-03-15
+@Company		PRODYNA AG
+@Description	One user preference element.
+public Datatype UserPreference {
+
+	@Description 	The id of the user.
+	private Basetype UserId[1] userId;
+	
+	@Description	The category of the preference.
+	private Basetype PreferenceCategory[1] category; 
+
+	@Description	The type of the preference value.
+	private Enumeration PreferenceType[1] type;
+	 
+ 	@Description	The values of the preference.
+ 	private Basetype PreferenceValue[1] value; 
+ 
+}

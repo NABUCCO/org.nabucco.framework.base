@@ -6,7 +6,7 @@
  * You may obtain a copy of the License at
  *
  * http://www.opensource.org/licenses/eclipse-1.0.php or
- * http://www.nabucco-source.org/nabucco-license.html
+ * http://nabuccosource.org/License.html
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -20,25 +20,31 @@ package org.nabucco.framework.base.facade.datatype.log;
 @Company		PRODYNA AG
 @Date			2010-07-22
 @Version		1.0
-@Description	TODO
+@Description	The severity of a logging statement.
 public Enumeration LogLevel {
 
-	@LiteralId	F
+	@LiteralId		F
+	@Description	Highest severity, should be used for serious errors.
 	FATAL
 
-	@LiteralId	E
+	@LiteralId		E
+	@Description	Error severity, should be used for exceptions.
 	ERROR
 
-	@LiteralId	W
+	@LiteralId		W
+	@Description	Warning severity, should be used for considerable state.
 	WARNING
 
-	@LiteralId	I
+	@LiteralId		I
+	@Description	Information serverity, should be used for instructive information.
 	INFO
 	
-	@LiteralId	D
+	@LiteralId		D
+	@Description	Debug serverity, should be used for administration/monitoring information.
 	DEBUG
 	
-	@LiteralId	T
+	@LiteralId		T
+	@Description	Lowest serverity, should be used for monitoring information.
 	TRACE
 	
 }

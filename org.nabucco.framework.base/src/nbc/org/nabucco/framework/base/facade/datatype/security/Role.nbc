@@ -6,7 +6,7 @@
  * You may obtain a copy of the License at
  *
  * http://www.opensource.org/licenses/eclipse-1.0.php or
- * http://www.nabucco-source.org/nabucco-license.html
+ * http://nabuccosource.org/License.html
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -16,30 +16,31 @@
  */
 package org.nabucco.framework.base.facade.datatype.security;
 
-import org.nabucco.framework.base.facade.datatype.code.CodeType;
 import org.nabucco.framework.base.facade.datatype.Description;
+import org.nabucco.framework.base.facade.datatype.MultiTenantDatatype;
 import org.nabucco.framework.base.facade.datatype.Name;
 import org.nabucco.framework.base.facade.datatype.Owner;
-import org.nabucco.framework.base.facade.datatype.NabuccoDatatype;
+import org.nabucco.framework.base.facade.datatype.code.Code;
 
 @Author			Frank Ratschinski
 @Company		PRODYNA AG
 @Date			2010-01-18
 @Version		1.0
 @Description	A Role is a collection of permissions
-public Datatype Role extends NabuccoDatatype {
+public Datatype Role extends MultiTenantDatatype {
 
-	@Description	Name of the role
-	private Basetype Name[1] rolename;
-	
 	@Description	Owner of the Role
 	private Basetype Owner[1] owner;
+	
+	@MaxLength			50
+	@Description	Name of the role
+	private Basetype Name[1] rolename;
 	
 	@Description	Description of the role
 	private Basetype Description[1] description;
 
-	@Description	Code of the role
-	@CodePath nabucco.authorization.role
-	private Basetype CodeType[1] roleType;
+	@Description	Type of the role
+	@CodePath		nabucco.authorization.role
+	private Datatype  Code[1] roleType;
 
 }

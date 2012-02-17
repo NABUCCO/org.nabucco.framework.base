@@ -1,12 +1,12 @@
 /*
- * Copyright 2010 PRODYNA AG
+ * Copyright 2012 PRODYNA AG
  *
  * Licensed under the Eclipse Public License (EPL), Version 1.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
  * http://www.opensource.org/licenses/eclipse-1.0.php or
- * http://www.nabucco-source.org/nabucco-license.html
+ * http://www.nabucco.org/License.html
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -19,6 +19,8 @@ package org.nabucco.framework.base.facade.message.tracing;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.Random;
+
+import org.nabucco.framework.base.facade.datatype.NabuccoSystem;
 
 /**
  * InvocationIdentifierFactory
@@ -77,7 +79,7 @@ public final class InvocationIdentifierFactory {
      */
     public InvocationIdentifier createInvocationIdentifier() {
         long count = nextCount();
-        long time = System.currentTimeMillis();
+        long time = NabuccoSystem.getCurrentTimeMillis();
         long id = this.generateID(count, this.nodeName, this.nodeAddress, time);
 
         return new InvocationIdentifier(id, count, this.nodeName, this.nodeAddress, time);
@@ -87,8 +89,7 @@ public final class InvocationIdentifierFactory {
         long nextCount = this.invocationCount;
         this.invocationCount = this.invocationCount + 1;
         if (nextCount > this.invocationCount) {
-            // invocationCount overflow
-            // set new invocationCount to 0
+            // invocationCount overflow set new invocationCount to 0
             this.invocationCount = 0;
         }
         return nextCount;
@@ -99,14 +100,14 @@ public final class InvocationIdentifierFactory {
         long id = counter;
 
         if (name == null) {
-            Random rand = new Random(System.currentTimeMillis());
+            Random rand = new Random(NabuccoSystem.getCurrentTimeMillis());
             id = id + rand.nextInt();
         } else {
             id = id + name.hashCode();
         }
 
         if (address == null) {
-            Random rand = new Random(System.currentTimeMillis());
+            Random rand = new Random(NabuccoSystem.getCurrentTimeMillis());
             id = id + rand.nextInt();
         } else {
             id = id + address.hashCode();

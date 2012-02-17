@@ -1,12 +1,12 @@
 /*
- * Copyright 2010 PRODYNA AG
+ * Copyright 2012 PRODYNA AG
  *
  * Licensed under the Eclipse Public License (EPL), Version 1.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
  * http://www.opensource.org/licenses/eclipse-1.0.php or
- * http://www.nabucco-source.org/nabucco-license.html
+ * http://www.nabucco.org/License.html
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -17,10 +17,12 @@
 package org.nabucco.framework.base.facade.datatype.validation.constraint.element;
 
 import java.text.MessageFormat;
-import java.util.List;
 import java.util.regex.Pattern;
 
-import org.nabucco.framework.base.facade.datatype.Basetype;
+import org.nabucco.framework.base.facade.datatype.property.BasetypeProperty;
+import org.nabucco.framework.base.facade.datatype.property.NabuccoProperty;
+import org.nabucco.framework.base.facade.datatype.property.NabuccoPropertyType;
+import org.nabucco.framework.base.facade.datatype.property.SimpleProperty;
 import org.nabucco.framework.base.facade.datatype.validation.Validatable;
 import org.nabucco.framework.base.facade.datatype.validation.ValidationError;
 import org.nabucco.framework.base.facade.datatype.validation.ValidationResult;
@@ -32,11 +34,12 @@ import org.nabucco.framework.base.facade.datatype.validation.ValidationResult;
  */
 public class LengthConstraint extends Constraint {
 
+    /** The length constraint type. */
+    static final char TYPE = 'l';
+
     private final int minLength;
 
     private final int maxLength;
-
-    static final char TYPE = 'l';
 
     private static final char MAX_CHAR = 'n';
 
@@ -44,7 +47,7 @@ public class LengthConstraint extends Constraint {
 
     private static final String MIN_LENGTH = "min-length";
 
-    private static final String MESSAGE = "Error at {0} with property {1} where length is [{2}] and {3} constraint is [{4}].";
+    private static final String MESSAGE = "Error at {0} with property {1} where length is {2} and {3} constraint is [{4}].";
 
     private static final Pattern PATTERN = Pattern.compile("\\,");
 
@@ -96,52 +99,72 @@ public class LengthConstraint extends Constraint {
      * 
      * @return the tokenized constraint strings
      */
-    protected String[] tokenize(String constraint, int min, int max) {
+    private String[] tokenize(String constraint, int min, int max) {
         String[] tokens = PATTERN.split(constraint);
         if (tokens.length < min) {
-            throw new IllegalArgumentException("Length of tokens is less than "
-                    + min + ": [" + constraint + "]");
+            throw new IllegalArgumentException("Length of tokens is less than " + min + ": [" + constraint + "]");
         }
         if (max > -1 && tokens.length > max) {
-            throw new IllegalArgumentException("Length of tokens is more than "
-                    + max + ": [" + constraint + "]");
+            throw new IllegalArgumentException("Length of tokens is more than " + max + ": [" + constraint + "]");
         }
         return tokens;
     }
 
-    @Override
-    public void check(Validatable owner, Object property, String propertyName,
-            ValidationResult result) {
+    /**
+     * Getter for the minLength.
+     * 
+     * @return Returns the minLength.
+     */
+    public int getMinLength() {
+        return this.minLength;
+    }
 
-        if (property == null) {
+    /**
+     * Getter for the maxLength.
+     * 
+     * @return Returns the maxLength.
+     */
+    public int getMaxLength() {
+        return this.maxLength;
+    }
+
+    @Override
+    public void check(Validatable owner, NabuccoProperty property, ValidationResult result) {
+
+        if (property == null || property.getInstance() == null) {
             return;
         }
 
-        if (property instanceof Basetype) {
-            Object value = ((Basetype) property).getValue();
+        if (property.getPropertyType() == NabuccoPropertyType.BASETYPE) {
+            BasetypeProperty basetypeProperty = (BasetypeProperty) property;
+            Object value = basetypeProperty.getInstance().getValue();
 
             if (value == null) {
                 return;
             }
 
             if (value instanceof String) {
-                checkString((String) value, propertyName, owner, result);
+                this.checkString((String) value, property.getName(), owner, result);
             } else if (value instanceof Number) {
-                checkString(value.toString(), propertyName, owner, result);
+                this.checkString(value.toString(), property.getName(), owner, result);
             }
 
-        } else if (property instanceof List<?>) {
-            for (Object listProperty : (List<?>) property) {
-                check(owner, listProperty, propertyName, result);
+        } else if (property.getPropertyType() == NabuccoPropertyType.SIMPLE) {
+            SimpleProperty simpleProperty = (SimpleProperty) property;
+            Object value = simpleProperty.getInstance();
+
+            if (value == null) {
+                return;
             }
 
-            // TODO: Do not validate other types than basetypes.
-        } else if (property instanceof String) {
-            checkString((String) property, propertyName, owner, result);
-        } else if (property instanceof Number) {
-            checkString(property.toString(), propertyName, owner, result);
+            if (value instanceof String) {
+                this.checkString((String) value, property.getName(), owner, result);
+            } else if (value instanceof Number) {
+                this.checkString(value.toString(), property.getName(), owner, result);
+            }
+
         } else {
-            raiseException(owner, property, propertyName);
+            this.raiseException(owner, property);
         }
     }
 
@@ -152,25 +175,24 @@ public class LengthConstraint extends Constraint {
      *            the concrete property value
      * @param propertyName
      *            name of the property to validate
+     * @param parent
+     *            the parent object
      * @param result
      *            the validation result
      */
-    private void checkString(String propertyValue, String propertyName, Validatable parent,
-            ValidationResult result) {
+    private void checkString(String propertyValue, String propertyName, Validatable parent, ValidationResult result) {
 
         int length = propertyValue.length();
         String parentName = parent.getClass().getSimpleName();
 
-        if (length < minLength) {
-            Object[] arguments = new Object[] { parentName, propertyName, length, MIN_LENGTH,
-                    minLength };
+        if (length < this.minLength) {
+            Object[] arguments = new Object[] { parentName, propertyName, length, MIN_LENGTH, minLength };
 
             String message = MessageFormat.format(MESSAGE, arguments);
             result.getErrorList().add(new ValidationError(parent, propertyName, message));
         }
-        if (length > maxLength) {
-            Object[] arguments = new Object[] { parentName, propertyName, length, MAX_LENGTH,
-                    maxLength };
+        if (length > this.maxLength) {
+            Object[] arguments = new Object[] { parentName, propertyName, length, MAX_LENGTH, maxLength };
             String message = MessageFormat.format(MESSAGE, arguments);
             result.getErrorList().add(new ValidationError(parent, propertyName, message));
         }
@@ -183,32 +205,49 @@ public class LengthConstraint extends Constraint {
      *            the validation owner
      * @param property
      *            the property
-     * @param propertyName
-     *            the property name
      */
-    private void raiseException(Validatable owner, Object property, String propertyName) {
+    private void raiseException(Validatable owner, NabuccoProperty property) {
         StringBuilder message = new StringBuilder();
-        message.append("Can only validate a LengthConstraint against a Basetype. Given type was ");
-        message.append(property.getClass());
+        message.append("Can only validate a LengthConstraint against a Basetype. Given property ");
+        message.append(property.getName());
         message.append(" in type ");
         message.append(owner.getClass().getSimpleName());
-        message.append(", property ");
-        message.append(propertyName);
+        message.append(" was of type ");
+        message.append(property.getPropertyType().getName());
         message.append(".");
         throw new IllegalArgumentException(message.toString());
     }
 
     @Override
+    public String format() {
+        StringBuilder result = new StringBuilder();
+        result.append(TYPE);
+        result.append(this.minLength);
+        result.append(',');
+        result.append(this.maxLength);
+        return result.toString();
+    }
+
+    @Override
     public String toString() {
         StringBuilder result = new StringBuilder();
-
         result.append("Length (");
-        result.append(minLength);
+        result.append(this.minLength);
         result.append(", ");
-        result.append(maxLength);
+        result.append(this.maxLength);
         result.append(")");
-
         return result.toString();
+    }
+
+    @Override
+    public boolean isValidRestriction(Constraint c) {
+        if (c instanceof LengthConstraint) {
+            boolean result = true;
+            result &= this.getMaxLength() > ((LengthConstraint) c).getMaxLength();
+            result &= this.getMinLength() < ((LengthConstraint) c).getMinLength();
+            return result;
+        }
+        return false;
     }
 
 }

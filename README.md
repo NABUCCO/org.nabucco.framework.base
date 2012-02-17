@@ -37,13 +37,8 @@ Objectives
 
 Contact
 -------
-*Find more Information on our [website](http://nabuccosource.org/).*
+*Find more Information on our [website](http://nabucco.org/).*
 
-*The complete documentation may be found on our [Confluence](http://www.nabucco-source.org/confluence/). Sign up for free to add comments and help us to improve NABUCCO.*
+*The complete documentation may be found on our [Confluence](http://www.nabucco.org/confluence/). Sign up for free to add comments and help us to improve NABUCCO.*
 
-*Found any bugs? Want to track improvements? Report them in our public [Jira](http://www.nabucco-source.org/jira/).*
-
-
-org.nabucco.framework.base
-=======================
-The component org.nabucco.framework.base is the fundamental component of all NABUCCO components and is the minimum requirement for the development. It holds basic Basetypes, Enumerations, Datatypes and common functionalities for bottom-up NABUCCO components.
+*Found any bugs? Want to track improvements? Report them in our public [Jira](http://www.nabucco.org/jira/).*

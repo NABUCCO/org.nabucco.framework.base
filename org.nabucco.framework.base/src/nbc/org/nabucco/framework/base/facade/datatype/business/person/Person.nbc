@@ -6,7 +6,7 @@
  * You may obtain a copy of the License at
  *
  * http://www.opensource.org/licenses/eclipse-1.0.php or
- * http://www.nabucco-source.org/nabucco-license.html
+ * http://nabuccosource.org/License.html
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -16,43 +16,84 @@
  */
 package org.nabucco.framework.base.facade.datatype.business.person;
 
+import org.nabucco.framework.base.facade.datatype.Description;
+import org.nabucco.framework.base.facade.datatype.FunctionalIdentifier;
+import org.nabucco.framework.base.facade.datatype.NabuccoDatatype;
 import org.nabucco.framework.base.facade.datatype.Name;
 import org.nabucco.framework.base.facade.datatype.Owner;
 import org.nabucco.framework.base.facade.datatype.StatusType;
-import org.nabucco.framework.base.facade.datatype.NabuccoDatatype;
-import org.nabucco.framework.base.facade.datatype.date.Date;
-import org.nabucco.framework.base.facade.datatype.image.ImageFile;
-import org.nabucco.framework.base.facade.datatype.business.person.Gender;
-import org.nabucco.framework.base.facade.datatype.business.person.Nationality;
 import org.nabucco.framework.base.facade.datatype.business.person.FamilyState;
+import org.nabucco.framework.base.facade.datatype.business.person.Gender;
 import org.nabucco.framework.base.facade.datatype.business.person.PersonTitle;
+import org.nabucco.framework.base.facade.datatype.code.Code;
+import org.nabucco.framework.base.facade.datatype.date.Date;
+import org.nabucco.framework.base.facade.datatype.security.UserId;
 
 @Author			Dominic Trumpfheller
 @Company		PRODYNA AG
 @Date			2010-11-30
 @Version		1.0
+@Description	A natural person in the Person Component.
 public Datatype Person extends NabuccoDatatype {
 
-	private Basetype Name[1] forename;
-	
-	private Basetype Name[1] middlename;
-	
-	private Basetype Name[1] surname;
-	
-	private Basetype Date[1] birthday;
-	
+	@Description		The owner of the Person.
 	private Basetype Owner[1] owner;
 	
-	private Datatype ImageFile[1] image;
+	@Description		The description of the Person.
+	private Basetype Description[0..1] description;
 	
+	@Description		The Persons forename.
+	private Basetype Name[1] forename;
+	
+	@Description		An optional middlename of the Person.
+	private Basetype Name[0..1] middlename;
+	
+	@Description		The Persons surname.
+	private Basetype Name[1] surname;
+	
+	@Description		The Persons birthname, when married.
+	private Basetype Name[0..1] birthname;
+	
+	@Description		The Persons day of birth.
+	private Basetype Date[0..1] birthday;
+	
+	@Description		The Persons city of birth.
+	private Basetype Name[0..1] birthcity;
+
+	@Description		The Persons gender.	
+	private Enumeration Gender[0..1] gender;
+	
+	@Description		The Persons family state.
+	private Enumeration FamilyState[0..1] familyState;
+	
+	@Description		The Persons title.
+	private Enumeration PersonTitle[0..1] personTitle;
+	
+	@Description		The Persons nationality.
+	@CodePath			nabucco.framework.nationality
+	private Datatype Code[0..1] nationality;
+	
+	@Description		The Persons birth country.
+	@CodePath			nabucco.framework.country
+	private Datatype Code[0..1] birthcountry;
+	
+	@Description		The Persons religion.
+	@CodePath			nabucco.business.person.religion
+	private Datatype Code[0..1] religion;
+
+	@Description		The ID of the responsible user.
+	private Basetype UserId[0..1] userId;
+	
+	@TechnicalProperty
+	@Default			ACTIVE
+	@Description		The Persons status type.
 	private Enumeration StatusType[1] statusType;
 	
-	private Enumeration Nationality[1] nationality;
+	@Description		The functional Person ID.
+	private Basetype FunctionalIdentifier[0..1] functionalId;
 	
-	private Enumeration Gender[1] gender;
-	
-	private Enumeration FamilyState[1] familyState;
-	
-	private Enumeration PersonTitle[1] personTitle;
+	@Description		The functional Person Type.
+	@CodePath			nabucco.business.person.functionaltype
+	private Datatype Code[0..1] functionalType;
 
 }

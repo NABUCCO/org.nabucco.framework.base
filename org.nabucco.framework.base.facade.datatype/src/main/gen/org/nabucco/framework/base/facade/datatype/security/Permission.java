@@ -1,17 +1,38 @@
 /*
- * NABUCCO Generator, Copyright (c) 2010, PRODYNA AG, Germany. All rights reserved.
+ * Copyright 2012 PRODYNA AG
+ *
+ * Licensed under the Eclipse Public License (EPL), Version 1.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.opensource.org/licenses/eclipse-1.0.php or
+ * http://www.nabucco.org/License.html
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 package org.nabucco.framework.base.facade.datatype.security;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import org.nabucco.framework.base.facade.datatype.Datatype;
 import org.nabucco.framework.base.facade.datatype.Description;
-import org.nabucco.framework.base.facade.datatype.NabuccoDatatype;
+import org.nabucco.framework.base.facade.datatype.MultiTenantDatatype;
 import org.nabucco.framework.base.facade.datatype.Name;
 import org.nabucco.framework.base.facade.datatype.Owner;
-import org.nabucco.framework.base.facade.datatype.code.CodeType;
-import org.nabucco.framework.base.facade.datatype.property.BasetypeProperty;
+import org.nabucco.framework.base.facade.datatype.code.Code;
+import org.nabucco.framework.base.facade.datatype.code.CodePath;
 import org.nabucco.framework.base.facade.datatype.property.NabuccoProperty;
+import org.nabucco.framework.base.facade.datatype.property.NabuccoPropertyContainer;
+import org.nabucco.framework.base.facade.datatype.property.NabuccoPropertyDescriptor;
+import org.nabucco.framework.base.facade.datatype.property.PropertyAssociationType;
+import org.nabucco.framework.base.facade.datatype.property.PropertyCache;
+import org.nabucco.framework.base.facade.datatype.property.PropertyDescriptorSupport;
 
 /**
  * Permission<p/>A Permission, assigned to a Role, User or Group<p/>
@@ -19,27 +40,34 @@ import org.nabucco.framework.base.facade.datatype.property.NabuccoProperty;
  * @version 1.0
  * @author Frank Ratschinski, PRODYNA AG, 2010-01-18
  */
-public class Permission extends NabuccoDatatype implements Datatype {
+public class Permission extends MultiTenantDatatype implements Datatype {
 
     private static final long serialVersionUID = 1L;
 
-    private static final String[] PROPERTY_NAMES = { "permissionname", "owner", "description",
-            "permissionType" };
+    private static final String[] PROPERTY_CONSTRAINTS = { "l3,12;u0,n;m1,1;", "l0,255;u0,n;m1,1;",
+            "l0,255;u0,n;m1,1;", "m1,1;" };
 
-    private static final String[] PROPERTY_CONSTRAINTS = { "l0,n;m1,1;", "l0,n;m1,1;",
-            "l0,n;m1,1;", "l0,n;m1,1;" };
+    public static final String OWNER = "owner";
 
-    /** Name of the permission */
-    private Name permissionname;
+    public static final String PERMISSIONNAME = "permissionname";
+
+    public static final String DESCRIPTION = "description";
+
+    public static final String PERMISSIONTYPE = "permissionType";
 
     /** Owner of the permission */
     private Owner owner;
 
-    /** of the permission */
+    /** Name of the permission */
+    private Name permissionname;
+
+    /** Description of the permission */
     private Description description;
 
-    /** Code of the permission */
-    private CodeType permissionType;
+    /** Type of the permission */
+    private Code permissionType;
+
+    protected static final String PERMISSIONTYPE_CODEPATH = "nabucco.authorization.permission";
 
     /** Constructs a new Permission instance. */
     public Permission() {
@@ -58,11 +86,11 @@ public class Permission extends NabuccoDatatype implements Datatype {
      */
     protected void cloneObject(Permission clone) {
         super.cloneObject(clone);
-        if ((this.getPermissionname() != null)) {
-            clone.setPermissionname(this.getPermissionname().cloneObject());
-        }
         if ((this.getOwner() != null)) {
             clone.setOwner(this.getOwner().cloneObject());
+        }
+        if ((this.getPermissionname() != null)) {
+            clone.setPermissionname(this.getPermissionname().cloneObject());
         }
         if ((this.getDescription() != null)) {
             clone.setDescription(this.getDescription().cloneObject());
@@ -72,23 +100,62 @@ public class Permission extends NabuccoDatatype implements Datatype {
         }
     }
 
+    /**
+     * CreatePropertyContainer.
+     *
+     * @return the NabuccoPropertyContainer.
+     */
+    protected static NabuccoPropertyContainer createPropertyContainer() {
+        Map<String, NabuccoPropertyDescriptor> propertyMap = new HashMap<String, NabuccoPropertyDescriptor>();
+        propertyMap.putAll(PropertyCache.getInstance().retrieve(MultiTenantDatatype.class).getPropertyMap());
+        propertyMap.put(OWNER,
+                PropertyDescriptorSupport.createBasetype(OWNER, Owner.class, 4, PROPERTY_CONSTRAINTS[0], false));
+        propertyMap
+                .put(PERMISSIONNAME, PropertyDescriptorSupport.createBasetype(PERMISSIONNAME, Name.class, 5,
+                        PROPERTY_CONSTRAINTS[1], false));
+        propertyMap.put(DESCRIPTION, PropertyDescriptorSupport.createBasetype(DESCRIPTION, Description.class, 6,
+                PROPERTY_CONSTRAINTS[2], false));
+        propertyMap.put(PERMISSIONTYPE, PropertyDescriptorSupport.createDatatype(PERMISSIONTYPE, Code.class, 7,
+                PROPERTY_CONSTRAINTS[3], false, PropertyAssociationType.COMPOSITION, PERMISSIONTYPE_CODEPATH));
+        return new NabuccoPropertyContainer(propertyMap);
+    }
+
     @Override
     public void init() {
         this.initDefaults();
     }
 
     @Override
-    public List<NabuccoProperty<?>> getProperties() {
-        List<NabuccoProperty<?>> properties = super.getProperties();
-        properties.add(new BasetypeProperty<Name>(PROPERTY_NAMES[0], Name.class,
-                PROPERTY_CONSTRAINTS[0], this.permissionname));
-        properties.add(new BasetypeProperty<Owner>(PROPERTY_NAMES[1], Owner.class,
-                PROPERTY_CONSTRAINTS[1], this.owner));
-        properties.add(new BasetypeProperty<Description>(PROPERTY_NAMES[2], Description.class,
-                PROPERTY_CONSTRAINTS[2], this.description));
-        properties.add(new BasetypeProperty<CodeType>(PROPERTY_NAMES[3], CodeType.class,
-                PROPERTY_CONSTRAINTS[3], this.permissionType));
+    public Set<NabuccoProperty> getProperties() {
+        Set<NabuccoProperty> properties = super.getProperties();
+        properties.add(super.createProperty(Permission.getPropertyDescriptor(OWNER), this.owner, null));
+        properties
+                .add(super.createProperty(Permission.getPropertyDescriptor(PERMISSIONNAME), this.permissionname, null));
+        properties.add(super.createProperty(Permission.getPropertyDescriptor(DESCRIPTION), this.description, null));
+        properties.add(super.createProperty(Permission.getPropertyDescriptor(PERMISSIONTYPE), this.getPermissionType(),
+                null));
         return properties;
+    }
+
+    @Override
+    public boolean setProperty(NabuccoProperty property) {
+        if (super.setProperty(property)) {
+            return true;
+        }
+        if ((property.getName().equals(OWNER) && (property.getType() == Owner.class))) {
+            this.setOwner(((Owner) property.getInstance()));
+            return true;
+        } else if ((property.getName().equals(PERMISSIONNAME) && (property.getType() == Name.class))) {
+            this.setPermissionname(((Name) property.getInstance()));
+            return true;
+        } else if ((property.getName().equals(DESCRIPTION) && (property.getType() == Description.class))) {
+            this.setDescription(((Description) property.getInstance()));
+            return true;
+        } else if ((property.getName().equals(PERMISSIONTYPE) && (property.getType() == Code.class))) {
+            this.setPermissionType(((Code) property.getInstance()));
+            return true;
+        }
+        return false;
     }
 
     @Override
@@ -106,15 +173,15 @@ public class Permission extends NabuccoDatatype implements Datatype {
             return false;
         }
         final Permission other = ((Permission) obj);
-        if ((this.permissionname == null)) {
-            if ((other.permissionname != null))
-                return false;
-        } else if ((!this.permissionname.equals(other.permissionname)))
-            return false;
         if ((this.owner == null)) {
             if ((other.owner != null))
                 return false;
         } else if ((!this.owner.equals(other.owner)))
+            return false;
+        if ((this.permissionname == null)) {
+            if ((other.permissionname != null))
+                return false;
+        } else if ((!this.permissionname.equals(other.permissionname)))
             return false;
         if ((this.description == null)) {
             if ((other.description != null))
@@ -133,26 +200,11 @@ public class Permission extends NabuccoDatatype implements Datatype {
     public int hashCode() {
         final int PRIME = 31;
         int result = super.hashCode();
-        result = ((PRIME * result) + ((this.permissionname == null) ? 0 : this.permissionname
-                .hashCode()));
         result = ((PRIME * result) + ((this.owner == null) ? 0 : this.owner.hashCode()));
+        result = ((PRIME * result) + ((this.permissionname == null) ? 0 : this.permissionname.hashCode()));
         result = ((PRIME * result) + ((this.description == null) ? 0 : this.description.hashCode()));
-        result = ((PRIME * result) + ((this.permissionType == null) ? 0 : this.permissionType
-                .hashCode()));
+        result = ((PRIME * result) + ((this.permissionType == null) ? 0 : this.permissionType.hashCode()));
         return result;
-    }
-
-    @Override
-    public String toString() {
-        StringBuilder appendable = new StringBuilder();
-        appendable.append("<Permission>\n");
-        appendable.append(super.toString());
-        appendable.append((("<permissionname>" + this.permissionname) + "</permissionname>\n"));
-        appendable.append((("<owner>" + this.owner) + "</owner>\n"));
-        appendable.append((("<description>" + this.description) + "</description>\n"));
-        appendable.append((("<permissionType>" + this.permissionType) + "</permissionType>\n"));
-        appendable.append("</Permission>\n");
-        return appendable.toString();
     }
 
     @Override
@@ -160,36 +212,6 @@ public class Permission extends NabuccoDatatype implements Datatype {
         Permission clone = new Permission();
         this.cloneObject(clone);
         return clone;
-    }
-
-    /**
-     * Name of the permission
-     *
-     * @return the Name.
-     */
-    public Name getPermissionname() {
-        return this.permissionname;
-    }
-
-    /**
-     * Name of the permission
-     *
-     * @param permissionname the Name.
-     */
-    public void setPermissionname(Name permissionname) {
-        this.permissionname = permissionname;
-    }
-
-    /**
-     * Name of the permission
-     *
-     * @param permissionname the String.
-     */
-    public void setPermissionname(String permissionname) {
-        if ((this.permissionname == null)) {
-            this.permissionname = new Name();
-        }
-        this.permissionname.setValue(permissionname);
     }
 
     /**
@@ -217,13 +239,49 @@ public class Permission extends NabuccoDatatype implements Datatype {
      */
     public void setOwner(String owner) {
         if ((this.owner == null)) {
+            if ((owner == null)) {
+                return;
+            }
             this.owner = new Owner();
         }
         this.owner.setValue(owner);
     }
 
     /**
-     * of the permission
+     * Name of the permission
+     *
+     * @return the Name.
+     */
+    public Name getPermissionname() {
+        return this.permissionname;
+    }
+
+    /**
+     * Name of the permission
+     *
+     * @param permissionname the Name.
+     */
+    public void setPermissionname(Name permissionname) {
+        this.permissionname = permissionname;
+    }
+
+    /**
+     * Name of the permission
+     *
+     * @param permissionname the String.
+     */
+    public void setPermissionname(String permissionname) {
+        if ((this.permissionname == null)) {
+            if ((permissionname == null)) {
+                return;
+            }
+            this.permissionname = new Name();
+        }
+        this.permissionname.setValue(permissionname);
+    }
+
+    /**
+     * Description of the permission
      *
      * @return the Description.
      */
@@ -232,7 +290,7 @@ public class Permission extends NabuccoDatatype implements Datatype {
     }
 
     /**
-     * of the permission
+     * Description of the permission
      *
      * @param description the Description.
      */
@@ -241,44 +299,63 @@ public class Permission extends NabuccoDatatype implements Datatype {
     }
 
     /**
-     * of the permission
+     * Description of the permission
      *
      * @param description the String.
      */
     public void setDescription(String description) {
         if ((this.description == null)) {
+            if ((description == null)) {
+                return;
+            }
             this.description = new Description();
         }
         this.description.setValue(description);
     }
 
     /**
-     * Code of the permission
+     * Type of the permission
      *
-     * @return the CodeType.
+     * @param permissionType the Code.
      */
-    public CodeType getPermissionType() {
-        return this.permissionType;
-    }
-
-    /**
-     * Code of the permission
-     *
-     * @param permissionType the CodeType.
-     */
-    public void setPermissionType(CodeType permissionType) {
+    public void setPermissionType(Code permissionType) {
         this.permissionType = permissionType;
     }
 
     /**
-     * Code of the permission
+     * Type of the permission
      *
-     * @param permissionType the String.
+     * @return the Code.
      */
-    public void setPermissionType(String permissionType) {
-        if ((this.permissionType == null)) {
-            this.permissionType = new CodeType();
-        }
-        this.permissionType.setValue(permissionType);
+    public Code getPermissionType() {
+        return this.permissionType;
+    }
+
+    /**
+     * Getter for the PropertyDescriptor.
+     *
+     * @param propertyName the String.
+     * @return the NabuccoPropertyDescriptor.
+     */
+    public static NabuccoPropertyDescriptor getPropertyDescriptor(String propertyName) {
+        return PropertyCache.getInstance().retrieve(Permission.class).getProperty(propertyName);
+    }
+
+    /**
+     * Getter for the PropertyDescriptorList.
+     *
+     * @return the List<NabuccoPropertyDescriptor>.
+     */
+    public static List<NabuccoPropertyDescriptor> getPropertyDescriptorList() {
+        return PropertyCache.getInstance().retrieve(Permission.class).getAllProperties();
+    }
+
+    /**
+     * Getter for the PermissionTypeCodePath.
+     *
+     * @return the CodePath.
+     */
+    public static CodePath getPermissionTypeCodePath() {
+        return new CodePath(PERMISSIONTYPE_CODEPATH);
     }
 }

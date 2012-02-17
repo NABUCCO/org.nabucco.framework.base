@@ -1,0 +1,116 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!--
+	Copyright 2011 PRODYNA AG
+
+	Licensed under the Eclipse Public License (EPL), Version 1.0 (the "License");
+	you may not use this file except in compliance with the License.
+	You may obtain a copy of the License at
+
+	http://www.opensource.org/licenses/eclipse-1.0.php or
+	http://nabuccosource.org/License.html
+
+	Unless required by applicable law or agreed to in writing, software
+	distributed under the License is distributed on an "AS IS" BASIS,
+	WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+	See the License for the specific language governing permissions and
+	limitations under the License.
+-->
+
+<xsd:schema
+	targetNamespace="org.nabucco"
+	elementFormDefault="qualified"
+	xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+	xmlns="org.nabucco"
+	xmlns:bts="org.nabucco.bootstrap">
+
+
+
+
+
+
+	<xsd:complexType
+		name="ExtensionType"
+		abstract="true">
+		<xsd:attribute
+			name="id"
+			use="required">
+			<xsd:simpleType>
+				<xsd:restriction base="xsd:string">
+					<xsd:minLength value="1"></xsd:minLength>
+				</xsd:restriction>
+			</xsd:simpleType>
+		</xsd:attribute>
+		<xsd:attribute
+			name="point"
+			type="ExtensionPointIdType"
+			use="required"></xsd:attribute>
+	</xsd:complexType>
+
+	<xsd:simpleType name="ExtensionPointIdType">
+		<xsd:annotation>
+			<xsd:documentation>
+				The id of the extension point
+			</xsd:documentation>
+		</xsd:annotation>
+		<xsd:restriction base="xsd:string">
+			<xsd:minLength value="1"></xsd:minLength>
+			<xsd:pattern value="\w+(\.\w+)+"></xsd:pattern>
+		</xsd:restriction>
+	</xsd:simpleType>
+
+	<xsd:simpleType name="ActionIdType">
+		<xsd:annotation>
+			<xsd:documentation>
+				The type for action. XXX.XXX
+			</xsd:documentation>
+		</xsd:annotation>
+		<xsd:restriction base="xsd:string">
+			<xsd:pattern value="\w+\.\w+"></xsd:pattern>
+			<xsd:minLength value="1"></xsd:minLength>
+		</xsd:restriction>
+	</xsd:simpleType>
+
+	<xsd:simpleType name="ExtensionPointClassNameType">
+		<xsd:restriction base="xsd:string">
+			<xsd:pattern value="\w+(\.\w+)+"></xsd:pattern>
+			<xsd:minLength value="1"></xsd:minLength>
+		</xsd:restriction>
+	</xsd:simpleType>
+
+	<xsd:simpleType name="ClassNameType">
+		<xsd:restriction base="xsd:string">
+			<xsd:minLength value="1"></xsd:minLength>
+			<xsd:pattern value="\w+(\.\w+)+"></xsd:pattern>
+		</xsd:restriction>
+	</xsd:simpleType>
+
+	<xsd:complexType name="UiElement">
+		<xsd:sequence>
+		</xsd:sequence>
+		<xsd:attribute
+			name="grand"
+			type="GrantType">
+		</xsd:attribute>
+	</xsd:complexType>
+
+	
+	<xsd:simpleType name="GrantType">
+		<xsd:restriction base="xsd:string">
+			<xsd:enumeration value="DISABLED"></xsd:enumeration>
+			<xsd:enumeration value="ACTIVE"></xsd:enumeration>
+			<xsd:enumeration value="HIDDEN"></xsd:enumeration>
+		</xsd:restriction>
+	</xsd:simpleType>
+
+	<xsd:complexType name="UiPermissionType">
+		<xsd:attribute
+			name="grant"
+			type="GrantType">
+		</xsd:attribute>
+		<xsd:attribute
+			name="id"
+			type="xsd:string">
+		</xsd:attribute>
+	</xsd:complexType>
+</xsd:schema>

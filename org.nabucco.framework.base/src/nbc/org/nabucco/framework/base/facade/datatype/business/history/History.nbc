@@ -1,0 +1,70 @@
+/*
+ * Copyright 2010 PRODYNA AG
+ *
+ * Licensed under the Eclipse Public License (EPL), Version 1.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.opensource.org/licenses/eclipse-1.0.php or
+ * http://nabuccosource.org/License.html
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+package org.nabucco.framework.base.facade.datatype.business.history;
+
+import org.nabucco.framework.base.facade.datatype.FunctionalIdentifier;
+import org.nabucco.framework.base.facade.datatype.Identifier;
+import org.nabucco.framework.base.facade.datatype.NabuccoDatatype;
+import org.nabucco.framework.base.facade.datatype.Name;
+import org.nabucco.framework.base.facade.datatype.Owner;
+import org.nabucco.framework.base.facade.datatype.code.Code;
+import org.nabucco.framework.base.facade.datatype.date.Timestamp;
+import org.nabucco.framework.base.facade.datatype.mail.Body;
+import org.nabucco.framework.base.facade.datatype.security.UserId;
+import org.nabucco.framework.base.facade.datatype.xml.XmlDocument;
+
+@Author			Raffael Bieniek
+@Company		PRODYNA AG
+@Date			2011-04-07
+@Version		1.0
+@Description	A history entry that is created for business historization.
+public Datatype History extends NabuccoDatatype  {
+
+	@Description	Owner of the History.
+	private Basetype Owner[1] owner;
+	
+	@Description	Title of the History.
+	private Basetype Name[1] title;
+	
+	@Description	Body of the History.
+	private Basetype Body[0..1] body; 
+	
+	@Description	ID of the user that created the history.
+	private Basetype UserId[1] createdUserId;
+	
+	@Description	Timestamp of the history creation.
+	private Basetype Timestamp[1] createdTimestamp; 
+	
+	@Description	Type of the Target Datatype.
+	private Basetype Name[0..1] targetType;
+	
+	@Description	ID of the Target Datatype.
+	private Basetype Identifier[0..1] targetId;
+	
+	@Description	Metadata of the Target Datatype.
+	private Basetype Name[0..1] targetMeta; 
+	
+	@Description	The XML Payload.
+	private Basetype XmlDocument[0..1] payload; 
+	
+	@Description	The functional History ID.
+	private Basetype FunctionalIdentifier[0..1] functionalId;
+	
+	@Description	The functional History type.
+	@CodePath		nabucco.business.history.functionaltype
+	private Datatype Code[0..1] functionalType;
+}

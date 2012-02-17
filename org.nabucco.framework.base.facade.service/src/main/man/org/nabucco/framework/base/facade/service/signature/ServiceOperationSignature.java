@@ -1,12 +1,12 @@
 /*
- * Copyright 2010 PRODYNA AG
+ * Copyright 2012 PRODYNA AG
  *
  * Licensed under the Eclipse Public License (EPL), Version 1.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
  * http://www.opensource.org/licenses/eclipse-1.0.php or
- * http://www.nabucco-source.org/nabucco-license.html
+ * http://www.nabucco.org/License.html
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -50,12 +50,10 @@ public class ServiceOperationSignature {
      */
     public ServiceOperationSignature(String serviceId, String operationId, String requestMessage) {
         if (serviceId == null) {
-            throw new IllegalArgumentException(
-                    "Cannot create service operation signature for serviceId [null].");
+            throw new IllegalArgumentException("Cannot create service operation signature for serviceId [null].");
         }
         if (operationId == null) {
-            throw new IllegalArgumentException(
-                    "Cannot create service operation signature for operationId [null].");
+            throw new IllegalArgumentException("Cannot create service operation signature for operationId [null].");
         }
 
         this.serviceId = serviceId;
@@ -77,16 +75,13 @@ public class ServiceOperationSignature {
      */
     public ServiceOperationSignature(Service service, Method operation, ServiceRequest<?> request) {
         if (service == null) {
-            throw new IllegalArgumentException(
-                    "Cannot create service operation signature for service [null].");
+            throw new IllegalArgumentException("Cannot create service operation signature for service [null].");
         }
         if (operation == null) {
-            throw new IllegalArgumentException(
-                    "Cannot create service operation signature for operation [null].");
+            throw new IllegalArgumentException("Cannot create service operation signature for operation [null].");
         }
         if (request == null || request.getRequestMessage() == null) {
-            throw new IllegalArgumentException(
-                    "Cannot create service operation signature for request [null].");
+            throw new IllegalArgumentException("Cannot create service operation signature for request [null].");
         }
 
         this.serviceId = service.getName();
@@ -100,8 +95,7 @@ public class ServiceOperationSignature {
         int result = 1;
         result = prime * result + ((this.serviceId == null) ? 0 : this.serviceId.hashCode());
         result = prime * result + ((this.operationId == null) ? 0 : this.operationId.hashCode());
-        result = prime
-                * result + ((this.requestMessage == null) ? 0 : this.requestMessage.hashCode());
+        result = prime * result + ((this.requestMessage == null) ? 0 : this.requestMessage.hashCode());
         return result;
     }
 

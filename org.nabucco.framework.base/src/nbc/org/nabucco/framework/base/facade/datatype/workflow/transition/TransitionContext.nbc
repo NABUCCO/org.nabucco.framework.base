@@ -1,0 +1,62 @@
+/*
+* Copyright 2010 PRODYNA AG
+*
+* Licensed under the Eclipse Public License (EPL), Version 1.0 (the "License");
+* you may not use this file except in compliance with the License.
+* You may obtain a copy of the License at
+*
+* http://www.opensource.org/licenses/eclipse-1.0.php or
+* http://nabuccosource.org/License.html
+*
+* Unless required by applicable law or agreed to in writing, software
+* distributed under the License is distributed on an "AS IS" BASIS,
+* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+* See the License for the specific language governing permissions and
+* limitations under the License.
+*/
+package org.nabucco.framework.base.facade.datatype.workflow.transition;
+
+import org.nabucco.framework.base.facade.datatype.Identifier;
+import org.nabucco.framework.base.facade.datatype.Name;
+import org.nabucco.framework.base.facade.datatype.documentation.Comment;
+import org.nabucco.framework.base.facade.datatype.workflow.Signal;
+import org.nabucco.framework.base.facade.datatype.workflow.context.Context;
+import org.nabucco.framework.base.facade.datatype.workflow.instance.Instance;
+import org.nabucco.framework.base.facade.datatype.workflow.transition.TransitionParameter;
+
+
+@Author			Nicolas Moser
+@Company		PRODYNA AG
+@Date			2011-03-03
+@Version		1.0
+@Description	The context of a workflow transition.
+public Datatype TransitionContext {
+
+	@Description	The name of the workflow.
+	private Basetype Name[1] name;
+
+	@Description	The workflow instance.
+	private Datatype Instance[1] instance;
+
+	@Description	Sub-Workflow instances.
+	private Datatype Instance[0..*] subInstances; 
+
+	@Description	The id of the workflow instance.
+	private Basetype Identifier[1] instanceId;
+
+	@Description	Name of the current state.
+	private Basetype Name[1] stateName; 
+
+	@Description	The signal triggering the transition.
+	private Datatype Signal[0..1] signal;
+	
+	@Description	Comment of the transition.
+	private Basetype Comment[0..1] comment; 
+
+	@Description	The list of next available transitions.
+	private Datatype TransitionParameter[0..*] nextTransitions;
+	
+	@Description	The context of the transition.
+	private Datatype Context[0..1] workflowContext;  
+	
+}

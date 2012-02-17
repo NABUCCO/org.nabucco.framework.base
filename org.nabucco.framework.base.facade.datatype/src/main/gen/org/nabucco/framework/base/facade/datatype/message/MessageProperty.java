@@ -1,15 +1,34 @@
 /*
- * NABUCCO Generator, Copyright (c) 2010, PRODYNA AG, Germany. All rights reserved.
+ * Copyright 2012 PRODYNA AG
+ *
+ * Licensed under the Eclipse Public License (EPL), Version 1.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.opensource.org/licenses/eclipse-1.0.php or
+ * http://www.nabucco.org/License.html
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 package org.nabucco.framework.base.facade.datatype.message;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import org.nabucco.framework.base.facade.datatype.Datatype;
 import org.nabucco.framework.base.facade.datatype.NabuccoDatatype;
 import org.nabucco.framework.base.facade.datatype.Name;
 import org.nabucco.framework.base.facade.datatype.Value;
-import org.nabucco.framework.base.facade.datatype.property.BasetypeProperty;
 import org.nabucco.framework.base.facade.datatype.property.NabuccoProperty;
+import org.nabucco.framework.base.facade.datatype.property.NabuccoPropertyContainer;
+import org.nabucco.framework.base.facade.datatype.property.NabuccoPropertyDescriptor;
+import org.nabucco.framework.base.facade.datatype.property.PropertyCache;
+import org.nabucco.framework.base.facade.datatype.property.PropertyDescriptorSupport;
 
 /**
  * MessageProperty<p/>TODO<p/>
@@ -20,9 +39,11 @@ public class MessageProperty extends NabuccoDatatype implements Datatype {
 
     private static final long serialVersionUID = 1L;
 
-    private static final String[] PROPERTY_NAMES = { "key", "value" };
+    private static final String[] PROPERTY_CONSTRAINTS = { "l0,255;u0,n;m1,1;", "l0,n;u0,n;m1,1;" };
 
-    private static final String[] PROPERTY_CONSTRAINTS = { "l0,n;m1,1;", "l0,n;m1,1;" };
+    public static final String KEY = "key";
+
+    public static final String VALUE = "value";
 
     private Name key;
 
@@ -53,19 +74,47 @@ public class MessageProperty extends NabuccoDatatype implements Datatype {
         }
     }
 
+    /**
+     * CreatePropertyContainer.
+     *
+     * @return the NabuccoPropertyContainer.
+     */
+    protected static NabuccoPropertyContainer createPropertyContainer() {
+        Map<String, NabuccoPropertyDescriptor> propertyMap = new HashMap<String, NabuccoPropertyDescriptor>();
+        propertyMap.putAll(PropertyCache.getInstance().retrieve(NabuccoDatatype.class).getPropertyMap());
+        propertyMap.put(KEY,
+                PropertyDescriptorSupport.createBasetype(KEY, Name.class, 3, PROPERTY_CONSTRAINTS[0], false));
+        propertyMap.put(VALUE,
+                PropertyDescriptorSupport.createBasetype(VALUE, Value.class, 4, PROPERTY_CONSTRAINTS[1], false));
+        return new NabuccoPropertyContainer(propertyMap);
+    }
+
     @Override
     public void init() {
         this.initDefaults();
     }
 
     @Override
-    public List<NabuccoProperty<?>> getProperties() {
-        List<NabuccoProperty<?>> properties = super.getProperties();
-        properties.add(new BasetypeProperty<Name>(PROPERTY_NAMES[0], Name.class,
-                PROPERTY_CONSTRAINTS[0], this.key));
-        properties.add(new BasetypeProperty<Value>(PROPERTY_NAMES[1], Value.class,
-                PROPERTY_CONSTRAINTS[1], this.value));
+    public Set<NabuccoProperty> getProperties() {
+        Set<NabuccoProperty> properties = super.getProperties();
+        properties.add(super.createProperty(MessageProperty.getPropertyDescriptor(KEY), this.key, null));
+        properties.add(super.createProperty(MessageProperty.getPropertyDescriptor(VALUE), this.value, null));
         return properties;
+    }
+
+    @Override
+    public boolean setProperty(NabuccoProperty property) {
+        if (super.setProperty(property)) {
+            return true;
+        }
+        if ((property.getName().equals(KEY) && (property.getType() == Name.class))) {
+            this.setKey(((Name) property.getInstance()));
+            return true;
+        } else if ((property.getName().equals(VALUE) && (property.getType() == Value.class))) {
+            this.setValue(((Value) property.getInstance()));
+            return true;
+        }
+        return false;
     }
 
     @Override
@@ -106,17 +155,6 @@ public class MessageProperty extends NabuccoDatatype implements Datatype {
     }
 
     @Override
-    public String toString() {
-        StringBuilder appendable = new StringBuilder();
-        appendable.append("<MessageProperty>\n");
-        appendable.append(super.toString());
-        appendable.append((("<key>" + this.key) + "</key>\n"));
-        appendable.append((("<value>" + this.value) + "</value>\n"));
-        appendable.append("</MessageProperty>\n");
-        return appendable.toString();
-    }
-
-    @Override
     public MessageProperty cloneObject() {
         MessageProperty clone = new MessageProperty();
         this.cloneObject(clone);
@@ -148,6 +186,9 @@ public class MessageProperty extends NabuccoDatatype implements Datatype {
      */
     public void setKey(String key) {
         if ((this.key == null)) {
+            if ((key == null)) {
+                return;
+            }
             this.key = new Name();
         }
         this.key.setValue(key);
@@ -178,8 +219,30 @@ public class MessageProperty extends NabuccoDatatype implements Datatype {
      */
     public void setValue(String value) {
         if ((this.value == null)) {
+            if ((value == null)) {
+                return;
+            }
             this.value = new Value();
         }
         this.value.setValue(value);
+    }
+
+    /**
+     * Getter for the PropertyDescriptor.
+     *
+     * @param propertyName the String.
+     * @return the NabuccoPropertyDescriptor.
+     */
+    public static NabuccoPropertyDescriptor getPropertyDescriptor(String propertyName) {
+        return PropertyCache.getInstance().retrieve(MessageProperty.class).getProperty(propertyName);
+    }
+
+    /**
+     * Getter for the PropertyDescriptorList.
+     *
+     * @return the List<NabuccoPropertyDescriptor>.
+     */
+    public static List<NabuccoPropertyDescriptor> getPropertyDescriptorList() {
+        return PropertyCache.getInstance().retrieve(MessageProperty.class).getAllProperties();
     }
 }

@@ -1,12 +1,12 @@
 /*
- * Copyright 2010 PRODYNA AG
+ * Copyright 2012 PRODYNA AG
  *
  * Licensed under the Eclipse Public License (EPL), Version 1.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
  * http://www.opensource.org/licenses/eclipse-1.0.php or
- * http://www.nabucco-source.org/nabucco-license.html
+ * http://www.nabucco.org/License.html
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -16,7 +16,10 @@
  */
 package org.nabucco.framework.base.facade.component;
 
+import java.util.Properties;
+
 import org.nabucco.framework.base.facade.component.application.Application;
+import org.nabucco.framework.base.facade.datatype.Owner;
 import org.nabucco.framework.base.facade.service.injection.Injectable;
 import org.nabucco.framework.base.facade.service.injection.InjectionProvider;
 
@@ -26,6 +29,8 @@ import org.nabucco.framework.base.facade.service.injection.InjectionProvider;
  * @author Nicolas Moser, PRODYNA AG
  */
 public class NabuccoInstance {
+
+    private static final String PROPERTY_OWNER = "owner";
 
     /** The current application. */
     private Application application;
@@ -69,6 +74,17 @@ public class NabuccoInstance {
      */
     public Application getApplication() {
         return this.application;
+    }
+
+    /**
+     * Getter for the configured owner.
+     * 
+     * @return the owner
+     */
+    public Owner getOwner() {
+        InjectionProvider injectionProvider = InjectionProvider.getInstance(INSTANCE_ID);
+        Properties properties = injectionProvider.getProperties();
+        return new Owner(properties.getProperty(PROPERTY_OWNER, NabuccoConstants.OWNER));
     }
 
 }

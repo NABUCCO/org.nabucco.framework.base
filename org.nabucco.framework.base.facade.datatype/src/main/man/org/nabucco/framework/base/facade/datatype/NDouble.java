@@ -1,12 +1,12 @@
 /*
- * Copyright 2010 PRODYNA AG
+ * Copyright 2012 PRODYNA AG
  *
  * Licensed under the Eclipse Public License (EPL), Version 1.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
  * http://www.opensource.org/licenses/eclipse-1.0.php or
- * http://www.nabucco-source.org/nabucco-license.html
+ * http://www.nabucco.org/License.html
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -23,9 +23,6 @@ package org.nabucco.framework.base.facade.datatype;
  */
 public abstract class NDouble extends BasetypeSupport implements Basetype, Comparable<NDouble> {
 
-    /**
-     * Comment for <code>serialVersionUID</code>
-     */
     private static final long serialVersionUID = 1L;
 
     private Double value;
@@ -34,6 +31,7 @@ public abstract class NDouble extends BasetypeSupport implements Basetype, Compa
      * Default constructor
      */
     public NDouble() {
+        this(null);
     }
 
     /**
@@ -43,12 +41,21 @@ public abstract class NDouble extends BasetypeSupport implements Basetype, Compa
      *            the value to initialize
      */
     public NDouble(Double value) {
+        super(BasetypeType.DOUBLE);
         this.value = value;
     }
 
     @Override
     public Double getValue() {
         return this.value;
+    }
+
+    @Override
+    public void setValue(Object value) throws IllegalArgumentException {
+        if (value != null && !(value instanceof Double)) {
+            throw new IllegalArgumentException("Cannot set value '" + value + "' to NDouble.");
+        }
+        this.setValue((Double) value);
     }
 
     /**
@@ -66,7 +73,7 @@ public abstract class NDouble extends BasetypeSupport implements Basetype, Compa
      */
     @Override
     public String toString() {
-        return String.valueOf(value);
+        return String.valueOf(this.value);
     }
 
     @Override
@@ -123,7 +130,7 @@ public abstract class NDouble extends BasetypeSupport implements Basetype, Compa
     /**
      * Clones the properties of this basetype into the given basetype.
      * 
-     * @param basetype
+     * @param clone
      *            the cloned basetype
      */
     protected void cloneObject(NDouble clone) {

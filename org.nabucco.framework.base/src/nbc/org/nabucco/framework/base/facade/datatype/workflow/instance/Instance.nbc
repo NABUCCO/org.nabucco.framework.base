@@ -1,0 +1,81 @@
+/*
+* Copyright 2010 PRODYNA AG
+*
+* Licensed under the Eclipse Public License (EPL), Version 1.0 (the "License");
+* you may not use this file except in compliance with the License.
+* You may obtain a copy of the License at
+*
+* http://www.opensource.org/licenses/eclipse-1.0.php or
+* http://nabuccosource.org/License.html
+*
+* Unless required by applicable law or agreed to in writing, software
+* distributed under the License is distributed on an "AS IS" BASIS,
+* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+* See the License for the specific language governing permissions and
+* limitations under the License.
+*/
+package org.nabucco.framework.base.facade.datatype.workflow.instance;
+
+import org.nabucco.framework.base.facade.datatype.Description;
+import org.nabucco.framework.base.facade.datatype.NabuccoDatatype;
+import org.nabucco.framework.base.facade.datatype.Name;
+import org.nabucco.framework.base.facade.datatype.Owner;
+import org.nabucco.framework.base.facade.datatype.code.Code;
+import org.nabucco.framework.base.facade.datatype.date.Date;
+import org.nabucco.framework.base.facade.datatype.date.Timestamp;
+import org.nabucco.framework.base.facade.datatype.text.TextContent;
+import org.nabucco.framework.base.facade.datatype.workflow.instance.WorkflowType;
+
+
+@Author			Nicolas Moser
+@Company		PRODYNA AG
+@Date			2011-02-08
+@Version		1.0
+@Description	An instance of a workflow (represents a complete workflow iteration).
+public Datatype Instance extends NabuccoDatatype {
+
+	@MinLength				1	
+	@Description			The name of the WorkflowInstance.
+	private Basetype Name[1] name;
+
+	@Description			The owner of the WorkflowInstance.
+	private Basetype Owner[1] owner;
+	
+	@MinLength				1	
+	@Description			A summary of the WorkflowInstance.
+	private Basetype Description[1] summary;
+	
+	@Description			A brief description of the WorkflowInstance.
+	private Basetype TextContent[0..1] description;
+	
+	@Default				DETACHED
+	@Description			The type of the workflow instance.
+	private Enumeration WorkflowType[1] type;
+	
+	@Description			The actual creator
+	private Basetype Name[1] creator;
+	
+	@Description			The date and time of creation
+	private Basetype Timestamp[1] creationTime;
+	
+	@Description			The user the instance is assigned to.
+	private Basetype Name[0..1] assignedUser;
+	
+	@Description			The group the instance is assigned to.
+	private Basetype Name[0..1] assignedGroup;
+	
+	@Description			The role the instance is assigned to.
+	private Basetype Name[0..1] assignedRole;
+	
+	@CodePath	 			nabucco.workflow.functionaltype
+	@Description			Functional type of the workflow.
+	private Datatype Code[1] functionalType;
+	
+	@CodePath	 			nabucco.workflow.priority 
+	@Description			Priority of the workflow.
+	private Datatype Code[0..1] priority;
+	
+	@Description			Due date of the instance. 
+	private Basetype Date[0..1] dueDate;
+}
+

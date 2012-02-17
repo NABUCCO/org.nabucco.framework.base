@@ -6,7 +6,7 @@
  * You may obtain a copy of the License at
  *
  * http://www.opensource.org/licenses/eclipse-1.0.php or
- * http://www.nabucco-source.org/nabucco-license.html
+ * http://nabuccosource.org/License.html
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -16,24 +16,48 @@
  */
 package org.nabucco.framework.base.facade.datatype.business.organization;
 
-import org.nabucco.framework.base.facade.datatype.Name;
 import org.nabucco.framework.base.facade.datatype.Description;
+import org.nabucco.framework.base.facade.datatype.FunctionalIdentifier;
+import org.nabucco.framework.base.facade.datatype.NabuccoDatatype;
+import org.nabucco.framework.base.facade.datatype.Name;
 import org.nabucco.framework.base.facade.datatype.Owner;
 import org.nabucco.framework.base.facade.datatype.StatusType;
-import org.nabucco.framework.base.facade.datatype.NabuccoDatatype;
+import org.nabucco.framework.base.facade.datatype.code.Code;
+import org.nabucco.framework.base.facade.datatype.security.UserId;
 
 @Author			Dominic Trumpfheller
 @Company		PRODYNA AG
 @Date			2010-11-30
 @Version		1.0
+@Description	An organization in the Organization Component.
 public Datatype Organization extends NabuccoDatatype {
 
+	@Description		The Organization Owner.
+	private Basetype Owner[1] owner;
+	
+	@Description		The Organization Name.
 	private Basetype Name[1] name;
 	
-	private Basetype Description[1] description;
+	@Description		Additinal Organization Information
+	private Basetype Name[0..1] additional;
 	
-	private Basetype Owner[1] owner;
-
+	@Description		The Organization Description.
+	private Basetype Description[0..1] description;
+	
+	@TechnicalProperty
+	@Default			ACTIVE
+	@Description		The Organization Status.
 	private Enumeration StatusType[1] statusType;
 
+	@Description		The ID of the responsible user.
+	private Basetype UserId[0..1] userId;
+	
+	@Description		A Functional Organization ID.
+	private Basetype FunctionalIdentifier[0..1] functionalId;
+	
+	@Description		The Functional Organization Type.
+	@CodePath 			nabucco.business.organization.organization.functionaltype
+	private Datatype Code[0..1] functionalType;
+	
 }
+

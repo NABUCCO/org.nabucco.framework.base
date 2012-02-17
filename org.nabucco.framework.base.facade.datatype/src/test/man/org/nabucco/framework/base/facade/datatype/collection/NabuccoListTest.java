@@ -1,19 +1,19 @@
 /*
-* Copyright 2010 PRODYNA AG
-*
-* Licensed under the Eclipse Public License (EPL), Version 1.0 (the "License");
-* you may not use this file except in compliance with the License.
-* You may obtain a copy of the License at
-*
-* http://www.opensource.org/licenses/eclipse-1.0.php or
-* http://www.nabucco-source.org/nabucco-license.html
-*
-* Unless required by applicable law or agreed to in writing, software
-* distributed under the License is distributed on an "AS IS" BASIS,
-* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-* See the License for the specific language governing permissions and
-* limitations under the License.
-*/
+ * Copyright 2012 PRODYNA AG
+ *
+ * Licensed under the Eclipse Public License (EPL), Version 1.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.opensource.org/licenses/eclipse-1.0.php or
+ * http://www.nabucco.org/License.html
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package org.nabucco.framework.base.facade.datatype.collection;
 
 import static org.junit.Assert.fail;
@@ -27,7 +27,6 @@ import org.junit.Before;
 import org.junit.Test;
 import org.nabucco.framework.base.facade.datatype.security.User;
 
-
 /**
  * NabuccoListTest
  * 
@@ -35,16 +34,16 @@ import org.nabucco.framework.base.facade.datatype.security.User;
  */
 public class NabuccoListTest {
 
-    private NabuccoList<User> userList;
+    private NabuccoListImpl<User> userList;
 
     @Before
     public void setUp() throws Exception {
-        this.userList = new NabuccoList<User>();
+        this.userList = new NabuccoListImpl<User>();
     }
 
     /**
      * Test method for
-     * {@link org.nabucco.framework.base.facade.datatype.collection.NabuccoList#add(org.nabucco.framework.base.facade.datatype.NType)}
+     * {@link org.nabucco.framework.base.facade.datatype.collection.NabuccoListImpl#add(org.nabucco.framework.base.facade.datatype.NType)}
      * .
      */
     @Test(expected = LazyInitializationException.class)
@@ -67,7 +66,7 @@ public class NabuccoListTest {
 
     /**
      * Test method for
-     * {@link org.nabucco.framework.base.facade.datatype.collection.NabuccoList#addAll(java.util.Collection)}
+     * {@link org.nabucco.framework.base.facade.datatype.collection.NabuccoListImpl#addAll(java.util.Collection)}
      * .
      */
     @Test(expected = LazyInitializationException.class)
@@ -87,7 +86,7 @@ public class NabuccoListTest {
 
     /**
      * Test method for
-     * {@link org.nabucco.framework.base.facade.datatype.collection.NabuccoList#clear()}.
+     * {@link org.nabucco.framework.base.facade.datatype.collection.NabuccoListImpl#clear()}.
      */
     @Test
     public void testClear() {
@@ -115,7 +114,7 @@ public class NabuccoListTest {
 
     /**
      * Test method for
-     * {@link org.nabucco.framework.base.facade.datatype.collection.NabuccoList#isEmpty()}.
+     * {@link org.nabucco.framework.base.facade.datatype.collection.NabuccoListImpl#isEmpty()}.
      */
     @Test
     public void testIsEmpty() {
@@ -130,7 +129,7 @@ public class NabuccoListTest {
 
     /**
      * Test method for
-     * {@link org.nabucco.framework.base.facade.datatype.collection.NabuccoList#remove(java.lang.Object)}
+     * {@link org.nabucco.framework.base.facade.datatype.collection.NabuccoListImpl#remove(java.lang.Object)}
      * .
      */
     @Test(expected = LazyInitializationException.class)
@@ -153,7 +152,7 @@ public class NabuccoListTest {
 
     /**
      * Test method for
-     * {@link org.nabucco.framework.base.facade.datatype.collection.NabuccoList#removeAll(java.util.Collection)}
+     * {@link org.nabucco.framework.base.facade.datatype.collection.NabuccoListImpl#removeAll(java.util.Collection)}
      * .
      */
     @Test(expected = LazyInitializationException.class)
@@ -173,7 +172,7 @@ public class NabuccoListTest {
 
     /**
      * Test method for
-     * {@link org.nabucco.framework.base.facade.datatype.collection.NabuccoList#retainAll(java.util.Collection)}
+     * {@link org.nabucco.framework.base.facade.datatype.collection.NabuccoListImpl#retainAll(java.util.Collection)}
      * .
      */
     @Test(expected = LazyInitializationException.class)
@@ -206,7 +205,7 @@ public class NabuccoListTest {
 
     /**
      * Test method for
-     * {@link org.nabucco.framework.base.facade.datatype.collection.NabuccoList#set(int, org.nabucco.framework.base.facade.datatype.NType)}
+     * {@link org.nabucco.framework.base.facade.datatype.collection.NabuccoListImpl#set(int, org.nabucco.framework.base.facade.datatype.NType)}
      * .
      */
     @Test
@@ -226,7 +225,7 @@ public class NabuccoListTest {
 
     /**
      * Test method for
-     * {@link org.nabucco.framework.base.facade.datatype.collection.NabuccoList#getState()}.
+     * {@link org.nabucco.framework.base.facade.datatype.collection.NabuccoListImpl#getState()}.
      */
     @Test
     public void testGetState() {
@@ -235,19 +234,19 @@ public class NabuccoListTest {
 
     /**
      * Test method for
-     * {@link org.nabucco.framework.base.facade.datatype.collection.NabuccoList#setState(org.nabucco.framework.base.facade.datatype.collection.NabuccoCollectionState)}
+     * {@link org.nabucco.framework.base.facade.datatype.collection.NabuccoListImpl#setState(org.nabucco.framework.base.facade.datatype.collection.NabuccoCollectionState)}
      * .
      */
     @Test
     public void testSetState() {
         Assert.assertEquals(NabuccoCollectionState.INITIALIZED, this.userList.getState());
-        this.userList = new NabuccoList<User>(NabuccoCollectionState.LAZY);
+        this.userList = new NabuccoListImpl<User>(NabuccoCollectionState.LAZY);
         Assert.assertEquals(NabuccoCollectionState.LAZY, this.userList.getState());
     }
 
     /**
      * Test method for
-     * {@link org.nabucco.framework.base.facade.datatype.collection.NabuccoList#clearAll()}.
+     * {@link org.nabucco.framework.base.facade.datatype.collection.NabuccoListImpl#clearAll()}.
      */
     @Test
     public void testClearAll() {
@@ -273,7 +272,7 @@ public class NabuccoListTest {
 
     /**
      * Test method for
-     * {@link org.nabucco.framework.base.facade.datatype.collection.NabuccoList#addWithoutAssignment(org.nabucco.framework.base.facade.datatype.NType)}
+     * {@link org.nabucco.framework.base.facade.datatype.collection.NabuccoListImpl#addWithoutAssignment(org.nabucco.framework.base.facade.datatype.NType)}
      * .
      */
     @Test
@@ -287,7 +286,7 @@ public class NabuccoListTest {
 
     /**
      * Test method for
-     * {@link org.nabucco.framework.base.facade.datatype.collection.NabuccoList#addAllWithoutAssignment(java.util.Collection)}
+     * {@link org.nabucco.framework.base.facade.datatype.collection.NabuccoListImpl#addAllWithoutAssignment(java.util.Collection)}
      * .
      */
     @Test
@@ -301,29 +300,30 @@ public class NabuccoListTest {
 
     /**
      * Test method for
-     * {@link org.nabucco.framework.base.facade.datatype.collection.NabuccoList#replace(org.nabucco.framework.base.facade.datatype.NType, org.nabucco.framework.base.facade.datatype.NType)}
+     * {@link org.nabucco.framework.base.facade.datatype.collection.NabuccoListImpl#replace(org.nabucco.framework.base.facade.datatype.NType, org.nabucco.framework.base.facade.datatype.NType)}
      * .
      */
     @Test
     public void testReplace() {
         User user = new User();
         user.setUsername("U1");
-        
+
         this.userList.add(user);
         Assert.assertTrue(this.userList.getAssignedList().contains(user));
         Assert.assertFalse(this.userList.getAssignedList().contains(new User()));
-        
+
         this.userList.replace(user, new User());
         Assert.assertFalse(this.userList.getAssignedList().contains(user));
         Assert.assertTrue(this.userList.getAssignedList().contains(new User()));
-        
+
         Assert.assertTrue(this.userList.contains(new User()));
         Assert.assertFalse(this.userList.contains(user));
     }
 
     /**
      * Test method for
-     * {@link org.nabucco.framework.base.facade.datatype.collection.NabuccoList#getAssignedList()}.
+     * {@link org.nabucco.framework.base.facade.datatype.collection.NabuccoListImpl#getAssignedList()}
+     * .
      */
     @Test
     public void testGetAssignedList() {
@@ -333,7 +333,8 @@ public class NabuccoListTest {
 
     /**
      * Test method for
-     * {@link org.nabucco.framework.base.facade.datatype.collection.NabuccoList#getUnassignedList()}.
+     * {@link org.nabucco.framework.base.facade.datatype.collection.NabuccoListImpl#getUnassignedList()}
+     * .
      */
     @Test
     public void testGetUnassignedList() {
@@ -343,21 +344,20 @@ public class NabuccoListTest {
 
     /**
      * Test method for
-     * {@link org.nabucco.framework.base.facade.datatype.collection.NabuccoList#reload()}.
+     * {@link org.nabucco.framework.base.facade.datatype.collection.NabuccoListImpl#reload()}.
      */
     @Test
     public void testReload() {
         this.userList.setState(NabuccoCollectionState.LAZY);
         Assert.assertEquals(NabuccoCollectionState.LAZY, this.userList.getState());
-        
+
         this.userList.reload();
         Assert.assertEquals(NabuccoCollectionState.EAGER, this.userList.getState());
     }
 
     /**
      * Test method for
-     * {@link org.nabucco.framework.base.facade.datatype.collection.NabuccoList#detach()}
-     * .
+     * {@link org.nabucco.framework.base.facade.datatype.collection.NabuccoListImpl#detach()} .
      */
     @Test
     public void testRemoveLazyCollection() {
@@ -371,7 +371,8 @@ public class NabuccoListTest {
 
     /**
      * Test method for
-     * {@link org.nabucco.framework.base.facade.datatype.collection.NabuccoList#cloneCollection()}.
+     * {@link org.nabucco.framework.base.facade.datatype.collection.NabuccoListImpl#cloneCollection()}
+     * .
      */
     @Test
     public void testCloneCollection() {
@@ -380,4 +381,33 @@ public class NabuccoListTest {
         Assert.assertNotSame(this.userList, clone);
     }
 
+    /**
+     * Test method for
+     * {@link org.nabucco.framework.base.facade.datatype.collection.NabuccoListImpl#filter(NabuccoCollectionFilter)}
+     * .
+     */
+    @Test
+    public void testFilter() {
+
+        User user1 = new User();
+        user1.setUsername("U1");
+        this.userList.add(user1);
+
+        User user2 = new User();
+        user2.setUsername("U2");
+        this.userList.add(user2);
+
+        NabuccoList<User> filteredList = this.userList.filter(new NabuccoCollectionFilter<User>() {
+
+            @Override
+            public boolean filter(User element) {
+                return element.getUsername().getValue().equals("U1");
+            }
+
+        });
+
+        Assert.assertNotSame(this.userList, filteredList);
+        Assert.assertEquals(2, this.userList.size());
+        Assert.assertEquals(1, filteredList.size());
+    }
 }

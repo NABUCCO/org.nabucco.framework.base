@@ -6,7 +6,7 @@
  * You may obtain a copy of the License at
  *
  * http://www.opensource.org/licenses/eclipse-1.0.php or
- * http://www.nabucco-source.org/nabucco-license.html
+ * http://nabuccosource.org/License.html
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -21,19 +21,35 @@ import org.nabucco.framework.base.facade.datatype.Description;
 import org.nabucco.framework.base.facade.datatype.Owner;
 import org.nabucco.framework.base.facade.datatype.StatusType;
 import org.nabucco.framework.base.facade.datatype.NabuccoDatatype;
+import org.nabucco.framework.base.facade.datatype.FunctionalIdentifier;
+import org.nabucco.framework.base.facade.datatype.code.Code;
 
 @Author			Dominic Trumpfheller
 @Company		PRODYNA AG
 @Date			2010-11-30
 @Version		1.0
+@Description	A Training in the Training Component
 public Datatype Training extends NabuccoDatatype {
 
+	@Description		The training owner.
+	private Basetype Owner[1] owner;
+
+	@Description		The training name.
 	private Basetype Name[1] name;
 	
-	private Basetype Description[1] description;
+	@Description		The training description.
+	private Basetype Description[0..1] description;
 	
-	private Basetype Owner[1] owner;
-	
+	@TechnicalProperty
+	@Default			ACTIVE
+	@Description		The training status type.
 	private Enumeration StatusType[1] statusType;
+	
+	@Description		The functional Training ID.
+	private Basetype FunctionalIdentifier[0..1] functionalId;
+
+	@Description		The functional Training type.
+	@CodePath			nabucco.business.training.functionaltype
+	private Datatype Code[0..1] functionalType;
 
 }

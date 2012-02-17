@@ -1,12 +1,12 @@
 /*
- * Copyright 2010 PRODYNA AG
+ * Copyright 2012 PRODYNA AG
  *
  * Licensed under the Eclipse Public License (EPL), Version 1.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
  * http://www.opensource.org/licenses/eclipse-1.0.php or
- * http://www.nabucco-source.org/nabucco-license.html
+ * http://www.nabucco.org/License.html
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -25,24 +25,45 @@ import org.nabucco.framework.base.facade.exception.NabuccoException;
  */
 public class ConnectionException extends NabuccoException {
 
-    // TODO: Generate!
-
     private static final long serialVersionUID = 1L;
 
+    /**
+     * Creates a new {@link ConnectionException} instance.
+     */
     public ConnectionException() {
         super();
     }
 
-    public ConnectionException(String message, Throwable throwable) {
-        super(message, throwable);
-    }
-
+    /**
+     * Creates a new {@link ConnectionException} instance.
+     * 
+     * @param messages
+     *            the error message
+     */
     public ConnectionException(String messages) {
         super(messages);
     }
 
-    public ConnectionException(Throwable throwable) {
-        super(throwable);
+    /**
+     * Creates a new {@link ConnectionException} instance.
+     * 
+     * @param cause
+     *            the error cause
+     */
+    public ConnectionException(Throwable cause) {
+        super(cause);
+    }
+
+    /**
+     * Creates a new {@link ConnectionException} instance.
+     * 
+     * @param message
+     *            the error message
+     * @param cause
+     *            the error cause
+     */
+    public ConnectionException(String message, Throwable cause) {
+        super(message, cause);
     }
 
 }

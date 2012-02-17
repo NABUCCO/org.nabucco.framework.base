@@ -1,12 +1,12 @@
 /*
- * Copyright 2010 PRODYNA AG
+ * Copyright 2012 PRODYNA AG
  *
  * Licensed under the Eclipse Public License (EPL), Version 1.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
  * http://www.opensource.org/licenses/eclipse-1.0.php or
- * http://www.nabucco-source.org/nabucco-license.html
+ * http://www.nabucco.org/License.html
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -41,6 +41,9 @@ import org.nabucco.framework.base.impl.service.interceptor.service.ServiceInterc
  */
 public class ServiceConnectorInterceptorStrategy implements ServiceInterceptorStrategy {
 
+    /** Flag indicating that a warning has already been logged. */
+    static boolean missingApplicationWarning = false;
+
     @Override
     public void beforeInvocation(InterceptorContext context, Service service, Method operation,
             ServiceRequest<?> request, NabuccoLogger logger) throws ServiceException {
@@ -48,12 +51,14 @@ public class ServiceConnectorInterceptorStrategy implements ServiceInterceptorSt
         Application application = NabuccoInstance.getInstance().getApplication();
 
         if (application == null) {
-            logger.warning("No application has been configured for NabuccoInstance.");
+            if (!ServiceConnectorInterceptorStrategy.missingApplicationWarning) {
+                logger.warning("No application has been configured for NabuccoInstance.");
+                ServiceConnectorInterceptorStrategy.missingApplicationWarning = true;
+            }
             return;
         }
 
-        ServiceOperationSignature signature = new ServiceOperationSignature(service, operation,
-                request);
+        ServiceOperationSignature signature = new ServiceOperationSignature(service, operation, request);
 
         for (Connector connector : application.getConnectors(ConnectorStrategy.BEFORE)) {
 
@@ -69,23 +74,25 @@ public class ServiceConnectorInterceptorStrategy implements ServiceInterceptorSt
 
     @Override
     public void afterInvocation(InterceptorContext context, Service service, Method operation,
-            ServiceRequest<?> request, ServiceResponse<?> response, NabuccoLogger logger,
-            Throwable exception) throws ServiceException {
+            ServiceRequest<?> request, ServiceResponse<?> response, NabuccoLogger logger, Throwable exception)
+            throws ServiceException {
 
         if (exception != null) {
-            logger.warning("Component connection failed. Cannot connect service operations when exception occurs.");
+            logger.debug("Component connection failed. Cannot connect service operations when exception occurs.");
             return;
         }
 
         Application application = NabuccoInstance.getInstance().getApplication();
 
         if (application == null) {
-            logger.warning("No application has been configured for NabuccoInstance.");
+            if (!ServiceConnectorInterceptorStrategy.missingApplicationWarning) {
+                logger.warning("No application has been configured for NabuccoInstance.");
+                ServiceConnectorInterceptorStrategy.missingApplicationWarning = true;
+            }
             return;
         }
 
-        ServiceOperationSignature signature = new ServiceOperationSignature(service, operation,
-                request);
+        ServiceOperationSignature signature = new ServiceOperationSignature(service, operation, request);
 
         for (Connector connector : application.getConnectors(ConnectorStrategy.AFTER)) {
 
@@ -113,8 +120,8 @@ public class ServiceConnectorInterceptorStrategy implements ServiceInterceptorSt
      * @throws ServiceException
      *             when the connection fails or the target service raises an exception
      */
-    private void connect(ServiceRequest<?> request, ServiceResponse<?> response,
-            ServiceConnector serviceConnector) throws ServiceException {
+    private void connect(ServiceRequest<?> request, ServiceResponse<?> response, ServiceConnector serviceConnector)
+            throws ServiceException {
         try {
             serviceConnector.setSourceRequest(request);
             serviceConnector.setSourceResponse(response);

@@ -1,12 +1,12 @@
 /*
- * Copyright 2010 PRODYNA AG
+ * Copyright 2012 PRODYNA AG
  *
  * Licensed under the Eclipse Public License (EPL), Version 1.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
  * http://www.opensource.org/licenses/eclipse-1.0.php or
- * http://www.nabucco-source.org/nabucco-license.html
+ * http://www.nabucco.org/License.html
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -23,8 +23,7 @@ import java.util.Arrays;
  * 
  * @author Nicolas Moser, PRODYNA AG
  */
-public abstract class NByteArray extends BasetypeSupport implements Basetype,
-        Comparable<NByteArray> {
+public abstract class NByteArray extends BasetypeSupport implements Basetype, Comparable<NByteArray> {
 
     private static final long serialVersionUID = 1L;
 
@@ -34,6 +33,7 @@ public abstract class NByteArray extends BasetypeSupport implements Basetype,
      * Default constructor
      */
     public NByteArray() {
+        this(null);
     }
 
     /**
@@ -43,12 +43,29 @@ public abstract class NByteArray extends BasetypeSupport implements Basetype,
      *            the value to initialize
      */
     public NByteArray(byte[] value) {
+        super(BasetypeType.BYTE_ARRAY);
         this.value = value;
     }
 
     @Override
     public byte[] getValue() {
         return value;
+    }
+
+    @Override
+    public String getValueAsString() {
+        if (this.value == null) {
+            return null;
+        }
+        return new String(this.value);
+    }
+
+    @Override
+    public void setValue(Object value) throws IllegalArgumentException {
+        if (value != null && !(value instanceof byte[])) {
+            throw new IllegalArgumentException("Cannot set value '" + value + "' to NByteArray.");
+        }
+        this.setValue((byte[]) value);
     }
 
     /**
@@ -68,7 +85,10 @@ public abstract class NByteArray extends BasetypeSupport implements Basetype,
      */
     @Override
     public String toString() {
-        return String.valueOf(value);
+        if (this.value == null) {
+            return null;
+        }
+        return new String(this.value);
     }
 
     @Override
@@ -137,11 +157,13 @@ public abstract class NByteArray extends BasetypeSupport implements Basetype,
     /**
      * Clones the properties of this basetype into the given basetype.
      * 
-     * @param basetype
+     * @param clone
      *            the cloned basetype
      */
     protected void cloneObject(NByteArray clone) {
-        clone.value = this.value;
+        if (this.value != null) {
+            clone.value = Arrays.copyOf(this.value, this.value.length);
+        }
     }
 
 }

@@ -1,22 +1,43 @@
 /*
- * NABUCCO Generator, Copyright (c) 2010, PRODYNA AG, Germany. All rights reserved.
+ * Copyright 2012 PRODYNA AG
+ *
+ * Licensed under the Eclipse Public License (EPL), Version 1.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.opensource.org/licenses/eclipse-1.0.php or
+ * http://www.nabucco.org/License.html
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 package org.nabucco.framework.base.facade.datatype.issuetracking;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import org.nabucco.framework.base.facade.datatype.Datatype;
 import org.nabucco.framework.base.facade.datatype.Description;
+import org.nabucco.framework.base.facade.datatype.Identifier;
 import org.nabucco.framework.base.facade.datatype.Key;
 import org.nabucco.framework.base.facade.datatype.NabuccoDatatype;
 import org.nabucco.framework.base.facade.datatype.Name;
 import org.nabucco.framework.base.facade.datatype.Owner;
 import org.nabucco.framework.base.facade.datatype.collection.NabuccoCollectionState;
 import org.nabucco.framework.base.facade.datatype.collection.NabuccoList;
+import org.nabucco.framework.base.facade.datatype.collection.NabuccoListImpl;
 import org.nabucco.framework.base.facade.datatype.issuetracking.IssueType;
 import org.nabucco.framework.base.facade.datatype.net.Url;
-import org.nabucco.framework.base.facade.datatype.property.BasetypeProperty;
-import org.nabucco.framework.base.facade.datatype.property.ListProperty;
 import org.nabucco.framework.base.facade.datatype.property.NabuccoProperty;
+import org.nabucco.framework.base.facade.datatype.property.NabuccoPropertyContainer;
+import org.nabucco.framework.base.facade.datatype.property.NabuccoPropertyDescriptor;
+import org.nabucco.framework.base.facade.datatype.property.PropertyAssociationType;
+import org.nabucco.framework.base.facade.datatype.property.PropertyCache;
+import org.nabucco.framework.base.facade.datatype.property.PropertyDescriptorSupport;
 
 /**
  * Project<p/>A Project<p/>
@@ -28,11 +49,24 @@ public class Project extends NabuccoDatatype implements Datatype {
 
     private static final long serialVersionUID = 1L;
 
-    private static final String[] PROPERTY_NAMES = { "name", "description", "key", "owner", "url",
-            "issueTypes" };
+    private static final String[] PROPERTY_CONSTRAINTS = { "l0,n;u0,n;m1,1;", "l0,255;u0,n;m1,1;", "l0,255;u0,n;m1,1;",
+            "l0,n;u0,n;m1,1;", "l3,12;u0,n;m1,1;", "l0,255;u0,n;m1,1;", "m0,n;" };
 
-    private static final String[] PROPERTY_CONSTRAINTS = { "l0,n;m1,1;", "l0,n;m1,1;",
-            "l0,n;m1,1;", "l0,n;m1,1;", "l0,n;m1,1;", "m0,n;" };
+    public static final String PROJECTID = "projectId";
+
+    public static final String NAME = "name";
+
+    public static final String DESCRIPTION = "description";
+
+    public static final String KEY = "key";
+
+    public static final String OWNER = "owner";
+
+    public static final String URL = "url";
+
+    public static final String ISSUETYPES = "issueTypes";
+
+    private Identifier projectId;
 
     private Name name;
 
@@ -44,9 +78,7 @@ public class Project extends NabuccoDatatype implements Datatype {
 
     private Url url;
 
-    private List<IssueType> issueTypes;
-
-    private Long issueTypesRefId;
+    private NabuccoList<IssueType> issueTypes;
 
     /** Constructs a new Project instance. */
     public Project() {
@@ -65,6 +97,9 @@ public class Project extends NabuccoDatatype implements Datatype {
      */
     protected void cloneObject(Project clone) {
         super.cloneObject(clone);
+        if ((this.getProjectId() != null)) {
+            clone.setProjectId(this.getProjectId().cloneObject());
+        }
         if ((this.getName() != null)) {
             clone.setName(this.getName().cloneObject());
         }
@@ -80,8 +115,8 @@ public class Project extends NabuccoDatatype implements Datatype {
         if ((this.getUrl() != null)) {
             clone.setUrl(this.getUrl().cloneObject());
         }
-        if ((this.issueTypes instanceof NabuccoList<?>)) {
-            clone.issueTypes = ((NabuccoList<IssueType>) this.issueTypes).cloneCollection();
+        if ((this.issueTypes != null)) {
+            clone.issueTypes = this.issueTypes.cloneCollection();
         }
     }
 
@@ -92,9 +127,9 @@ public class Project extends NabuccoDatatype implements Datatype {
      */
     List<IssueType> getIssueTypesJPA() {
         if ((this.issueTypes == null)) {
-            this.issueTypes = new NabuccoList<IssueType>(NabuccoCollectionState.LAZY);
+            this.issueTypes = new NabuccoListImpl<IssueType>(NabuccoCollectionState.LAZY);
         }
-        return ((NabuccoList<IssueType>) this.issueTypes).getDelegate();
+        return ((NabuccoListImpl<IssueType>) this.issueTypes).getDelegate();
     }
 
     /**
@@ -104,9 +139,34 @@ public class Project extends NabuccoDatatype implements Datatype {
      */
     void setIssueTypesJPA(List<IssueType> issueTypes) {
         if ((this.issueTypes == null)) {
-            this.issueTypes = new NabuccoList<IssueType>(NabuccoCollectionState.LAZY);
+            this.issueTypes = new NabuccoListImpl<IssueType>(NabuccoCollectionState.LAZY);
         }
-        ((NabuccoList<IssueType>) this.issueTypes).setDelegate(issueTypes);
+        ((NabuccoListImpl<IssueType>) this.issueTypes).setDelegate(issueTypes);
+    }
+
+    /**
+     * CreatePropertyContainer.
+     *
+     * @return the NabuccoPropertyContainer.
+     */
+    protected static NabuccoPropertyContainer createPropertyContainer() {
+        Map<String, NabuccoPropertyDescriptor> propertyMap = new HashMap<String, NabuccoPropertyDescriptor>();
+        propertyMap.putAll(PropertyCache.getInstance().retrieve(NabuccoDatatype.class).getPropertyMap());
+        propertyMap.put(PROJECTID, PropertyDescriptorSupport.createBasetype(PROJECTID, Identifier.class, 3,
+                PROPERTY_CONSTRAINTS[0], false));
+        propertyMap.put(NAME,
+                PropertyDescriptorSupport.createBasetype(NAME, Name.class, 4, PROPERTY_CONSTRAINTS[1], false));
+        propertyMap.put(DESCRIPTION, PropertyDescriptorSupport.createBasetype(DESCRIPTION, Description.class, 5,
+                PROPERTY_CONSTRAINTS[2], false));
+        propertyMap.put(KEY,
+                PropertyDescriptorSupport.createBasetype(KEY, Key.class, 6, PROPERTY_CONSTRAINTS[3], false));
+        propertyMap.put(OWNER,
+                PropertyDescriptorSupport.createBasetype(OWNER, Owner.class, 7, PROPERTY_CONSTRAINTS[4], false));
+        propertyMap.put(URL,
+                PropertyDescriptorSupport.createBasetype(URL, Url.class, 8, PROPERTY_CONSTRAINTS[5], false));
+        propertyMap.put(ISSUETYPES, PropertyDescriptorSupport.createCollection(ISSUETYPES, IssueType.class, 9,
+                PROPERTY_CONSTRAINTS[6], false, PropertyAssociationType.COMPOSITION));
+        return new NabuccoPropertyContainer(propertyMap);
     }
 
     @Override
@@ -115,21 +175,47 @@ public class Project extends NabuccoDatatype implements Datatype {
     }
 
     @Override
-    public List<NabuccoProperty<?>> getProperties() {
-        List<NabuccoProperty<?>> properties = super.getProperties();
-        properties.add(new BasetypeProperty<Name>(PROPERTY_NAMES[0], Name.class,
-                PROPERTY_CONSTRAINTS[0], this.name));
-        properties.add(new BasetypeProperty<Description>(PROPERTY_NAMES[1], Description.class,
-                PROPERTY_CONSTRAINTS[1], this.description));
-        properties.add(new BasetypeProperty<Key>(PROPERTY_NAMES[2], Key.class,
-                PROPERTY_CONSTRAINTS[2], this.key));
-        properties.add(new BasetypeProperty<Owner>(PROPERTY_NAMES[3], Owner.class,
-                PROPERTY_CONSTRAINTS[3], this.owner));
-        properties.add(new BasetypeProperty<Url>(PROPERTY_NAMES[4], Url.class,
-                PROPERTY_CONSTRAINTS[4], this.url));
-        properties.add(new ListProperty<IssueType>(PROPERTY_NAMES[5], IssueType.class,
-                PROPERTY_CONSTRAINTS[5], this.issueTypes));
+    public Set<NabuccoProperty> getProperties() {
+        Set<NabuccoProperty> properties = super.getProperties();
+        properties.add(super.createProperty(Project.getPropertyDescriptor(PROJECTID), this.projectId, null));
+        properties.add(super.createProperty(Project.getPropertyDescriptor(NAME), this.name, null));
+        properties.add(super.createProperty(Project.getPropertyDescriptor(DESCRIPTION), this.description, null));
+        properties.add(super.createProperty(Project.getPropertyDescriptor(KEY), this.key, null));
+        properties.add(super.createProperty(Project.getPropertyDescriptor(OWNER), this.owner, null));
+        properties.add(super.createProperty(Project.getPropertyDescriptor(URL), this.url, null));
+        properties.add(super.createProperty(Project.getPropertyDescriptor(ISSUETYPES), this.issueTypes, null));
         return properties;
+    }
+
+    @Override
+    @SuppressWarnings("unchecked")
+    public boolean setProperty(NabuccoProperty property) {
+        if (super.setProperty(property)) {
+            return true;
+        }
+        if ((property.getName().equals(PROJECTID) && (property.getType() == Identifier.class))) {
+            this.setProjectId(((Identifier) property.getInstance()));
+            return true;
+        } else if ((property.getName().equals(NAME) && (property.getType() == Name.class))) {
+            this.setName(((Name) property.getInstance()));
+            return true;
+        } else if ((property.getName().equals(DESCRIPTION) && (property.getType() == Description.class))) {
+            this.setDescription(((Description) property.getInstance()));
+            return true;
+        } else if ((property.getName().equals(KEY) && (property.getType() == Key.class))) {
+            this.setKey(((Key) property.getInstance()));
+            return true;
+        } else if ((property.getName().equals(OWNER) && (property.getType() == Owner.class))) {
+            this.setOwner(((Owner) property.getInstance()));
+            return true;
+        } else if ((property.getName().equals(URL) && (property.getType() == Url.class))) {
+            this.setUrl(((Url) property.getInstance()));
+            return true;
+        } else if ((property.getName().equals(ISSUETYPES) && (property.getType() == IssueType.class))) {
+            this.issueTypes = ((NabuccoList<IssueType>) property.getInstance());
+            return true;
+        }
+        return false;
     }
 
     @Override
@@ -147,6 +233,11 @@ public class Project extends NabuccoDatatype implements Datatype {
             return false;
         }
         final Project other = ((Project) obj);
+        if ((this.projectId == null)) {
+            if ((other.projectId != null))
+                return false;
+        } else if ((!this.projectId.equals(other.projectId)))
+            return false;
         if ((this.name == null)) {
             if ((other.name != null))
                 return false;
@@ -172,11 +263,6 @@ public class Project extends NabuccoDatatype implements Datatype {
                 return false;
         } else if ((!this.url.equals(other.url)))
             return false;
-        if ((this.issueTypesRefId == null)) {
-            if ((other.issueTypesRefId != null))
-                return false;
-        } else if ((!this.issueTypesRefId.equals(other.issueTypesRefId)))
-            return false;
         return true;
     }
 
@@ -184,29 +270,13 @@ public class Project extends NabuccoDatatype implements Datatype {
     public int hashCode() {
         final int PRIME = 31;
         int result = super.hashCode();
+        result = ((PRIME * result) + ((this.projectId == null) ? 0 : this.projectId.hashCode()));
         result = ((PRIME * result) + ((this.name == null) ? 0 : this.name.hashCode()));
         result = ((PRIME * result) + ((this.description == null) ? 0 : this.description.hashCode()));
         result = ((PRIME * result) + ((this.key == null) ? 0 : this.key.hashCode()));
         result = ((PRIME * result) + ((this.owner == null) ? 0 : this.owner.hashCode()));
         result = ((PRIME * result) + ((this.url == null) ? 0 : this.url.hashCode()));
-        result = ((PRIME * result) + ((this.issueTypesRefId == null) ? 0 : this.issueTypesRefId
-                .hashCode()));
         return result;
-    }
-
-    @Override
-    public String toString() {
-        StringBuilder appendable = new StringBuilder();
-        appendable.append("<Project>\n");
-        appendable.append(super.toString());
-        appendable.append((("<name>" + this.name) + "</name>\n"));
-        appendable.append((("<description>" + this.description) + "</description>\n"));
-        appendable.append((("<key>" + this.key) + "</key>\n"));
-        appendable.append((("<owner>" + this.owner) + "</owner>\n"));
-        appendable.append((("<url>" + this.url) + "</url>\n"));
-        appendable.append((("<issueTypesRefId>" + this.issueTypesRefId) + "</issueTypesRefId>\n"));
-        appendable.append("</Project>\n");
-        return appendable.toString();
     }
 
     @Override
@@ -214,6 +284,39 @@ public class Project extends NabuccoDatatype implements Datatype {
         Project clone = new Project();
         this.cloneObject(clone);
         return clone;
+    }
+
+    /**
+     * Missing description at method getProjectId.
+     *
+     * @return the Identifier.
+     */
+    public Identifier getProjectId() {
+        return this.projectId;
+    }
+
+    /**
+     * Missing description at method setProjectId.
+     *
+     * @param projectId the Identifier.
+     */
+    public void setProjectId(Identifier projectId) {
+        this.projectId = projectId;
+    }
+
+    /**
+     * Missing description at method setProjectId.
+     *
+     * @param projectId the Long.
+     */
+    public void setProjectId(Long projectId) {
+        if ((this.projectId == null)) {
+            if ((projectId == null)) {
+                return;
+            }
+            this.projectId = new Identifier();
+        }
+        this.projectId.setValue(projectId);
     }
 
     /**
@@ -241,6 +344,9 @@ public class Project extends NabuccoDatatype implements Datatype {
      */
     public void setName(String name) {
         if ((this.name == null)) {
+            if ((name == null)) {
+                return;
+            }
             this.name = new Name();
         }
         this.name.setValue(name);
@@ -271,6 +377,9 @@ public class Project extends NabuccoDatatype implements Datatype {
      */
     public void setDescription(String description) {
         if ((this.description == null)) {
+            if ((description == null)) {
+                return;
+            }
             this.description = new Description();
         }
         this.description.setValue(description);
@@ -301,6 +410,9 @@ public class Project extends NabuccoDatatype implements Datatype {
      */
     public void setKey(String key) {
         if ((this.key == null)) {
+            if ((key == null)) {
+                return;
+            }
             this.key = new Key();
         }
         this.key.setValue(key);
@@ -331,6 +443,9 @@ public class Project extends NabuccoDatatype implements Datatype {
      */
     public void setOwner(String owner) {
         if ((this.owner == null)) {
+            if ((owner == null)) {
+                return;
+            }
             this.owner = new Owner();
         }
         this.owner.setValue(owner);
@@ -361,6 +476,9 @@ public class Project extends NabuccoDatatype implements Datatype {
      */
     public void setUrl(String url) {
         if ((this.url == null)) {
+            if ((url == null)) {
+                return;
+            }
             this.url = new Url();
         }
         this.url.setValue(url);
@@ -369,30 +487,31 @@ public class Project extends NabuccoDatatype implements Datatype {
     /**
      * Missing description at method getIssueTypes.
      *
-     * @return the List<IssueType>.
+     * @return the NabuccoList<IssueType>.
      */
-    public List<IssueType> getIssueTypes() {
+    public NabuccoList<IssueType> getIssueTypes() {
         if ((this.issueTypes == null)) {
-            this.issueTypes = new NabuccoList<IssueType>(NabuccoCollectionState.INITIALIZED);
+            this.issueTypes = new NabuccoListImpl<IssueType>(NabuccoCollectionState.INITIALIZED);
         }
         return this.issueTypes;
     }
 
     /**
-     * Getter for the IssueTypesRefId.
+     * Getter for the PropertyDescriptor.
      *
-     * @return the Long.
+     * @param propertyName the String.
+     * @return the NabuccoPropertyDescriptor.
      */
-    public Long getIssueTypesRefId() {
-        return this.issueTypesRefId;
+    public static NabuccoPropertyDescriptor getPropertyDescriptor(String propertyName) {
+        return PropertyCache.getInstance().retrieve(Project.class).getProperty(propertyName);
     }
 
     /**
-     * Setter for the IssueTypesRefId.
+     * Getter for the PropertyDescriptorList.
      *
-     * @param issueTypesRefId the Long.
+     * @return the List<NabuccoPropertyDescriptor>.
      */
-    public void setIssueTypesRefId(Long issueTypesRefId) {
-        this.issueTypesRefId = issueTypesRefId;
+    public static List<NabuccoPropertyDescriptor> getPropertyDescriptorList() {
+        return PropertyCache.getInstance().retrieve(Project.class).getAllProperties();
     }
 }

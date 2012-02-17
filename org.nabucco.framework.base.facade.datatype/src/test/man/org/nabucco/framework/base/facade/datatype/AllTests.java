@@ -1,12 +1,12 @@
 /*
- * Copyright 2010 PRODYNA AG
+ * Copyright 2012 PRODYNA AG
  *
  * Licensed under the Eclipse Public License (EPL), Version 1.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
  * http://www.opensource.org/licenses/eclipse-1.0.php or
- * http://www.nabucco-source.org/nabucco-license.html
+ * http://www.nabucco.org/License.html
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -28,11 +28,15 @@ import org.junit.runners.Suite;
 @Suite.SuiteClasses({
 
 org.nabucco.framework.base.facade.datatype.collection.AllTests.class,
+        org.nabucco.framework.base.facade.datatype.componentrelation.AllTests.class,
+        org.nabucco.framework.base.facade.datatype.enumeration.AllTests.class,
+        org.nabucco.framework.base.facade.datatype.extension.AllTests.class,
+        org.nabucco.framework.base.facade.datatype.numbers.AllTests.class,
         org.nabucco.framework.base.facade.datatype.object.AllTests.class,
+        org.nabucco.framework.base.facade.datatype.property.AllTests.class,
+        org.nabucco.framework.base.facade.datatype.serialization.AllTests.class,
         org.nabucco.framework.base.facade.datatype.validation.AllTests.class,
-        org.nabucco.framework.base.facade.datatype.visitor.AllTests.class
-
-})
+        org.nabucco.framework.base.facade.datatype.visitor.AllTests.class })
 public class AllTests {
 
 }

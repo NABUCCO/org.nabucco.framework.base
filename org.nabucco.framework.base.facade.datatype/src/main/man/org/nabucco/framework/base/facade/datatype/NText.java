@@ -1,12 +1,12 @@
 /*
- * Copyright 2010 PRODYNA AG
+ * Copyright 2012 PRODYNA AG
  *
  * Licensed under the Eclipse Public License (EPL), Version 1.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
  * http://www.opensource.org/licenses/eclipse-1.0.php or
- * http://www.nabucco-source.org/nabucco-license.html
+ * http://www.nabucco.org/License.html
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -18,6 +18,8 @@ package org.nabucco.framework.base.facade.datatype;
 
 /**
  * NText
+ * <p/>
+ * Represents a large text with a size > 255.
  * 
  * @author Nicolas Moser, PRODYNA AG
  */
@@ -31,6 +33,7 @@ public abstract class NText extends BasetypeSupport implements Basetype, Compara
      * Default constructor
      */
     public NText() {
+        this(null);
     }
 
     /**
@@ -40,7 +43,17 @@ public abstract class NText extends BasetypeSupport implements Basetype, Compara
      *            the value to initialize
      */
     public NText(String value) {
+        super(BasetypeType.TEXT);
+
         this.value = value;
+    }
+
+    @Override
+    public void setValue(Object value) throws IllegalArgumentException {
+        if (value != null && !(value instanceof String)) {
+            throw new IllegalArgumentException("Cannot set value '" + value + "' to NText.");
+        }
+        this.setValue((String) value);
     }
 
     @Override
@@ -59,7 +72,7 @@ public abstract class NText extends BasetypeSupport implements Basetype, Compara
     }
 
     /**
-     * Returns a <code>String</code> object representing this <code>NString</code>'s value.
+     * Returns a <code>String</code> object representing this <code>NText</code>'s value.
      * 
      * @return a string representation of the value of this object in base&nbsp;10.
      */
@@ -117,7 +130,7 @@ public abstract class NText extends BasetypeSupport implements Basetype, Compara
     /**
      * Clones the properties of this NText into the given NText.
      * 
-     * @param basetype
+     * @param clone
      *            the cloned NText
      */
     protected void cloneObject(NText clone) {

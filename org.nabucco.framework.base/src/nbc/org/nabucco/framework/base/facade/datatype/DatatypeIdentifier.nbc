@@ -1,0 +1,44 @@
+/*
+ * Copyright 2010 PRODYNA AG
+ *
+ * Licensed under the Eclipse Public License (EPL), Version 1.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.opensource.org/licenses/eclipse-1.0.php or
+ * http://nabuccosource.org/License.html
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+package org.nabucco.framework.base.facade.datatype;
+
+import org.nabucco.framework.base.facade.datatype.FullQualifiedClassName;
+import org.nabucco.framework.base.facade.datatype.Identifier;
+import org.nabucco.framework.base.facade.datatype.NabuccoDatatype;
+import org.nabucco.framework.base.facade.datatype.Name;
+
+@Author			Markus Jorroch
+@Company		PRODYNA AG
+@Date			2011-01-29
+@Version		1.0
+@Description	Identifies a datatype.
+@Version		1.0
+public Datatype DatatypeIdentifier extends NabuccoDatatype {
+
+	@Description	The datatype ID.
+	private Basetype Identifier[1] identifier;
+	
+	@Description	The datatype classname.
+	private Basetype FullQualifiedClassName[0..1] fullQualifiedClassName;
+	
+	@Description	The datatype component name.
+	private Basetype Name[0..1] component;
+	
+	@Description	The datatype descriptor.
+	private Basetype Name[0..1] descriptor;
+	
+}

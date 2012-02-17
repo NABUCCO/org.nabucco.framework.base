@@ -1,12 +1,12 @@
 /*
- * Copyright 2010 PRODYNA AG
+ * Copyright 2012 PRODYNA AG
  *
  * Licensed under the Eclipse Public License (EPL), Version 1.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
  * http://www.opensource.org/licenses/eclipse-1.0.php or
- * http://www.nabucco-source.org/nabucco-license.html
+ * http://www.nabucco.org/License.html
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -35,8 +35,13 @@ import org.nabucco.framework.base.facade.datatype.logger.NabuccoLoggingFactory;
  */
 public class MessageFormatter {
 
-    private static NabuccoLogger logger = NabuccoLoggingFactory.getInstance().getLogger(
-            MessageFormat.class);
+    private static NabuccoLogger logger = NabuccoLoggingFactory.getInstance().getLogger(MessageFormat.class);
+
+    /**
+     * Private constructor must not be invoked.
+     */
+    private MessageFormatter() {
+    }
 
     /**
      * Formats the message in the format "text text {parameter} {another}" with the objects in the
@@ -64,8 +69,7 @@ public class MessageFormatter {
      *            the input-local
      * @return the formatted message
      */
-    public static String format(String plainMessage, Map<String, ? extends Serializable> params,
-            Locale locale) {
+    public static String format(String plainMessage, Map<String, ? extends Serializable> params, Locale locale) {
         String out = plainMessage;
         try {
             String[] parameterKeysMessage = getParameterKeys(plainMessage);
@@ -86,8 +90,7 @@ public class MessageFormatter {
      * 
      * @param plainMessage
      *            the message in format one
-     * @param parameterKeysMessage
-     *            the keys to substitute
+     * 
      * @return the message in java-message-format
      */
     private static String prepareForMessageFormat(String plainMessage) {
@@ -128,8 +131,7 @@ public class MessageFormatter {
      *            the param-map
      * @return the parameter-values in the correct ordering
      */
-    private static Object[] getParameterValues(String[] parameterKeys,
-            Map<String, ? extends Serializable> params) {
+    private static Object[] getParameterValues(String[] parameterKeys, Map<String, ? extends Serializable> params) {
         Object[] out = new Object[parameterKeys.length];
         for (int i = 0; i < parameterKeys.length; i++) {
             if (params.containsKey(parameterKeys[i])) {
@@ -182,10 +184,17 @@ public class MessageFormatter {
         return params.toArray(new String[params.size()]);
     }
 
-    /** Escapes a given string for message-format. */
-    private static String escape(String s) {
+    /**
+     * Escapes a given string for message-format.
+     * 
+     * @param string
+     *            the original string
+     * 
+     * @return the escaped string
+     */
+    private static String escape(String string) {
         StringBuilder out = new StringBuilder();
-        char[] chs = s.toCharArray();
+        char[] chs = string.toCharArray();
         for (char c : chs) {
             if (c == '\'') {
                 out.append('\'');

@@ -1,0 +1,57 @@
+/*
+* Copyright 2011 PRODYNA AG
+*
+* Licensed under the Eclipse Public License (EPL), Version 1.0 (the "License");
+* you may not use this file except in compliance with the License.
+* You may obtain a copy of the License at
+*
+* http://www.opensource.org/licenses/eclipse-1.0.php or
+* http://nabuccosource.org/License.html
+*
+* Unless required by applicable law or agreed to in writing, software
+* distributed under the License is distributed on an "AS IS" BASIS,
+* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+* See the License for the specific language governing permissions and
+* limitations under the License.
+*/
+package org.nabucco.framework.base.facade.datatype.extension.schema.setup; 
+
+import org.nabucco.framework.base.facade.datatype.extension.NabuccoExtensionComposite;
+import org.nabucco.framework.base.facade.datatype.extension.property.BooleanProperty;
+import org.nabucco.framework.base.facade.datatype.extension.property.EnumerationProperty;
+import org.nabucco.framework.base.facade.datatype.extension.property.StringProperty;
+
+@Author         Nicolas Moser
+@Company        PRODYNA AG
+@Date           2011-06-01
+@Version        1.0
+@Description    Configuration for sequence generators.
+public Datatype SequenceGeneratorExtension extends NabuccoExtensionComposite {
+
+	@Description		The generator type.
+	private Datatype EnumerationProperty[1] type;
+	
+	@Description		The generator id.
+	private Datatype StringProperty[1] id;
+
+	@Description		The sequence start value.
+	private Datatype StringProperty[0..1] start;
+
+	@Description		When max value is reached, reset to start value.
+	private Datatype BooleanProperty[0..1] overflow; 
+
+	@Description		The sequence step size.
+	private Datatype StringProperty[0..1] steps; 
+
+	@Description		The amount of numbers.
+	private Datatype StringProperty[0..1] length; 
+
+	@Description		Fill the number with leading zeros.
+	private Datatype BooleanProperty[0..1] leadingZeros; 
+
+	@Description		Reset to start value by a triggering event.
+	private Datatype EnumerationProperty[0..1] autoReset; 
+
+	@Description		The date pattern.
+	private Datatype StringProperty[0..1] pattern; 
+}

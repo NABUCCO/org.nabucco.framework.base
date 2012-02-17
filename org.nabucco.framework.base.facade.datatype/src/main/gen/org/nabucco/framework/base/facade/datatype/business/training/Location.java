@@ -1,19 +1,38 @@
 /*
- * NABUCCO Generator, Copyright (c) 2010, PRODYNA AG, Germany. All rights reserved.
+ * Copyright 2012 PRODYNA AG
+ *
+ * Licensed under the Eclipse Public License (EPL), Version 1.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.opensource.org/licenses/eclipse-1.0.php or
+ * http://www.nabucco.org/License.html
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 package org.nabucco.framework.base.facade.datatype.business.training;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import org.nabucco.framework.base.facade.datatype.Datatype;
 import org.nabucco.framework.base.facade.datatype.Description;
 import org.nabucco.framework.base.facade.datatype.NabuccoDatatype;
 import org.nabucco.framework.base.facade.datatype.Name;
 import org.nabucco.framework.base.facade.datatype.Owner;
-import org.nabucco.framework.base.facade.datatype.property.BasetypeProperty;
 import org.nabucco.framework.base.facade.datatype.property.NabuccoProperty;
+import org.nabucco.framework.base.facade.datatype.property.NabuccoPropertyContainer;
+import org.nabucco.framework.base.facade.datatype.property.NabuccoPropertyDescriptor;
+import org.nabucco.framework.base.facade.datatype.property.PropertyCache;
+import org.nabucco.framework.base.facade.datatype.property.PropertyDescriptorSupport;
 
 /**
- * Location
+ * Location<p/>Location of a Training.<p/>
  *
  * @version 1.0
  * @author Dominic Trumpfheller, PRODYNA AG, 2010-11-30
@@ -22,15 +41,22 @@ public class Location extends NabuccoDatatype implements Datatype {
 
     private static final long serialVersionUID = 1L;
 
-    private static final String[] PROPERTY_NAMES = { "name", "description", "owner" };
+    private static final String[] PROPERTY_CONSTRAINTS = { "l3,12;u0,n;m1,1;", "l0,255;u0,n;m1,1;", "l0,255;u0,n;m0,1;" };
 
-    private static final String[] PROPERTY_CONSTRAINTS = { "l0,n;m1,1;", "l0,n;m1,1;", "l0,n;m1,1;" };
+    public static final String OWNER = "owner";
 
+    public static final String NAME = "name";
+
+    public static final String DESCRIPTION = "description";
+
+    /** The owner of the location. */
+    private Owner owner;
+
+    /** The name of the location. */
     private Name name;
 
+    /** The description of the location. */
     private Description description;
-
-    private Owner owner;
 
     /** Constructs a new Location instance. */
     public Location() {
@@ -49,15 +75,32 @@ public class Location extends NabuccoDatatype implements Datatype {
      */
     protected void cloneObject(Location clone) {
         super.cloneObject(clone);
+        if ((this.getOwner() != null)) {
+            clone.setOwner(this.getOwner().cloneObject());
+        }
         if ((this.getName() != null)) {
             clone.setName(this.getName().cloneObject());
         }
         if ((this.getDescription() != null)) {
             clone.setDescription(this.getDescription().cloneObject());
         }
-        if ((this.getOwner() != null)) {
-            clone.setOwner(this.getOwner().cloneObject());
-        }
+    }
+
+    /**
+     * CreatePropertyContainer.
+     *
+     * @return the NabuccoPropertyContainer.
+     */
+    protected static NabuccoPropertyContainer createPropertyContainer() {
+        Map<String, NabuccoPropertyDescriptor> propertyMap = new HashMap<String, NabuccoPropertyDescriptor>();
+        propertyMap.putAll(PropertyCache.getInstance().retrieve(NabuccoDatatype.class).getPropertyMap());
+        propertyMap.put(OWNER,
+                PropertyDescriptorSupport.createBasetype(OWNER, Owner.class, 3, PROPERTY_CONSTRAINTS[0], false));
+        propertyMap.put(NAME,
+                PropertyDescriptorSupport.createBasetype(NAME, Name.class, 4, PROPERTY_CONSTRAINTS[1], false));
+        propertyMap.put(DESCRIPTION, PropertyDescriptorSupport.createBasetype(DESCRIPTION, Description.class, 5,
+                PROPERTY_CONSTRAINTS[2], false));
+        return new NabuccoPropertyContainer(propertyMap);
     }
 
     @Override
@@ -66,15 +109,30 @@ public class Location extends NabuccoDatatype implements Datatype {
     }
 
     @Override
-    public List<NabuccoProperty<?>> getProperties() {
-        List<NabuccoProperty<?>> properties = super.getProperties();
-        properties.add(new BasetypeProperty<Name>(PROPERTY_NAMES[0], Name.class,
-                PROPERTY_CONSTRAINTS[0], this.name));
-        properties.add(new BasetypeProperty<Description>(PROPERTY_NAMES[1], Description.class,
-                PROPERTY_CONSTRAINTS[1], this.description));
-        properties.add(new BasetypeProperty<Owner>(PROPERTY_NAMES[2], Owner.class,
-                PROPERTY_CONSTRAINTS[2], this.owner));
+    public Set<NabuccoProperty> getProperties() {
+        Set<NabuccoProperty> properties = super.getProperties();
+        properties.add(super.createProperty(Location.getPropertyDescriptor(OWNER), this.owner, null));
+        properties.add(super.createProperty(Location.getPropertyDescriptor(NAME), this.name, null));
+        properties.add(super.createProperty(Location.getPropertyDescriptor(DESCRIPTION), this.description, null));
         return properties;
+    }
+
+    @Override
+    public boolean setProperty(NabuccoProperty property) {
+        if (super.setProperty(property)) {
+            return true;
+        }
+        if ((property.getName().equals(OWNER) && (property.getType() == Owner.class))) {
+            this.setOwner(((Owner) property.getInstance()));
+            return true;
+        } else if ((property.getName().equals(NAME) && (property.getType() == Name.class))) {
+            this.setName(((Name) property.getInstance()));
+            return true;
+        } else if ((property.getName().equals(DESCRIPTION) && (property.getType() == Description.class))) {
+            this.setDescription(((Description) property.getInstance()));
+            return true;
+        }
+        return false;
     }
 
     @Override
@@ -92,6 +150,11 @@ public class Location extends NabuccoDatatype implements Datatype {
             return false;
         }
         final Location other = ((Location) obj);
+        if ((this.owner == null)) {
+            if ((other.owner != null))
+                return false;
+        } else if ((!this.owner.equals(other.owner)))
+            return false;
         if ((this.name == null)) {
             if ((other.name != null))
                 return false;
@@ -102,11 +165,6 @@ public class Location extends NabuccoDatatype implements Datatype {
                 return false;
         } else if ((!this.description.equals(other.description)))
             return false;
-        if ((this.owner == null)) {
-            if ((other.owner != null))
-                return false;
-        } else if ((!this.owner.equals(other.owner)))
-            return false;
         return true;
     }
 
@@ -114,22 +172,10 @@ public class Location extends NabuccoDatatype implements Datatype {
     public int hashCode() {
         final int PRIME = 31;
         int result = super.hashCode();
+        result = ((PRIME * result) + ((this.owner == null) ? 0 : this.owner.hashCode()));
         result = ((PRIME * result) + ((this.name == null) ? 0 : this.name.hashCode()));
         result = ((PRIME * result) + ((this.description == null) ? 0 : this.description.hashCode()));
-        result = ((PRIME * result) + ((this.owner == null) ? 0 : this.owner.hashCode()));
         return result;
-    }
-
-    @Override
-    public String toString() {
-        StringBuilder appendable = new StringBuilder();
-        appendable.append("<Location>\n");
-        appendable.append(super.toString());
-        appendable.append((("<name>" + this.name) + "</name>\n"));
-        appendable.append((("<description>" + this.description) + "</description>\n"));
-        appendable.append((("<owner>" + this.owner) + "</owner>\n"));
-        appendable.append("</Location>\n");
-        return appendable.toString();
     }
 
     @Override
@@ -140,67 +186,7 @@ public class Location extends NabuccoDatatype implements Datatype {
     }
 
     /**
-     * Missing description at method getName.
-     *
-     * @return the Name.
-     */
-    public Name getName() {
-        return this.name;
-    }
-
-    /**
-     * Missing description at method setName.
-     *
-     * @param name the Name.
-     */
-    public void setName(Name name) {
-        this.name = name;
-    }
-
-    /**
-     * Missing description at method setName.
-     *
-     * @param name the String.
-     */
-    public void setName(String name) {
-        if ((this.name == null)) {
-            this.name = new Name();
-        }
-        this.name.setValue(name);
-    }
-
-    /**
-     * Missing description at method getDescription.
-     *
-     * @return the Description.
-     */
-    public Description getDescription() {
-        return this.description;
-    }
-
-    /**
-     * Missing description at method setDescription.
-     *
-     * @param description the Description.
-     */
-    public void setDescription(Description description) {
-        this.description = description;
-    }
-
-    /**
-     * Missing description at method setDescription.
-     *
-     * @param description the String.
-     */
-    public void setDescription(String description) {
-        if ((this.description == null)) {
-            this.description = new Description();
-        }
-        this.description.setValue(description);
-    }
-
-    /**
-     * Missing description at method getOwner.
+     * The owner of the location.
      *
      * @return the Owner.
      */
@@ -209,7 +195,7 @@ public class Location extends NabuccoDatatype implements Datatype {
     }
 
     /**
-     * Missing description at method setOwner.
+     * The owner of the location.
      *
      * @param owner the Owner.
      */
@@ -218,14 +204,102 @@ public class Location extends NabuccoDatatype implements Datatype {
     }
 
     /**
-     * Missing description at method setOwner.
+     * The owner of the location.
      *
      * @param owner the String.
      */
     public void setOwner(String owner) {
         if ((this.owner == null)) {
+            if ((owner == null)) {
+                return;
+            }
             this.owner = new Owner();
         }
         this.owner.setValue(owner);
+    }
+
+    /**
+     * The name of the location.
+     *
+     * @return the Name.
+     */
+    public Name getName() {
+        return this.name;
+    }
+
+    /**
+     * The name of the location.
+     *
+     * @param name the Name.
+     */
+    public void setName(Name name) {
+        this.name = name;
+    }
+
+    /**
+     * The name of the location.
+     *
+     * @param name the String.
+     */
+    public void setName(String name) {
+        if ((this.name == null)) {
+            if ((name == null)) {
+                return;
+            }
+            this.name = new Name();
+        }
+        this.name.setValue(name);
+    }
+
+    /**
+     * The description of the location.
+     *
+     * @return the Description.
+     */
+    public Description getDescription() {
+        return this.description;
+    }
+
+    /**
+     * The description of the location.
+     *
+     * @param description the Description.
+     */
+    public void setDescription(Description description) {
+        this.description = description;
+    }
+
+    /**
+     * The description of the location.
+     *
+     * @param description the String.
+     */
+    public void setDescription(String description) {
+        if ((this.description == null)) {
+            if ((description == null)) {
+                return;
+            }
+            this.description = new Description();
+        }
+        this.description.setValue(description);
+    }
+
+    /**
+     * Getter for the PropertyDescriptor.
+     *
+     * @param propertyName the String.
+     * @return the NabuccoPropertyDescriptor.
+     */
+    public static NabuccoPropertyDescriptor getPropertyDescriptor(String propertyName) {
+        return PropertyCache.getInstance().retrieve(Location.class).getProperty(propertyName);
+    }
+
+    /**
+     * Getter for the PropertyDescriptorList.
+     *
+     * @return the List<NabuccoPropertyDescriptor>.
+     */
+    public static List<NabuccoPropertyDescriptor> getPropertyDescriptorList() {
+        return PropertyCache.getInstance().retrieve(Location.class).getAllProperties();
     }
 }

@@ -1,0 +1,20 @@
+/*
+ *  PRODYNA NABUCCO
+ *  Copyright 2010, PRODYNA AG
+ */
+package org.nabucco.framework.base.facade.datatype.extension.schema.template; 
+
+import org.nabucco.framework.base.facade.datatype.NabuccoDatatype;
+import org.nabucco.framework.base.facade.datatype.extension.property.StringProperty;
+
+@Author         Holger Librenz
+@Company        PRODYNA AG
+@Date           2011-03-29
+@Version        1.2
+@Description    Spoken in Component Pattern speach, this is our Component
+public abstract Datatype TemplateStructureItem extends NabuccoDatatype {
+
+	@Description	The "id" attribute value of any template structure element
+	private Datatype StringProperty[0..1] itemId;
+
+}

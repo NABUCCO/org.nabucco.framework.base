@@ -1,10 +1,21 @@
 /*
- * NABUCCO Generator, Copyright (c) 2010, PRODYNA AG, Germany. All rights reserved.
+ * Copyright 2012 PRODYNA AG
+ *
+ * Licensed under the Eclipse Public License (EPL), Version 1.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.opensource.org/licenses/eclipse-1.0.php or
+ * http://www.nabucco.org/License.html
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 package org.nabucco.framework.base.facade.exception.service;
 
-import java.util.HashMap;
-import java.util.Map;
 import org.nabucco.framework.base.facade.exception.NabuccoException;
 
 /**
@@ -17,23 +28,9 @@ public class ServiceException extends NabuccoException {
 
     private static final long serialVersionUID = 1L;
 
-    private Map<String, String> parameterMap = new HashMap<String, String>();
-
-    private String serviceId;
-
     /** Constructs a new ServiceException instance. */
     public ServiceException() {
         super();
-    }
-
-    /**
-     * Constructs a new ServiceException instance.
-     *
-     * @param throwable the Throwable.
-     * @param message the String.
-     */
-    public ServiceException(String message, Throwable throwable) {
-        super(message, throwable);
     }
 
     /**
@@ -48,36 +45,19 @@ public class ServiceException extends NabuccoException {
     /**
      * Constructs a new ServiceException instance.
      *
-     * @param throwable the Throwable.
+     * @param cause the Throwable.
      */
-    public ServiceException(Throwable throwable) {
-        super(throwable);
+    public ServiceException(Throwable cause) {
+        super(cause);
     }
 
     /**
-     * Getter for the Parameters.
+     * Constructs a new ServiceException instance.
      *
-     * @return the Map<String, String>.
+     * @param cause the Throwable.
+     * @param message the String.
      */
-    public Map<String, String> getParameters() {
-        return new HashMap<String, String>(this.parameterMap);
-    }
-
-    /**
-     * Getter for the ServiceId.
-     *
-     * @return the String.
-     */
-    public String getServiceId() {
-        return this.serviceId;
-    }
-
-    /**
-     * Setter for the ServiceId.
-     *
-     * @param serviceId the String.
-     */
-    public void setServiceId(String serviceId) {
-        this.serviceId = serviceId;
+    public ServiceException(String message, Throwable cause) {
+        super(message, cause);
     }
 }

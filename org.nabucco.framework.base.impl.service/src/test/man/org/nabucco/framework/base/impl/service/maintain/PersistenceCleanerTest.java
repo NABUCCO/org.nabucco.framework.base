@@ -1,12 +1,12 @@
 /*
- * Copyright 2010 PRODYNA AG
+ * Copyright 2012 PRODYNA AG
  *
  * Licensed under the Eclipse Public License (EPL), Version 1.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
  * http://www.opensource.org/licenses/eclipse-1.0.php or
- * http://www.nabucco-source.org/nabucco-license.html
+ * http://www.nabucco.org/License.html
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -18,8 +18,9 @@ package org.nabucco.framework.base.impl.service.maintain;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.LinkedHashSet;
 import java.util.LinkedList;
-import java.util.List;
+import java.util.Set;
 
 import org.junit.After;
 import org.junit.Assert;
@@ -27,9 +28,10 @@ import org.junit.Before;
 import org.junit.Test;
 import org.nabucco.framework.base.facade.datatype.DatatypeState;
 import org.nabucco.framework.base.facade.datatype.collection.NabuccoCollectionState;
-import org.nabucco.framework.base.facade.datatype.collection.NabuccoList;
-import org.nabucco.framework.base.facade.datatype.property.ListProperty;
+import org.nabucco.framework.base.facade.datatype.collection.NabuccoListImpl;
 import org.nabucco.framework.base.facade.datatype.property.NabuccoProperty;
+import org.nabucco.framework.base.facade.datatype.property.PropertyAssociationType;
+import org.nabucco.framework.base.facade.datatype.property.PropertyDescriptorSupport;
 import org.nabucco.framework.base.facade.datatype.security.User;
 
 /**
@@ -57,8 +59,8 @@ public class PersistenceCleanerTest {
         Parent parent = new Parent();
         parent.setDatatypeState(DatatypeState.INITIALIZED);
 
-        NabuccoList<Child> children = parent.getChildren();
-        
+        NabuccoListImpl<Child> children = parent.getChildren();
+
         Assert.assertEquals(NabuccoCollectionState.EAGER, children.getState());
         Assert.assertSame(LinkedList.class, children.getDelegate().getClass());
 
@@ -67,7 +69,7 @@ public class PersistenceCleanerTest {
         Assert.assertEquals(NabuccoCollectionState.EAGER, children.getState());
         Assert.assertSame(ArrayList.class, children.getDelegate().getClass());
         Assert.assertSame(1, children.getDelegate().size());
-        
+
         // Simulate persistence operation!
         children.setState(NabuccoCollectionState.LAZY);
 
@@ -83,19 +85,20 @@ public class PersistenceCleanerTest {
 
         private static final long serialVersionUID = 1L;
 
-        private NabuccoList<Child> children;
+        private NabuccoListImpl<Child> children;
 
         public Parent() {
-            children = new NabuccoList<PersistenceCleanerTest.Child>();
+            children = new NabuccoListImpl<PersistenceCleanerTest.Child>();
             children.setDelegate(new LinkedList<PersistenceCleanerTest.Child>());
             children.add(new Child());
         }
 
         @Override
-        public List<NabuccoProperty<?>> getProperties() {
-            List<NabuccoProperty<?>> properties = new ArrayList<NabuccoProperty<?>>();
-
-            properties.add(new ListProperty<Child>("child", Child.class, "", children));
+        public Set<NabuccoProperty> getProperties() {
+            Set<NabuccoProperty> properties = new LinkedHashSet<NabuccoProperty>();
+            PropertyDescriptorSupport descriptor = PropertyDescriptorSupport.createCollection("child", Child.class, 6,
+                    "", false, PropertyAssociationType.COMPOSITION);
+            properties.add(super.createProperty(descriptor, this.children, null));
             return properties;
         }
 
@@ -104,7 +107,7 @@ public class PersistenceCleanerTest {
          * 
          * @return Returns the children.
          */
-        public NabuccoList<Child> getChildren() {
+        public NabuccoListImpl<Child> getChildren() {
             return this.children;
         }
     }
@@ -114,8 +117,8 @@ public class PersistenceCleanerTest {
         private static final long serialVersionUID = 1L;
 
         @Override
-        public List<NabuccoProperty<?>> getProperties() {
-            return Collections.<NabuccoProperty<?>> emptyList();
+        public Set<NabuccoProperty> getProperties() {
+            return Collections.emptySet();
         }
 
     }

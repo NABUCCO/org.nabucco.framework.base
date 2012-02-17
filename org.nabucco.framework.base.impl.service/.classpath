@@ -13,6 +13,8 @@
 	<classpathentry combineaccessrules="false" kind="src" path="/org.nabucco.framework.base.facade.service"/>
 	<classpathentry kind="lib" path="/org.nabucco.framework.base/lib/impl/ejb3-persistence.jar"/>
 	<classpathentry kind="lib" path="/org.nabucco.framework.base/lib/impl/log4j.jar"/>
+	<classpathentry kind="lib" path="/org.nabucco.framework.base/lib/facade/org.nabucco.common.extension.jar"/>
+	<classpathentry kind="lib" path="/org.nabucco.framework.base/lib/impl/org.nabucco.common.cache.jar"/>
 	<classpathentry kind="lib" path="/org.nabucco.framework.base/lib/impl/jboss-javaee.jar"/>
-	<classpathentry kind="output" path="out"/>
+	<classpathentry kind="output" path="out/ide"/>
 </classpath>

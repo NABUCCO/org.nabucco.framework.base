@@ -1,17 +1,34 @@
 /*
- * Copyright (c) 2010, PRODYNA AG, Germany. All rights reserved. Created 16.12.2010
+ * Copyright 2012 PRODYNA AG
+ *
+ * Licensed under the Eclipse Public License (EPL), Version 1.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.opensource.org/licenses/eclipse-1.0.php or
+ * http://www.nabucco.org/License.html
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 package org.nabucco.framework.base.facade.exception;
 
 import java.util.HashMap;
 import java.util.Map;
 
+import org.nabucco.framework.base.facade.datatype.exceptionmsg.MessageOwner;
+import org.nabucco.framework.base.facade.datatype.exceptionmsg.field.FieldMessageSet;
+import org.nabucco.framework.base.facade.datatype.logger.LoggingBehaviour;
+
 /**
  * ExceptionSupport
  * 
  * @author Nicolas Moser, PRODYNA AG
  */
-public abstract class ExceptionSupport extends Exception {
+public abstract class ExceptionSupport extends Exception implements LoggingBehaviour, MessageOwner {
 
     /** The default serial version UID. */
     private static final long serialVersionUID = 1L;
@@ -27,6 +44,12 @@ public abstract class ExceptionSupport extends Exception {
 
     /** The error message. */
     private String message;
+
+    /** The error message set specific for each field. */
+    private FieldMessageSet fieldMessageSet;
+
+    /** Flag indicating whether the exception is already logged. */
+    private boolean logged = false;
 
     /**
      * Creates a new {@link ExceptionSupport} instance.
@@ -76,6 +99,16 @@ public abstract class ExceptionSupport extends Exception {
     }
 
     @Override
+    public boolean isLogged() {
+        return this.logged;
+    }
+
+    @Override
+    public void setLogged(boolean logged) {
+        this.logged = logged;
+    }
+
+    @Override
     public NestedThrowable getCause() {
         return this.cause;
     }
@@ -94,6 +127,16 @@ public abstract class ExceptionSupport extends Exception {
             return this.message;
         }
         return super.getMessage();
+    }
+
+    @Override
+    public FieldMessageSet getFieldMessageSet() {
+        return this.fieldMessageSet;
+    }
+
+    @Override
+    public void setFieldMessageSet(FieldMessageSet fieldMessageSet) {
+        this.fieldMessageSet = fieldMessageSet;
     }
 
     /**

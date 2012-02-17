@@ -1,0 +1,59 @@
+/*
+* Copyright 2011 PRODYNA AG
+*
+* Licensed under the Eclipse Public License (EPL), Version 1.0 (the "License");
+* you may not use this file except in compliance with the License.
+* You may obtain a copy of the License at
+*
+* http://www.opensource.org/licenses/eclipse-1.0.php or
+* http://nabuccosource.org/License.html
+*
+* Unless required by applicable law or agreed to in writing, software
+* distributed under the License is distributed on an "AS IS" BASIS,
+* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+* See the License for the specific language governing permissions and
+* limitations under the License.
+*/
+package org.nabucco.framework.base.facade.datatype.extension.schema.ui.common;
+
+import org.nabucco.framework.base.facade.datatype.extension.property.BooleanProperty;
+import org.nabucco.framework.base.facade.datatype.extension.property.ClassProperty;
+import org.nabucco.framework.base.facade.datatype.extension.property.EnumerationProperty;
+import org.nabucco.framework.base.facade.datatype.extension.property.StringProperty;
+import org.nabucco.framework.base.facade.datatype.extension.schema.ui.UiExtension;
+
+@Author			Nicolas Moser
+@Version		1.0
+@Date			2011-08-05
+@Company		PRODYNA AG
+@Description	NABUCCO User Interface List Column extension.
+public Datatype ColumnExtension extends UiExtension {
+
+	@Description		The Displayed Datatype Property.
+	private Datatype StringProperty[1] property;
+
+	@Description		The Column Label.
+	private Datatype StringProperty[1] label;
+	
+	@Description		The Column Tooltip.
+	private Datatype StringProperty[1] tooltip;
+	
+	@Description		Whether the column is visible or not.
+	private Datatype BooleanProperty[1] visible;
+	
+	@Description		Whether the column is sortable or not.
+	private Datatype BooleanProperty[1] sortable;
+	
+	@Description	Renderer for the displaying of data
+	private Datatype ClassProperty[0..1] renderer;
+	
+	@Description	Visualisation type (Percentage etc.)
+	private Datatype EnumerationProperty[0..1] layout; 
+	
+	@Description	The width of the column 0..100 (%)
+	private Datatype StringProperty[0..1] width; 
+	
+	
+	
+	
+}

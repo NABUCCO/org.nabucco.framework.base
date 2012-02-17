@@ -1,0 +1,22 @@
+/*
+ *  PRODYNA NABUCCO
+ *  Copyright 2010, PRODYNA AG
+ */
+package org.nabucco.framework.base.facade.datatype.extension.schema.template; 
+
+import org.nabucco.framework.base.facade.datatype.extension.property.StringProperty;
+import org.nabucco.framework.base.facade.datatype.extension.schema.template.TemplateStructureItem;
+
+@Author         Holger Librenz
+@Company        PRODYNA AG
+@Date           2011-03-10
+@Version        1.0
+@Description    Base for template structure composite elements
+public abstract Datatype TemplateComposite extends TemplateStructureItem {
+
+	@Description	The style for the in-laying elements
+	protected Datatype StringProperty[1] style;
+
+	@Description	Template elements are compositible
+	protected Datatype TemplateStructureItem[0..*] itemList;
+}

@@ -1,12 +1,12 @@
 /*
- * Copyright 2010 PRODYNA AG
+ * Copyright 2012 PRODYNA AG
  *
  * Licensed under the Eclipse Public License (EPL), Version 1.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
  * http://www.opensource.org/licenses/eclipse-1.0.php or
- * http://www.nabucco-source.org/nabucco-license.html
+ * http://www.nabucco.org/License.html
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -16,6 +16,7 @@
  */
 package org.nabucco.framework.base.facade.datatype.validation.constraint.element;
 
+import org.nabucco.framework.base.facade.datatype.property.NabuccoProperty;
 import org.nabucco.framework.base.facade.datatype.validation.Validatable;
 import org.nabucco.framework.base.facade.datatype.validation.ValidationResult;
 
@@ -45,13 +46,17 @@ public abstract class Constraint {
      *            the owning validatable
      * @param property
      *            the property to validate
-     * @param propertyName
-     *            name of the property to validate
      * @param result
      *            the validation result
      */
-    public abstract void check(Validatable validatable, Object property, String propertyName,
-            ValidationResult result);
+    public abstract void check(Validatable validatable, NabuccoProperty property, ValidationResult result);
+
+    /**
+     * Format the constraint to a parsable string representation.
+     * 
+     * @return the constraint as string
+     */
+    public abstract String format();
 
     /**
      * Getter for the constraint type.
@@ -72,15 +77,19 @@ public abstract class Constraint {
 
     @Override
     public boolean equals(Object obj) {
-        if (this == obj)
+        if (this == obj) {
             return true;
-        if (obj == null)
+        }
+        if (obj == null) {
             return false;
-        if (getClass() != obj.getClass())
+        }
+        if (this.getClass() != obj.getClass()) {
             return false;
+        }
         Constraint other = (Constraint) obj;
-        if (this.type != other.type)
+        if (this.type != other.type) {
             return false;
+        }
         return true;
     }
 
@@ -91,5 +100,15 @@ public abstract class Constraint {
         }
         return this.getClass().getSimpleName();
     }
+
+    /**
+     * Validates if the restriction by the dynamic constrain is valid according to the static
+     * constraints
+     * 
+     * @param c
+     *            constraint to be validated
+     * @return
+     */
+    public abstract boolean isValidRestriction(Constraint constraint);
 
 }

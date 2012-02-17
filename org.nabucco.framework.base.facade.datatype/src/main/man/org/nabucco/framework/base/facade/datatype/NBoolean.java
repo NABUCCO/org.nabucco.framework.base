@@ -1,12 +1,12 @@
 /*
- * Copyright 2010 PRODYNA AG
+ * Copyright 2012 PRODYNA AG
  *
  * Licensed under the Eclipse Public License (EPL), Version 1.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
  * http://www.opensource.org/licenses/eclipse-1.0.php or
- * http://www.nabucco-source.org/nabucco-license.html
+ * http://www.nabucco.org/License.html
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -34,6 +34,7 @@ public abstract class NBoolean extends BasetypeSupport implements Basetype, Comp
      * Default constructor
      */
     public NBoolean() {
+        this(null);
     }
 
     /**
@@ -43,7 +44,16 @@ public abstract class NBoolean extends BasetypeSupport implements Basetype, Comp
      *            the value to initialize
      */
     public NBoolean(Boolean value) {
+        super(BasetypeType.BOOLEAN);
         this.value = value;
+    }
+
+    @Override
+    public void setValue(Object value) throws IllegalArgumentException {
+        if (value != null && !(value instanceof Boolean)) {
+            throw new IllegalArgumentException("Cannot set value '" + value + "' to NBoolean.");
+        }
+        this.setValue((Boolean) value);
     }
 
     @Override

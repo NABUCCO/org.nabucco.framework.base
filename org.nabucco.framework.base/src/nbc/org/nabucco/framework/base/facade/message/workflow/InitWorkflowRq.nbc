@@ -1,0 +1,73 @@
+/*
+ * Copyright 2011 PRODYNA AG
+ *
+ * Licensed under the Eclipse Public License (EPL), Version 1.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.opensource.org/licenses/eclipse-1.0.php or
+ * http://nabuccosource.org/License.html
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+package org.nabucco.framework.base.facade.message.workflow;
+
+import org.nabucco.framework.base.facade.datatype.Description;
+import org.nabucco.framework.base.facade.datatype.Name;
+import org.nabucco.framework.base.facade.datatype.code.Code;
+import org.nabucco.framework.base.facade.datatype.date.Date;
+import org.nabucco.framework.base.facade.datatype.documentation.Comment;
+import org.nabucco.framework.base.facade.datatype.text.TextContent;
+import org.nabucco.framework.base.facade.datatype.workflow.context.Context;
+
+
+@Author			Nicolas Moser
+@Company		PRODYNA AG
+@Date			2011-03-18
+@Version		1.0
+@Description	Request for starting a assigned workflow.
+public Message InitWorkflowRq {
+
+	@MinLength		1
+	@Description	The name of the workflow to start.
+	private Basetype Name[1] workflowName;
+	
+	@MinLength		1
+	@Description	The summary of the new workflow instance.
+	private Basetype Description[1] summary;
+	
+	@Description	The description of the new workflow instance.
+	private Basetype TextContent[0..1] description;
+	
+	@Description	Context for the workflow transition.
+	private Datatype Context[0..1] context;
+
+	@Description	The assigned user.
+	private Basetype Name[0..1] assignedUser;
+	
+	@Description	The assigned group.
+	private Basetype Name[0..1] assignedGroup;
+	
+	@Description	The assigned role.
+	private Basetype Name[0..1] assignedRole;
+	
+	@CodePath	 	nabucco.workflow.functionaltype
+	@Description	Functional type of the workflow.
+	private Datatype Code[1] functionalType;
+	
+	@CodePath	 	nabucco.workflow.priority 
+	@Description	Priority of the workflow.
+	private Datatype Code[0..1] priority;
+	
+	@Description	Due date of the task. 
+	private Basetype Date[0..1] dueDate;
+
+	@Description	Initial workflow comment.
+	private Basetype Comment[0..1] comment; 
+
+}

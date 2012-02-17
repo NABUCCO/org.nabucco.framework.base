@@ -1,12 +1,12 @@
 /*
- * Copyright 2010 PRODYNA AG
+ * Copyright 2012 PRODYNA AG
  *
  * Licensed under the Eclipse Public License (EPL), Version 1.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
  * http://www.opensource.org/licenses/eclipse-1.0.php or
- * http://www.nabucco-source.org/nabucco-license.html
+ * http://www.nabucco.org/License.html
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -16,42 +16,82 @@
  */
 package org.nabucco.framework.base.facade.datatype.validation.constraint.parser;
 
-import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.Collections;
 import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
+import java.util.Iterator;
 import java.util.Set;
 
-import org.nabucco.framework.base.facade.datatype.Basetype;
+import org.nabucco.framework.base.facade.datatype.property.NabuccoProperty;
 import org.nabucco.framework.base.facade.datatype.validation.Validatable;
 import org.nabucco.framework.base.facade.datatype.validation.ValidationResult;
 import org.nabucco.framework.base.facade.datatype.validation.constraint.element.Constraint;
 import org.nabucco.framework.base.facade.datatype.validation.constraint.element.ConstraintType;
+import org.nabucco.framework.base.facade.datatype.validation.constraint.element.EditableConstraint;
+import org.nabucco.framework.base.facade.datatype.validation.constraint.element.MultiplicityConstraint;
+import org.nabucco.framework.base.facade.datatype.validation.constraint.element.VisibilityConstraint;
 
 /**
  * ConstraintContainer
+ * <p/>
+ * Container for all constraints of a single property.
+ * 
+ * @see ConstraintParser
  * 
  * @author Nicolas Moser, PRODYNA AG
  */
-public class ConstraintContainer {
+public class ConstraintContainer implements Iterable<Constraint> {
 
-    /** All constraints mapped by the related fields index. */
-    private Map<Integer, List<Constraint>> constraintMap = new HashMap<Integer, List<Constraint>>();
+    /** All static constraints mapped by the related fields index. */
+    private final Set<Constraint> staticConstraints;
+
+    /** All dynamic constraints mapped by the related fields index. */
+    private transient final Set<Constraint> dynamicConstraints;
 
     /**
      * Creates a new {@link ConstraintContainer} instance.
      */
     ConstraintContainer() {
+        this(null);
     }
 
     /**
-     * Checks whether the constraint container contains values or not.
+     * Creates a new {@link ConstraintContainer} instance.
      * 
-     * @return <b>true</b> if the container is empty, <b>false</b> if not
+     * @param constraints
+     *            the list of constraints
      */
-    public boolean isEmpty() {
-        return this.constraintMap.isEmpty();
+    ConstraintContainer(Set<Constraint> constraints) {
+        if (constraints != null) {
+            this.staticConstraints = Collections.unmodifiableSet(constraints);
+        } else {
+            this.staticConstraints = Collections.emptySet();
+        }
+
+        this.dynamicConstraints = new HashSet<Constraint>();
+    }
+
+    /**
+     * Add a constraint to the constraint container.
+     * 
+     * @param constraint
+     *            the constraint to add
+     */
+    public void add(Constraint constraint) {
+        if (constraint != null) {
+            this.dynamicConstraints.add(constraint);
+        }
+    }
+
+    /**
+     * Add a list of constraints to the constraint container.
+     * 
+     * @param constraintContainer
+     *            the constraints to add
+     */
+    public void addAll(ConstraintContainer constraintContainer) {
+        if (constraintContainer != null) {
+            this.dynamicConstraints.addAll(constraintContainer.getConstraints());
+        }
     }
 
     /**
@@ -61,132 +101,175 @@ public class ConstraintContainer {
      *            owner of the property
      * @param property
      *            the property to validate
-     * @param index
-     *            index of the property
      * @param result
      *            the validation result containing validation errors
      */
-    public void check(Validatable owner, Object property, Integer index, ValidationResult result) {
-        List<Constraint> constraintList = this.getConstraints(index);
-
-        if (property instanceof Basetype) {
-            this.addBasetypeConstraints((Basetype) property, constraintList);
-        }
+    public void check(Validatable owner, NabuccoProperty property, ValidationResult result) {
+        Set<Constraint> constraintList = this.getConstraints();
 
         // Each constraint type must only be visited once.
         Set<ConstraintType> validated = new HashSet<ConstraintType>();
         for (Constraint constraint : constraintList) {
             if (validated.add(constraint.getType())) {
-                String propertyName = this.getPropertyName(owner, index);
-                constraint.check(owner, property, propertyName, result);
+                constraint.check(owner, property, result);
             }
         }
     }
 
     /**
-     * Getter for the list of constraints for the given field index.
-     * 
-     * @param index
-     *            index of the field
+     * Getter for the list of constraints (static and dynamic).
      * 
      * @return the constraints for the fields index
      */
-    private List<Constraint> getConstraints(Integer index) {
-        List<Constraint> constraints = new ArrayList<Constraint>();
-        List<Constraint> value = this.constraintMap.get(index);
-        if (value != null && !value.isEmpty()) {
-            constraints.addAll(value);
-        }
+    public Set<Constraint> getConstraints() {
+        int initialCapacity = this.staticConstraints.size() + this.dynamicConstraints.size();
+        Set<Constraint> constraints = new HashSet<Constraint>(initialCapacity);
+
+        constraints.addAll(this.dynamicConstraints);
+        constraints.addAll(this.staticConstraints);
+
         return constraints;
     }
 
     /**
-     * Extracts constraints of a {@link Basetype}.
+     * Checks whether the constraint container contains values or not.
      * 
-     * @param basetype
-     *            the property
-     * @param constraintList
-     *            the list to add the constraints
-     * 
-     * @return the extracted basetype constraints
+     * @return <b>true</b> if the container is empty, <b>false</b> if not
      */
-    private void addBasetypeConstraints(Basetype basetype, List<Constraint> constraintList) {
-        ConstraintContainer container = ConstraintParser.getInstance().parseConstraint(basetype);
-        List<Constraint> basetypeConstraints = container.getConstraints(0);
-
-        List<Constraint> newConstraints = new ArrayList<Constraint>();
-
-        for (Constraint basetypeConstraint : basetypeConstraints) {
-
-            boolean contains = false;
-            for (Constraint constraint : constraintList) {
-                if (basetypeConstraint.getType() == constraint.getType()) {
-                    contains = true;
-                }
-            }
-
-            if (!contains) {
-                newConstraints.add(basetypeConstraint);
-            }
-        }
-
-        constraintList.addAll(newConstraints);
+    public boolean isEmpty() {
+        return this.staticConstraints.isEmpty() && this.dynamicConstraints.isEmpty();
     }
 
     /**
-     * Extracts the name of the property to validate.
+     * Checks whether a constraint container holds an editable constraint and whether it is editable
+     * or not.
      * 
-     * @param owner
-     *            owner of the validation
-     * @param index
-     *            index of the property
-     * 
-     * @return the name of the property
+     * @return <b>true</b> if the property is editable, <b>false</b> if not
      */
-    private String getPropertyName(Validatable owner, Integer index) {
-        String propertyName;
-        if (owner == null) {
-            propertyName = "undefined";
-        } else {
-            propertyName = owner.getProperties().get(index).getName();
+    public boolean isEditable() {
+        for (Constraint constraint : this.getConstraints()) {
+            if (constraint.getType() == ConstraintType.EDIT) {
+                return ((EditableConstraint) constraint).isEditable();
+            }
         }
-        return propertyName;
+        return true;
     }
 
     /**
-     * Adds a constraint to the given index.
+     * Returns the minimum multiplicity constraint
      * 
-     * @param index
-     *            the field index
-     * @param constraintList
-     *            the list of constraints for the given field
+     * 
+     * @return multiplicity or 0 is not defined
      */
-    public void put(Integer index, List<Constraint> constraintList) {
-        this.constraintMap.put(index, constraintList);
+    public int getMinMultiplicity() {
+        for (Constraint constraint : this.getConstraints()) {
+            if (constraint.getType() == ConstraintType.MULTIPLICITY) {
+                return ((MultiplicityConstraint) constraint).getMinMultiplicity();
+            }
+        }
+
+        return MultiplicityConstraint.MIN_VALUE;
+    }
+
+    /**
+     * Returns the maximum multiplicity constraint
+     * 
+     * 
+     * @return multiplicity or MAX_VALUE is not defined
+     */
+    public int getMaxMultiplicity() {
+        for (Constraint constraint : this.getConstraints()) {
+            if (constraint.getType() == ConstraintType.MULTIPLICITY) {
+                return ((MultiplicityConstraint) constraint).getMaxMultiplicity();
+            }
+        }
+
+        return MultiplicityConstraint.MAX_VALUE;
+    }
+
+    /**
+     * Checks whether a constraint container holds an visibility constraint and whether it is
+     * visible or not.
+     * 
+     * @return <b>true</b> if the property is visible, <b>false</b> if not
+     */
+    public boolean isVisible() {
+        for (Constraint constraint : this.getConstraints()) {
+            if (constraint.getType() == ConstraintType.VISIBILITY) {
+                return ((VisibilityConstraint) constraint).isVisible();
+            }
+        }
+        return true;
+    }
+
+    /**
+     * Format the dynamic constraint to a parsable string representation.
+     * 
+     * @return the constraint container as string
+     */
+    public String format() {
+        StringBuilder result = new StringBuilder();
+
+        for (Iterator<Constraint> iterator = this.dynamicConstraints.iterator(); iterator.hasNext();) {
+            Constraint constraint = iterator.next();
+            result.append(constraint.format());
+            if (iterator.hasNext()) {
+                result.append(ConstraintParser.CONSTRAINT_SEPARATOR);
+            }
+        }
+
+        return result.toString();
     }
 
     @Override
     public String toString() {
         StringBuilder result = new StringBuilder();
-        result.append("Constraints:\n");
-        for (int i = 0; i < this.constraintMap.size(); i++) {
-            List<Constraint> constraintList = this.constraintMap.get(i);
+        result.append("Static Constraints:\n");
 
-            result.append(i);
-            result.append(":");
-
-            if (constraintList == null || constraintList.isEmpty()) {
-                result.append("\t- None.\n");
-                continue;
-            }
-
-            for (Constraint constraint : constraintList) {
+        if (this.staticConstraints.isEmpty()) {
+            result.append("\t- None.\n");
+        } else {
+            for (Constraint constraint : this.staticConstraints) {
                 result.append("\t- ");
                 result.append(constraint);
                 result.append("\n");
             }
         }
+
+        result.append("\nDynamic Constraints:\n");
+
+        if (this.dynamicConstraints.isEmpty()) {
+            result.append("\t- None.\n");
+        } else {
+            for (Constraint constraint : this.dynamicConstraints) {
+                result.append("\t- ");
+                result.append(constraint);
+                result.append("\n");
+            }
+        }
+
         return result.toString();
+    }
+
+    @Override
+    public Iterator<Constraint> iterator() {
+        return this.getConstraints().iterator();
+    }
+
+    /**
+     * Clears the dynamic constraints.
+     */
+    void clear() {
+        this.dynamicConstraints.clear();
+    }
+
+    /**
+     * Creates an empty constraint container.
+     * 
+     * @return the empty container.
+     */
+    public static ConstraintContainer emptyContainer() {
+        return new ConstraintContainer();
     }
 
 }

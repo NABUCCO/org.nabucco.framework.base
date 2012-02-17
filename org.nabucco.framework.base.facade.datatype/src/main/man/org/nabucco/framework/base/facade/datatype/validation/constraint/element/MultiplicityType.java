@@ -1,12 +1,12 @@
 /*
- * Copyright 2010 PRODYNA AG
+ * Copyright 2012 PRODYNA AG
  *
  * Licensed under the Eclipse Public License (EPL), Version 1.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
  * http://www.opensource.org/licenses/eclipse-1.0.php or
- * http://www.nabucco-source.org/nabucco-license.html
+ * http://www.nabucco.org/License.html
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -23,14 +23,37 @@ package org.nabucco.framework.base.facade.datatype.validation.constraint.element
  */
 public enum MultiplicityType {
 
+    /**
+     * Optional single multiplicity.
+     */
     ZERO_TO_ONE("0..1"),
 
+    /**
+     * Mandatory single multiplicity.
+     */
     ONE("1"),
 
+    /**
+     * Optional list multiplicity.
+     */
     ZERO_TO_MANY("0..*"),
 
-    ONE_TO_MANY("1..*");
+    /**
+     * Mandatory list multiplicity..
+     */
+    ONE_TO_MANY("1..*"),
 
+    /**
+     * Custom multiplicity.
+     */
+    N_TO_M("n..m");
+
+    /**
+     * Creates a new {@link MultiplicityType} instance.
+     * 
+     * @param name
+     *            the multiplicity as string
+     */
     private MultiplicityType(String name) {
         this.name = name;
     }
@@ -57,6 +80,8 @@ public enum MultiplicityType {
             return true;
         case ZERO_TO_MANY:
             return true;
+        case N_TO_M:
+            return true;
         }
         return false;
     }
@@ -72,8 +97,51 @@ public enum MultiplicityType {
             return true;
         case ONE_TO_MANY:
             return true;
+        case N_TO_M:
+            return true;
         }
         return false;
+    }
+
+    /**
+     * Parse the string value to the appropriate multiplicity type.
+     * 
+     * @param value
+     *            the string value to parse
+     * 
+     * @return the multiplicity type
+     */
+    public static MultiplicityType parse(String value) {
+        for (MultiplicityType type : MultiplicityType.values()) {
+            if (type.getName().equalsIgnoreCase(value)) {
+                return type;
+            }
+        }
+        return MultiplicityType.ZERO_TO_MANY;
+    }
+
+    /**
+     * Convert the multiplicity type into a multiplicity constraint string.
+     * 
+     * @return the multiplicity constraint string
+     */
+    public String toConstraintString() {
+
+        switch (this) {
+        case ZERO_TO_ONE:
+            return "m0,1";
+
+        case ONE:
+            return "m1,1";
+
+        case ZERO_TO_MANY:
+            return "m0,n";
+
+        case ONE_TO_MANY:
+            return "m1,n";
+        }
+
+        return null;
     }
 
 }

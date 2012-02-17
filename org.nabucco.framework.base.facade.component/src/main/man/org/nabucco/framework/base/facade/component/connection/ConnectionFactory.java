@@ -1,12 +1,12 @@
 /*
- * Copyright 2010 PRODYNA AG
+ * Copyright 2012 PRODYNA AG
  *
  * Licensed under the Eclipse Public License (EPL), Version 1.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
  * http://www.opensource.org/licenses/eclipse-1.0.php or
- * http://www.nabucco-source.org/nabucco-license.html
+ * http://www.nabucco.org/License.html
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -22,24 +22,31 @@ import java.util.Map;
 
 /**
  * ConnectionFactory
+ * <p/>
+ * Creates new connection instances.
+ * 
+ * @see Connection
  * 
  * @author Nicolas Moser, PRODYNA AG
  */
 public final class ConnectionFactory {
 
+    /** The pooled connections. */
     private Map<ConnectionSpecification, Connection> connectionPool;
+
+    /** The local connection. */
+    private static Connection local;
 
     /**
      * Singleton instance.
      */
-    private static ConnectionFactory instance = new ConnectionFactory();
+    private static ConnectionFactory instance;
 
     /**
      * Private constructor.
      */
     private ConnectionFactory() {
-        this.connectionPool = Collections
-                .synchronizedMap(new HashMap<ConnectionSpecification, Connection>());
+        this.connectionPool = Collections.synchronizedMap(new HashMap<ConnectionSpecification, Connection>());
     }
 
     /**
@@ -47,8 +54,26 @@ public final class ConnectionFactory {
      * 
      * @return the ConnectionFactory instance.
      */
-    public static ConnectionFactory getInstance() {
+    public static synchronized ConnectionFactory getInstance() {
+        if (instance == null) {
+            instance = new ConnectionFactory();
+        }
         return instance;
+    }
+
+    /**
+     * Retrieves the connection to the current system for local calls.
+     * 
+     * @return the local connection
+     * 
+     * @throws ConnectionException
+     *             when the local connection cannot be created
+     */
+    public synchronized Connection createLocalConnection() throws ConnectionException {
+        if (local == null) {
+            local = new LocalConnection();
+        }
+        return local;
     }
 
     /**
@@ -60,9 +85,9 @@ public final class ConnectionFactory {
      * @return the connection
      * 
      * @throws ConnectionException
+     *             when the local connection cannot be created
      */
-    public synchronized Connection createConnection(ConnectionSpecification specification)
-            throws ConnectionException {
+    public synchronized Connection createConnection(ConnectionSpecification specification) throws ConnectionException {
 
         if (specification == null) {
             throw new IllegalArgumentException("Cannot create connection for specification [null].");
@@ -85,7 +110,7 @@ public final class ConnectionFactory {
             break;
 
         default:
-            connection = new DefaultConnection(specification);
+            return this.createLocalConnection();
         }
 
         connectionPool.put(specification, connection);

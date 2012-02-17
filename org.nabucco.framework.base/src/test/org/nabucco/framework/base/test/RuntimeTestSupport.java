@@ -1,12 +1,12 @@
 /*
- * Copyright 2010 PRODYNA AG
+ * Copyright 2012 PRODYNA AG
  *
  * Licensed under the Eclipse Public License (EPL), Version 1.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
  * http://www.opensource.org/licenses/eclipse-1.0.php or
- * http://www.nabucco-source.org/nabucco-license.html
+ * http://www.nabucco.org/License.html
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -20,15 +20,22 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.List;
 import java.util.Properties;
 
 import org.nabucco.framework.base.facade.component.Component;
+import org.nabucco.framework.base.facade.component.adapter.Adapter;
 import org.nabucco.framework.base.facade.component.connection.Connection;
 import org.nabucco.framework.base.facade.component.connection.ConnectionException;
 import org.nabucco.framework.base.facade.component.connection.ConnectionFactory;
 import org.nabucco.framework.base.facade.component.connection.ConnectionSpecification;
 import org.nabucco.framework.base.facade.component.connection.ConnectionType;
+import org.nabucco.framework.base.facade.component.locator.AdapterLocator;
 import org.nabucco.framework.base.facade.component.locator.ComponentLocator;
+import org.nabucco.framework.base.facade.datatype.Name;
+import org.nabucco.framework.base.facade.datatype.code.Code;
+import org.nabucco.framework.base.facade.datatype.code.CodeFacade;
+import org.nabucco.framework.base.facade.datatype.code.CodePath;
 import org.nabucco.framework.base.facade.datatype.security.Subject;
 import org.nabucco.framework.base.facade.message.context.ServiceContextFactory;
 import org.nabucco.framework.base.facade.message.context.ServiceMessageContext;
@@ -37,11 +44,11 @@ import org.nabucco.framework.base.test.security.SecurityTestUtil;
 /**
  * RuntimeTestSupport
  * 
- * @author Nicolas Moser, PRODYNA AG
+ * @author Nicolas Moser, Silas Schwarz, PRODYNA AG
  */
 public abstract class RuntimeTestSupport {
 
-    private static final String FORWARD_SLASH = "/";
+    private static final String URL_SEPARATOR = "/";
 
     private static final String ENVIRONMENT = "env";
 
@@ -59,9 +66,38 @@ public abstract class RuntimeTestSupport {
 
     private static final String TEST = "DummyInterceptor";
 
-    public <C extends Component> C getComponent(ComponentLocator<C> locator)
-            throws ConnectionException {
-        return locator.getComponent(getConnection());
+    /**
+     * Lookup of the component for the given locator.
+     * 
+     * @param <C>
+     *            the component to locate
+     * @param locator
+     *            the locator
+     * 
+     * @return the lookuped component
+     * 
+     * @throws ConnectionException
+     *             when the connection cannot be established
+     */
+    public <C extends Component> C getComponent(ComponentLocator<C> locator) throws ConnectionException {
+        return locator.getComponent(this.getConnection());
+    }
+
+    /**
+     * Lookup of the adapter for the given locator.
+     * 
+     * @param <C>
+     *            the adapter to locate
+     * @param locator
+     *            the locator
+     * 
+     * @return the lookuped adapter
+     * 
+     * @throws ConnectionException
+     *             when the connection cannot be established
+     */
+    public <A extends Adapter> A getAdapter(AdapterLocator<A> locator) throws ConnectionException {
+        return locator.getAdapter(this.getConnection());
     }
 
     /**
@@ -75,13 +111,39 @@ public abstract class RuntimeTestSupport {
     }
 
     /**
+     * Getter for the code with the given name registered for the given code path.
+     * 
+     * @param codePath
+     *            the code path to find the code for
+     * @param name
+     *            the name of the code
+     * 
+     * @return the resolved code, or null if no code was found
+     */
+    public Code getCode(String codePath, String name) {
+        return CodeFacade.getInstance().getCode(new CodePath(codePath), new Name(name));
+    }
+
+    /**
+     * Getter for the codes registered for the given code path.
+     * 
+     * @param codePath
+     *            the code path to find the codes for
+     * 
+     * @return the list of codes
+     */
+    public List<Code> getCode(String codePath) {
+        return CodeFacade.getInstance().getCodes(new CodePath(codePath));
+    }
+
+    /**
      * Establishes the connection.
      * 
      * @return the new connection.
      * 
      * @throws ConnectionException
      */
-    private Connection getConnection() throws ConnectionException {
+    protected Connection getConnection() throws ConnectionException {
 
         Properties prop;
         try {
@@ -114,18 +176,15 @@ public abstract class RuntimeTestSupport {
      * with user local overrides.
      * 
      * @return the test environment properties
+     * 
      * @throws IOException
      *             if I/O fails
      */
     private Properties getEnvironmentProperties() throws IOException {
         Properties result = new Properties();
 
-        InputStream propertiesStream = RuntimeTestSupport.class.getResourceAsStream(FORWARD_SLASH
-                + ENVIRONMENT
-                + FORWARD_SLASH
-                + DEVELOPMENT
-                + FORWARD_SLASH
-                + DEFAULT_PROPERTIES);
+        InputStream propertiesStream = RuntimeTestSupport.class.getResourceAsStream(URL_SEPARATOR
+                + ENVIRONMENT + URL_SEPARATOR + DEVELOPMENT + URL_SEPARATOR + DEFAULT_PROPERTIES);
         result.load(propertiesStream);
         propertiesStream.close();
 

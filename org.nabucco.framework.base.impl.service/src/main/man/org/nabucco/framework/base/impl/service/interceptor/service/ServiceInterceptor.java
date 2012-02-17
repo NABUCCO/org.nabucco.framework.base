@@ -1,12 +1,12 @@
 /*
- * Copyright 2010 PRODYNA AG
+ * Copyright 2012 PRODYNA AG
  *
  * Licensed under the Eclipse Public License (EPL), Version 1.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
  * http://www.opensource.org/licenses/eclipse-1.0.php or
- * http://www.nabucco-source.org/nabucco-license.html
+ * http://www.nabucco.org/License.html
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -20,8 +20,11 @@ import java.lang.reflect.Method;
 
 import javax.interceptor.InvocationContext;
 
+import org.nabucco.framework.base.facade.datatype.logger.InvocationIdentifierThreadLocal;
 import org.nabucco.framework.base.facade.datatype.logger.NabuccoLogger;
-import org.nabucco.framework.base.facade.exception.NabuccoException;
+import org.nabucco.framework.base.facade.datatype.logger.UserIdThreadLocal;
+import org.nabucco.framework.base.facade.datatype.security.Subject;
+import org.nabucco.framework.base.facade.exception.service.ServiceException;
 import org.nabucco.framework.base.facade.message.ServiceMessage;
 import org.nabucco.framework.base.facade.message.ServiceRequest;
 import org.nabucco.framework.base.facade.message.ServiceResponse;
@@ -31,6 +34,7 @@ import org.nabucco.framework.base.facade.message.tracing.InvocationIdentifier;
 import org.nabucco.framework.base.impl.service.ServiceSupport;
 import org.nabucco.framework.base.impl.service.interceptor.Interceptor;
 import org.nabucco.framework.base.impl.service.interceptor.context.InterceptorContext;
+import org.nabucco.framework.base.impl.service.interceptor.context.InterceptorContextType;
 
 /**
  * ServiceInterceptor
@@ -45,59 +49,85 @@ public class ServiceInterceptor implements Interceptor {
     private ServiceInterceptorStrategy strategy = new ServiceInterceptorStrategyDelegate();
 
     @Override
-    public Object intercept(InvocationContext ctx) throws NabuccoException {
+    @SuppressWarnings("unchecked")
+    public Object intercept(InvocationContext ctx) throws ServiceException {
+
         ServiceSupport service = null;
         Method operation = null;
         ServiceRequest<?> request = null;
         ServiceResponse<ServiceMessage> response = null;
-
         NabuccoLogger logger = null;
+        Exception exception = null;
+        boolean skipAfterExecution = false;
+
         InterceptorContext interceptorContext = new InterceptorContext();
 
+        String userId = "";
         String invocationIdentifier = "";
-        Throwable exception = null;
 
         try {
-
             service = (ServiceSupport) ctx.getTarget();
+            logger = service.getLogger();
             operation = ctx.getMethod();
+
             request = this.getServiceRequest(ctx.getParameters());
 
-            logger = service.getLogger();
-            invocationIdentifier = this.getInvocationIdentifier(request);
+            invocationIdentifier = this.getInvocationIdentifierId(request);
+            InvocationIdentifierThreadLocal.setInvocationIdentifier(invocationIdentifier);
 
-            strategy.beforeInvocation(interceptorContext, service, operation, request, logger);
+            userId = this.getUserId(request);
+            UserIdThreadLocal.setUserId(userId);
 
-            response = this.getServiceResponse(ctx.proceed());
+            this.strategy.beforeInvocation(interceptorContext, service, operation, request, logger);
 
-        } catch (NabuccoException ne) {
-            if (logger != null) {
-                logger.debug(ne, invocationIdentifier,
-                        " NabuccoException during service call of method: ", ctx.getMethod()
-                                .getName());
+            if (interceptorContext.isShorten()) {
+                // stopp chaining, returning response without proceeding
+                response = (ServiceResponse<ServiceMessage>) interceptorContext.get(InterceptorContextType.RESPONSE);
+            } else {
+                response = this.getServiceResponse(ctx.proceed());
             }
 
-            exception = ne;
-            throw ne;
+            if (response == null || response.getResponseMessage() == null) {
+                logger.warning("Service call of method:", ctx.getMethod().getName(), " did not respond acceptable.");
+                return response;
+            }
+
+        } catch (ServiceException se) {
+            if (logger != null) {
+                logger.debug(se, invocationIdentifier, " ServiceException during service call of method: ", ctx
+                        .getMethod().getName());
+            }
+
+            exception = se;
+
+            throw se;
 
         } catch (Exception e) {
             if (logger != null) {
-                logger.debug(e, invocationIdentifier, " Exception during service call of method: ",
-                        ctx.getMethod().getName());
+                logger.debug(e, invocationIdentifier, " Exception during service call of method: ", ctx.getMethod()
+                        .getName());
             }
 
             exception = e;
-            throw new NabuccoException(e.getMessage(), e);
+
+            throw new ServiceException(e.getMessage(), e);
 
         } catch (Throwable t) {
             if (logger != null) {
-                logger.fatal(t, invocationIdentifier, " Error during service call of method: ", ctx
-                        .getMethod().getName());
+                logger.fatal(t, invocationIdentifier, " Error during service call of method: ", ctx.getMethod()
+                        .getName());
             }
-            
+
+            // Skip after execution when error occurs.
+            skipAfterExecution = true;
+
+            throw new ServiceException(t.getMessage(), t);
+
         } finally {
-            strategy.afterInvocation(interceptorContext, service, operation, request, response,
-                    logger, exception);
+            if (!skipAfterExecution) {
+                this.strategy.afterInvocation(interceptorContext, service, operation, request, response, logger,
+                        exception);
+            }
         }
 
         return response;
@@ -111,6 +141,7 @@ public class ServiceInterceptor implements Interceptor {
      * 
      * @return the converted service request
      */
+    @SuppressWarnings("unchecked")
     private ServiceRequest<ServiceMessage> getServiceRequest(Object[] params) {
         if (params == null) {
             return null;
@@ -120,9 +151,7 @@ public class ServiceInterceptor implements Interceptor {
         }
         Object o = params[0];
         if (o instanceof ServiceRequest<?>) {
-            @SuppressWarnings("unchecked")
-            ServiceRequest<ServiceMessage> rq = (ServiceRequest<ServiceMessage>) o;
-            return rq;
+            return (ServiceRequest<ServiceMessage>) o;
         }
         return null;
     }
@@ -135,11 +164,10 @@ public class ServiceInterceptor implements Interceptor {
      * 
      * @return the converted service response
      */
+    @SuppressWarnings("unchecked")
     private ServiceResponse<ServiceMessage> getServiceResponse(Object object) {
         if (object instanceof ServiceResponse<?>) {
-            @SuppressWarnings("unchecked")
-            ServiceResponse<ServiceMessage> rs = (ServiceResponse<ServiceMessage>) object;
-            return rs;
+            return (ServiceResponse<ServiceMessage>) object;
         }
         return null;
     }
@@ -152,8 +180,7 @@ public class ServiceInterceptor implements Interceptor {
      * 
      * @return the invocation identifier ID
      */
-    private String getInvocationIdentifier(
-            ServiceContextContainer<ServiceMessageContext> contextContainer) {
+    private String getInvocationIdentifierId(ServiceContextContainer<ServiceMessageContext> contextContainer) {
         StringBuilder invocationIdentifierId = new StringBuilder();
 
         if (contextContainer != null) {
@@ -162,12 +189,35 @@ public class ServiceInterceptor implements Interceptor {
                 InvocationIdentifier invocationIdentifier = context.getInvocationIdentifier();
                 if (invocationIdentifier != null) {
                     long id = invocationIdentifier.getId();
-                    invocationIdentifierId.append("[");
                     invocationIdentifierId.append(id);
-                    invocationIdentifierId.append("]");
                 }
             }
         }
         return invocationIdentifierId.toString();
+    }
+
+    /**
+     * Extracts the user ID from the request/response objects.
+     * 
+     * @param contextContainer
+     *            the request/response object
+     * 
+     * @return the user ID
+     */
+    private String getUserId(ServiceContextContainer<ServiceMessageContext> contextContainer) {
+        StringBuilder userId = new StringBuilder();
+
+        if (contextContainer != null && contextContainer.getContext() != null) {
+            ServiceMessageContext context = contextContainer.getContext();
+            Subject subject = context.getSubject();
+
+            if (subject != null) {
+                if (subject.getUserId() != null && subject.getUserId().getValue() != null) {
+                    userId.append(subject.getUserId().getValue());
+                }
+            }
+        }
+
+        return userId.toString();
     }
 }

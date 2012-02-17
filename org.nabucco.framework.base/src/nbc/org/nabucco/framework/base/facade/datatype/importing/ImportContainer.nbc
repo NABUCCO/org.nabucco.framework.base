@@ -1,0 +1,37 @@
+/*
+ * Copyright 2011 PRODYNA AG
+ *
+ * Licensed under the Eclipse Public License (EPL), Version 1.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.opensource.org/licenses/eclipse-1.0.php or
+ * http://nabuccosource.org/License.html
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+package org.nabucco.framework.base.facade.datatype.importing;
+
+import org.nabucco.framework.base.facade.datatype.Data;
+import org.nabucco.framework.base.facade.datatype.NabuccoDatatype;
+import org.nabucco.framework.base.facade.datatype.text.TextContent;
+
+@Author			Silas Schwarz
+@Company		PRODYNA AG
+@Date			2011-02-18
+@Version		1.0
+@Description	Data Container as counterpart to ImportRs/Rq
+public Datatype ImportContainer extends NabuccoDatatype {
+
+	@Description	The serialized result as text
+	private Basetype TextContent[1] content;
+	
+    @Description	The archived resources as byte array.
+	@MaxLength		2147483647
+	private Basetype Data[0..1] resourceData;
+
+}

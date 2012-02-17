@@ -1,0 +1,21 @@
+/*
+ *  PRODYNA NABUCCO
+ *  Copyright 2011, PRODYNA AG
+ */
+package org.nabucco.framework.base.facade.datatype.extension.schema.template.fields; 
+
+import org.nabucco.framework.base.facade.datatype.Flag;
+import org.nabucco.framework.base.facade.datatype.extension.schema.template.TemplateComposite;
+
+
+@Author         Holger Librenz
+@Company        PRODYNA AG
+@Date           2011-03-29
+@Version        1.0
+@Description    Composite element for selection stuff 
+public Datatype SelectionGroupComposite extends TemplateComposite {
+	
+	@Description	If set, 0..* selections are possible
+	private Basetype Flag[1] isMultiple;
+
+}

@@ -1,12 +1,12 @@
 /*
- * Copyright 2010 PRODYNA AG
+ * Copyright 2012 PRODYNA AG
  *
  * Licensed under the Eclipse Public License (EPL), Version 1.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
  * http://www.opensource.org/licenses/eclipse-1.0.php or
- * http://www.nabucco-source.org/nabucco-license.html
+ * http://www.nabucco.org/License.html
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -16,43 +16,51 @@
  */
 package org.nabucco.framework.base.facade.datatype.componentrelation;
 
-import java.io.Serializable;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
+import org.nabucco.framework.base.facade.datatype.Datatype;
 import org.nabucco.framework.base.facade.datatype.Identifier;
 import org.nabucco.framework.base.facade.datatype.NabuccoDatatype;
-import org.nabucco.framework.base.facade.datatype.Version;
+import org.nabucco.framework.base.facade.datatype.property.NabuccoProperty;
+import org.nabucco.framework.base.facade.datatype.property.NabuccoPropertyContainer;
+import org.nabucco.framework.base.facade.datatype.property.NabuccoPropertyDescriptor;
+import org.nabucco.framework.base.facade.datatype.property.PropertyAssociationType;
+import org.nabucco.framework.base.facade.datatype.property.PropertyCache;
+import org.nabucco.framework.base.facade.datatype.property.PropertyDescriptorSupport;
+import org.nabucco.framework.base.facade.datatype.relation.RelationType;
 
 /**
  * ComponentRelation
  * <p/>
  * Inter-component datatype relation.
  * 
+ * @param <T>
+ *            the target datatype
+ * 
  * @author Nicolas Moser, PRODYNA AG
  * @author Dominic Trumpfheller, PRODYNA AG
  */
-public abstract class ComponentRelation<T extends NabuccoDatatype> implements Serializable {
+public abstract class ComponentRelation<T extends NabuccoDatatype> extends NabuccoDatatype implements Datatype {
 
     private static final long serialVersionUID = 1L;
 
-    /** Identifier, represents DB foreign key column */
-    private Identifier id;
-
-    /** Version, represents DB version column */
-    private Version version;
+    /** The target datatype. */
+    public static final String TARGET = "target";
 
     /** Type of the relation. */
-    private ComponentRelationType relationType;
+    private RelationType relationType;
 
-    /** State of the relation. */
-    private ComponentRelationState relationState;
+    /** Functional type of the relation. */
+    private ComponentRelationType functionalType;
 
     /** Identifier of the source datatype */
     private Identifier sourceId;
 
     /** The target datatype */
     private T target;
-
-    private static final String ENUM_SEPARATOR = "#";
 
     /**
      * Creates a new {@link ComponentRelation} instance.
@@ -61,7 +69,7 @@ public abstract class ComponentRelation<T extends NabuccoDatatype> implements Se
      * persistence provider.</i>
      */
     protected ComponentRelation() {
-        this.relationState = ComponentRelationState.INITIALIZED;
+        super();
     }
 
     /**
@@ -71,27 +79,50 @@ public abstract class ComponentRelation<T extends NabuccoDatatype> implements Se
      *            the type of the relation
      */
     public ComponentRelation(ComponentRelationType relationType) {
-        this.relationType = relationType;
-        this.relationState = ComponentRelationState.INITIALIZED;
+        this.functionalType = relationType;
+    }
+
+    @Override
+    public void init() {
+        // Nothing to initialize in component relation.
     }
 
     /**
-     * Setter for the relation type.
+     * Getter for the relationType.
+     * 
+     * @return Returns the relationType.
+     */
+    public RelationType getRelationType() {
+        return this.relationType;
+    }
+
+    /**
+     * Setter for the relationType.
+     * 
+     * @param relationType
+     *            The relationType to set.
+     */
+    public void setRelationType(RelationType relationType) {
+        this.relationType = relationType;
+    }
+
+    /**
+     * Getter for the functional type.
+     * 
+     * @return Returns the functionalType.
+     */
+    public ComponentRelationType getFunctionalType() {
+        return this.functionalType;
+    }
+
+    /**
+     * Setter for the functional type.
      * 
      * @param relationType
      *            The relation type to set.
      */
-    public void setRelationType(ComponentRelationType relationType) {
-        this.relationType = relationType;
-    }
-
-    /**
-     * Getter for the relation type.
-     * 
-     * @return Returns the relationType.
-     */
-    public ComponentRelationType getRelationType() {
-        return this.relationType;
+    public void setFunctionalType(ComponentRelationType relationType) {
+        this.functionalType = relationType;
     }
 
     /**
@@ -100,103 +131,17 @@ public abstract class ComponentRelation<T extends NabuccoDatatype> implements Se
      * @param relationType
      *            The relation type to set.
      */
-    @SuppressWarnings({ "unchecked", "rawtypes" })
     void setType(String relationType) {
-
-        try {
-            String enumName = relationType.substring(0, relationType.indexOf(ENUM_SEPARATOR));
-            String literal = relationType.substring(relationType.indexOf(ENUM_SEPARATOR) + 1,
-                    relationType.length());
-
-            Class<Enum> enumType = (Class<Enum>) this.getClass().getClassLoader()
-                    .loadClass(enumName);
-            Enum value = Enum.valueOf(enumType, literal);
-
-            this.relationType = (ComponentRelationType) value;
-
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
+        this.functionalType = ComponentRelationTypeMapper.getInstance().valueOf(relationType);
     }
 
     /**
      * Getter for the relation type string.
      * 
-     * @return Returns the relationType.
+     * @return Returns the functionalType.
      */
-    String getType() {
-        return this.relationType.getClass().getName() + ENUM_SEPARATOR + this.relationType.getId();
-    }
-
-    /**
-     * Getter for the relation relationState.
-     * 
-     * @return Returns the relationState.
-     */
-    public ComponentRelationState getRelationState() {
-        return this.relationState;
-    }
-
-    /**
-     * Setter for the relation relationState.
-     * 
-     * @param relationState
-     *            The relationState to set.
-     */
-    public void setRelationState(ComponentRelationState state) {
-        if (state != null) {
-            this.relationState = state;
-        }
-    }
-
-    /**
-     * Identifier, represents DB foreign key column
-     * 
-     * @return the Long.
-     */
-    public Long getId() {
-        if ((this.id == null)) {
-            this.id = new Identifier();
-        }
-        return this.id.getValue();
-    }
-
-    /**
-     * Identifier, represents DB foreign key column
-     * 
-     * @param id
-     *            the Long.
-     */
-    public void setId(Long id) {
-        if ((this.id == null)) {
-            this.id = new Identifier();
-        }
-        this.id.setValue(id);
-    }
-
-    /**
-     * Version, represents DB version column
-     * 
-     * @return the Long.
-     */
-    public Long getVersion() {
-        if ((this.version == null)) {
-            this.version = new Version();
-        }
-        return this.version.getValue();
-    }
-
-    /**
-     * Version, represents DB version column
-     * 
-     * @param version
-     *            the Long.
-     */
-    public void setVersion(Long version) {
-        if ((this.version == null)) {
-            this.version = new Version();
-        }
-        this.version.setValue(version);
+    public String getType() {
+        return ComponentRelationTypeMapper.getInstance().toString(this.functionalType);
     }
 
     /**
@@ -216,6 +161,17 @@ public abstract class ComponentRelation<T extends NabuccoDatatype> implements Se
      */
     public void setTarget(T target) {
         this.target = target;
+    }
+
+    /**
+     * Setter for the target datatype.
+     * 
+     * @param target
+     *            The target datatype to set.
+     */
+    @SuppressWarnings("unchecked")
+    public void setTarget(Object target) {
+        this.target = (T) target;
     }
 
     /**
@@ -266,7 +222,84 @@ public abstract class ComponentRelation<T extends NabuccoDatatype> implements Se
 
         clone.setId(this.getId());
         clone.setVersion(this.getVersion());
-        clone.relationState = this.relationState;
+        clone.functionalType = this.functionalType;
         clone.relationType = this.relationType;
     }
+
+    @Override
+    public Set<NabuccoProperty> getProperties() {
+        Set<NabuccoProperty> properties = super.getProperties();
+        properties.add(super.createProperty(ComponentRelation.getPropertyDescriptor(TARGET), this.target, null));
+        return properties;
+    }
+
+    /**
+     * Getter for the PropertyDescriptor.
+     * 
+     * @param propertyName
+     *            the String.
+     * @return the NabuccoPropertyDescriptor.
+     */
+    public static NabuccoPropertyDescriptor getPropertyDescriptor(String propertyName) {
+        return PropertyCache.getInstance().retrieve(ComponentRelation.class).getProperty(propertyName);
+    }
+
+    /**
+     * Getter for the PropertyDescriptorList.
+     * 
+     * @return the List<NabuccoPropertyDescriptor>.
+     */
+    public static List<NabuccoPropertyDescriptor> getPropertyDescriptorList() {
+        return PropertyCache.getInstance().retrieve(ComponentRelation.class).getAllProperties();
+    }
+
+    /**
+     * CreatePropertyContainer.
+     * 
+     * @return the NabuccoPropertyContainer.
+     */
+    protected static NabuccoPropertyContainer createPropertyContainer() {
+        Map<String, NabuccoPropertyDescriptor> propertyMap = new HashMap<String, NabuccoPropertyDescriptor>();
+
+        propertyMap.put(TARGET, PropertyDescriptorSupport.createDatatype(TARGET, NabuccoDatatype.class, 0, "m0,1;",
+                false, PropertyAssociationType.COMPOSITION));
+
+        return new NabuccoPropertyContainer(propertyMap);
+    }
+
+    @Override
+    public int hashCode() {
+        final int prime = 31;
+        int result = super.hashCode();
+        result = prime * result + ((this.relationType == null) ? 0 : this.relationType.hashCode());
+        result = prime * result + ((this.sourceId == null) ? 0 : this.sourceId.hashCode());
+        result = prime * result + ((this.target == null) ? 0 : this.target.hashCode());
+        return result;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj)
+            return true;
+        if (!super.equals(obj))
+            return false;
+        if (!(obj instanceof ComponentRelation))
+            return false;
+        ComponentRelation<?> other = (ComponentRelation<?>) obj;
+        if (this.relationType != other.relationType)
+            return false;
+        if (this.sourceId == null) {
+            if (other.sourceId != null)
+                return false;
+        } else if (!this.sourceId.equals(other.sourceId))
+            return false;
+        if (this.target == null) {
+            if (other.target != null)
+                return false;
+        } else if (!this.target.equals(other.target))
+            return false;
+        return true;
+    }
+    
+    
 }

@@ -1,12 +1,12 @@
 /*
- * Copyright 2010 PRODYNA AG
+ * Copyright 2012 PRODYNA AG
  *
  * Licensed under the Eclipse Public License (EPL), Version 1.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
  * http://www.opensource.org/licenses/eclipse-1.0.php or
- * http://www.nabucco-source.org/nabucco-license.html
+ * http://www.nabucco.org/License.html
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -89,8 +89,8 @@ public class NabuccoInjector {
             }
         } catch (IOException e) {
             // TODO: Logging
-            throw new IllegalStateException("Error reading command handler properties for "
-                    + receiver.getName() + ".", e);
+            throw new IllegalStateException("Error reading command handler properties for " + receiver.getName() + ".",
+                    e);
         }
     }
 
@@ -99,8 +99,7 @@ public class NabuccoInjector {
      * 
      * @return the NabuccoServiceHandlerInjector injectors.
      */
-    public static synchronized NabuccoInjector getInstance(
-            Class<? extends NabuccoInjectionReciever> receiver) {
+    public static synchronized NabuccoInjector getInstance(Class<? extends NabuccoInjectionReciever> receiver) {
 
         if (injectors.containsKey(receiver)) {
             return injectors.get(receiver);
@@ -135,8 +134,7 @@ public class NabuccoInjector {
             String implName = resolveImplementationName(handlerName);
 
             if (implName == null || implName.isEmpty()) {
-                throw new IllegalArgumentException("CommandHandler implementation not found for "
-                        + handlerName + ".");
+                throw new IllegalArgumentException("CommandHandler implementation not found for " + handlerName + ".");
             }
 
             @SuppressWarnings("unchecked")
@@ -145,8 +143,7 @@ public class NabuccoInjector {
             return handler.newInstance();
 
         } catch (Exception e) {
-            throw new IllegalStateException("CommandHandler implementation not found for "
-                    + handlerName + ".", e);
+            throw new IllegalStateException("CommandHandler implementation not found for " + handlerName + ".", e);
         }
 
     }

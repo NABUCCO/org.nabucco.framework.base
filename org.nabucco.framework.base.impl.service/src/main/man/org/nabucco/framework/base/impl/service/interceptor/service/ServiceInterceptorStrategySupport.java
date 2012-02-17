@@ -1,12 +1,12 @@
 /*
- * Copyright 2010 PRODYNA AG
+ * Copyright 2012 PRODYNA AG
  *
  * Licensed under the Eclipse Public License (EPL), Version 1.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
  * http://www.opensource.org/licenses/eclipse-1.0.php or
- * http://www.nabucco-source.org/nabucco-license.html
+ * http://www.nabucco.org/License.html
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -50,20 +50,37 @@ abstract class ServiceInterceptorStrategySupport implements ServiceInterceptorSt
     }
 
     @Override
-    public void beforeInvocation(InterceptorContext context, Service service, Method method,
-            ServiceRequest<?> request, NabuccoLogger logger) throws ServiceException {
+    public void beforeInvocation(InterceptorContext context, Service service, Method method, ServiceRequest<?> request,
+            NabuccoLogger logger) throws ServiceException {
+
         for (ServiceInterceptorStrategy strategy : this.delegateStrategies) {
+
+            // Before Invocation
             strategy.beforeInvocation(context, service, method, request, logger);
+
+            context.incrementDepth();
+
+            if (context.isShorten()) {
+                break;
+            }
+
         }
     }
 
     @Override
-    public void afterInvocation(InterceptorContext context, Service service, Method method,
-            ServiceRequest<?> request, ServiceResponse<?> response, NabuccoLogger logger,
-            Throwable exception) throws ServiceException {
-        for (ServiceInterceptorStrategy strategy : this.delegateStrategies) {
+    public void afterInvocation(InterceptorContext context, Service service, Method method, ServiceRequest<?> request,
+            ServiceResponse<?> response, NabuccoLogger logger, Throwable exception) throws ServiceException {
+
+        ServiceInterceptorStrategy strategy;
+
+        // Starting at last executed position in reverse order
+        for (int i = context.getDepth() - 1; i >= 0; i--) {
+            strategy = this.delegateStrategies.get(i);
+
+            // After Invocation
             strategy.afterInvocation(context, service, method, request, response, logger, exception);
         }
+
     }
 
 }

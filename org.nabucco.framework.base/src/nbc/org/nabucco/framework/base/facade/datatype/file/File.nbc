@@ -6,7 +6,7 @@
  * You may obtain a copy of the License at
  *
  * http://www.opensource.org/licenses/eclipse-1.0.php or
- * http://www.nabucco-source.org/nabucco-license.html
+ * http://nabuccosource.org/License.html
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -29,20 +29,28 @@ import org.nabucco.framework.base.facade.datatype.net.Uri;
 @Company		PRODYNA AG
 @Date			2010-12-06
 @Version		1.0
+@Description	A persistable file.
 public abstract Datatype File extends NabuccoDatatype {
 
+	@Description		Owner of the file.
 	private Basetype Owner[1] owner;
 	
-	private Basetype Data[1] data;
-	
+	@Description		Name of the file.
 	private Basetype FileName[1] fileName;
 	
+	@Description		Extension of the file.
 	private Basetype FileExtension[1] fileExtension;
 	
+	@Description		Size of the file.
 	private Basetype FileSize[0..1] fileSize;
 	
+	@Description		File Media Type.
 	private Basetype MimeType[1] mimeType;
 	
+	@Description		URI to the file.
 	private Basetype Uri[1] uri;
+	
+	@Description		Data of the file.
+	private Basetype Data[1] data;
 
 }

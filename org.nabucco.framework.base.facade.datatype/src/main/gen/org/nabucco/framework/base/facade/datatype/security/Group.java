@@ -1,17 +1,38 @@
 /*
- * NABUCCO Generator, Copyright (c) 2010, PRODYNA AG, Germany. All rights reserved.
+ * Copyright 2012 PRODYNA AG
+ *
+ * Licensed under the Eclipse Public License (EPL), Version 1.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.opensource.org/licenses/eclipse-1.0.php or
+ * http://www.nabucco.org/License.html
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 package org.nabucco.framework.base.facade.datatype.security;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import org.nabucco.framework.base.facade.datatype.Datatype;
 import org.nabucco.framework.base.facade.datatype.Description;
-import org.nabucco.framework.base.facade.datatype.NabuccoDatatype;
+import org.nabucco.framework.base.facade.datatype.MultiTenantDatatype;
 import org.nabucco.framework.base.facade.datatype.Name;
 import org.nabucco.framework.base.facade.datatype.Owner;
-import org.nabucco.framework.base.facade.datatype.code.CodeType;
-import org.nabucco.framework.base.facade.datatype.property.BasetypeProperty;
+import org.nabucco.framework.base.facade.datatype.code.Code;
+import org.nabucco.framework.base.facade.datatype.code.CodePath;
 import org.nabucco.framework.base.facade.datatype.property.NabuccoProperty;
+import org.nabucco.framework.base.facade.datatype.property.NabuccoPropertyContainer;
+import org.nabucco.framework.base.facade.datatype.property.NabuccoPropertyDescriptor;
+import org.nabucco.framework.base.facade.datatype.property.PropertyAssociationType;
+import org.nabucco.framework.base.facade.datatype.property.PropertyCache;
+import org.nabucco.framework.base.facade.datatype.property.PropertyDescriptorSupport;
 
 /**
  * Group<p/>Represents a group within the authorization component<p/>
@@ -19,27 +40,34 @@ import org.nabucco.framework.base.facade.datatype.property.NabuccoProperty;
  * @version 1.0
  * @author Frank Ratschinski, PRODYNA AG, 2010-01-18
  */
-public class Group extends NabuccoDatatype implements Datatype {
+public class Group extends MultiTenantDatatype implements Datatype {
 
     private static final long serialVersionUID = 1L;
 
-    private static final String[] PROPERTY_NAMES = { "groupname", "owner", "description",
-            "groupType" };
+    private static final String[] PROPERTY_CONSTRAINTS = { "l3,12;u0,n;m1,1;", "l0,30;u0,n;m1,1;", "l0,255;u0,n;m1,1;",
+            "m1,1;" };
 
-    private static final String[] PROPERTY_CONSTRAINTS = { "l0,n;m1,1;", "l0,n;m1,1;",
-            "l0,n;m1,1;", "l0,n;m1,1;" };
+    public static final String OWNER = "owner";
 
-    /** Name of the group */
-    private Name groupname;
+    public static final String GROUPNAME = "groupname";
+
+    public static final String DESCRIPTION = "description";
+
+    public static final String GROUPTYPE = "groupType";
 
     /** Owner of the group */
     private Owner owner;
 
-    /** of the group */
+    /** Name of the group */
+    private Name groupname;
+
+    /** Description of the group */
     private Description description;
 
-    /** Code of the group */
-    private CodeType groupType;
+    /** Type of the group */
+    private Code groupType;
+
+    protected static final String GROUPTYPE_CODEPATH = "nabucco.authorization.group";
 
     /** Constructs a new Group instance. */
     public Group() {
@@ -58,11 +86,11 @@ public class Group extends NabuccoDatatype implements Datatype {
      */
     protected void cloneObject(Group clone) {
         super.cloneObject(clone);
-        if ((this.getGroupname() != null)) {
-            clone.setGroupname(this.getGroupname().cloneObject());
-        }
         if ((this.getOwner() != null)) {
             clone.setOwner(this.getOwner().cloneObject());
+        }
+        if ((this.getGroupname() != null)) {
+            clone.setGroupname(this.getGroupname().cloneObject());
         }
         if ((this.getDescription() != null)) {
             clone.setDescription(this.getDescription().cloneObject());
@@ -72,23 +100,59 @@ public class Group extends NabuccoDatatype implements Datatype {
         }
     }
 
+    /**
+     * CreatePropertyContainer.
+     *
+     * @return the NabuccoPropertyContainer.
+     */
+    protected static NabuccoPropertyContainer createPropertyContainer() {
+        Map<String, NabuccoPropertyDescriptor> propertyMap = new HashMap<String, NabuccoPropertyDescriptor>();
+        propertyMap.putAll(PropertyCache.getInstance().retrieve(MultiTenantDatatype.class).getPropertyMap());
+        propertyMap.put(OWNER,
+                PropertyDescriptorSupport.createBasetype(OWNER, Owner.class, 4, PROPERTY_CONSTRAINTS[0], false));
+        propertyMap.put(GROUPNAME,
+                PropertyDescriptorSupport.createBasetype(GROUPNAME, Name.class, 5, PROPERTY_CONSTRAINTS[1], false));
+        propertyMap.put(DESCRIPTION, PropertyDescriptorSupport.createBasetype(DESCRIPTION, Description.class, 6,
+                PROPERTY_CONSTRAINTS[2], false));
+        propertyMap.put(GROUPTYPE, PropertyDescriptorSupport.createDatatype(GROUPTYPE, Code.class, 7,
+                PROPERTY_CONSTRAINTS[3], false, PropertyAssociationType.COMPOSITION, GROUPTYPE_CODEPATH));
+        return new NabuccoPropertyContainer(propertyMap);
+    }
+
     @Override
     public void init() {
         this.initDefaults();
     }
 
     @Override
-    public List<NabuccoProperty<?>> getProperties() {
-        List<NabuccoProperty<?>> properties = super.getProperties();
-        properties.add(new BasetypeProperty<Name>(PROPERTY_NAMES[0], Name.class,
-                PROPERTY_CONSTRAINTS[0], this.groupname));
-        properties.add(new BasetypeProperty<Owner>(PROPERTY_NAMES[1], Owner.class,
-                PROPERTY_CONSTRAINTS[1], this.owner));
-        properties.add(new BasetypeProperty<Description>(PROPERTY_NAMES[2], Description.class,
-                PROPERTY_CONSTRAINTS[2], this.description));
-        properties.add(new BasetypeProperty<CodeType>(PROPERTY_NAMES[3], CodeType.class,
-                PROPERTY_CONSTRAINTS[3], this.groupType));
+    public Set<NabuccoProperty> getProperties() {
+        Set<NabuccoProperty> properties = super.getProperties();
+        properties.add(super.createProperty(Group.getPropertyDescriptor(OWNER), this.owner, null));
+        properties.add(super.createProperty(Group.getPropertyDescriptor(GROUPNAME), this.groupname, null));
+        properties.add(super.createProperty(Group.getPropertyDescriptor(DESCRIPTION), this.description, null));
+        properties.add(super.createProperty(Group.getPropertyDescriptor(GROUPTYPE), this.getGroupType(), null));
         return properties;
+    }
+
+    @Override
+    public boolean setProperty(NabuccoProperty property) {
+        if (super.setProperty(property)) {
+            return true;
+        }
+        if ((property.getName().equals(OWNER) && (property.getType() == Owner.class))) {
+            this.setOwner(((Owner) property.getInstance()));
+            return true;
+        } else if ((property.getName().equals(GROUPNAME) && (property.getType() == Name.class))) {
+            this.setGroupname(((Name) property.getInstance()));
+            return true;
+        } else if ((property.getName().equals(DESCRIPTION) && (property.getType() == Description.class))) {
+            this.setDescription(((Description) property.getInstance()));
+            return true;
+        } else if ((property.getName().equals(GROUPTYPE) && (property.getType() == Code.class))) {
+            this.setGroupType(((Code) property.getInstance()));
+            return true;
+        }
+        return false;
     }
 
     @Override
@@ -106,15 +170,15 @@ public class Group extends NabuccoDatatype implements Datatype {
             return false;
         }
         final Group other = ((Group) obj);
-        if ((this.groupname == null)) {
-            if ((other.groupname != null))
-                return false;
-        } else if ((!this.groupname.equals(other.groupname)))
-            return false;
         if ((this.owner == null)) {
             if ((other.owner != null))
                 return false;
         } else if ((!this.owner.equals(other.owner)))
+            return false;
+        if ((this.groupname == null)) {
+            if ((other.groupname != null))
+                return false;
+        } else if ((!this.groupname.equals(other.groupname)))
             return false;
         if ((this.description == null)) {
             if ((other.description != null))
@@ -133,24 +197,11 @@ public class Group extends NabuccoDatatype implements Datatype {
     public int hashCode() {
         final int PRIME = 31;
         int result = super.hashCode();
-        result = ((PRIME * result) + ((this.groupname == null) ? 0 : this.groupname.hashCode()));
         result = ((PRIME * result) + ((this.owner == null) ? 0 : this.owner.hashCode()));
+        result = ((PRIME * result) + ((this.groupname == null) ? 0 : this.groupname.hashCode()));
         result = ((PRIME * result) + ((this.description == null) ? 0 : this.description.hashCode()));
         result = ((PRIME * result) + ((this.groupType == null) ? 0 : this.groupType.hashCode()));
         return result;
-    }
-
-    @Override
-    public String toString() {
-        StringBuilder appendable = new StringBuilder();
-        appendable.append("<Group>\n");
-        appendable.append(super.toString());
-        appendable.append((("<groupname>" + this.groupname) + "</groupname>\n"));
-        appendable.append((("<owner>" + this.owner) + "</owner>\n"));
-        appendable.append((("<description>" + this.description) + "</description>\n"));
-        appendable.append((("<groupType>" + this.groupType) + "</groupType>\n"));
-        appendable.append("</Group>\n");
-        return appendable.toString();
     }
 
     @Override
@@ -158,36 +209,6 @@ public class Group extends NabuccoDatatype implements Datatype {
         Group clone = new Group();
         this.cloneObject(clone);
         return clone;
-    }
-
-    /**
-     * Name of the group
-     *
-     * @return the Name.
-     */
-    public Name getGroupname() {
-        return this.groupname;
-    }
-
-    /**
-     * Name of the group
-     *
-     * @param groupname the Name.
-     */
-    public void setGroupname(Name groupname) {
-        this.groupname = groupname;
-    }
-
-    /**
-     * Name of the group
-     *
-     * @param groupname the String.
-     */
-    public void setGroupname(String groupname) {
-        if ((this.groupname == null)) {
-            this.groupname = new Name();
-        }
-        this.groupname.setValue(groupname);
     }
 
     /**
@@ -215,13 +236,49 @@ public class Group extends NabuccoDatatype implements Datatype {
      */
     public void setOwner(String owner) {
         if ((this.owner == null)) {
+            if ((owner == null)) {
+                return;
+            }
             this.owner = new Owner();
         }
         this.owner.setValue(owner);
     }
 
     /**
-     * of the group
+     * Name of the group
+     *
+     * @return the Name.
+     */
+    public Name getGroupname() {
+        return this.groupname;
+    }
+
+    /**
+     * Name of the group
+     *
+     * @param groupname the Name.
+     */
+    public void setGroupname(Name groupname) {
+        this.groupname = groupname;
+    }
+
+    /**
+     * Name of the group
+     *
+     * @param groupname the String.
+     */
+    public void setGroupname(String groupname) {
+        if ((this.groupname == null)) {
+            if ((groupname == null)) {
+                return;
+            }
+            this.groupname = new Name();
+        }
+        this.groupname.setValue(groupname);
+    }
+
+    /**
+     * Description of the group
      *
      * @return the Description.
      */
@@ -230,7 +287,7 @@ public class Group extends NabuccoDatatype implements Datatype {
     }
 
     /**
-     * of the group
+     * Description of the group
      *
      * @param description the Description.
      */
@@ -239,44 +296,63 @@ public class Group extends NabuccoDatatype implements Datatype {
     }
 
     /**
-     * of the group
+     * Description of the group
      *
      * @param description the String.
      */
     public void setDescription(String description) {
         if ((this.description == null)) {
+            if ((description == null)) {
+                return;
+            }
             this.description = new Description();
         }
         this.description.setValue(description);
     }
 
     /**
-     * Code of the group
+     * Type of the group
      *
-     * @return the CodeType.
+     * @param groupType the Code.
      */
-    public CodeType getGroupType() {
-        return this.groupType;
-    }
-
-    /**
-     * Code of the group
-     *
-     * @param groupType the CodeType.
-     */
-    public void setGroupType(CodeType groupType) {
+    public void setGroupType(Code groupType) {
         this.groupType = groupType;
     }
 
     /**
-     * Code of the group
+     * Type of the group
      *
-     * @param groupType the String.
+     * @return the Code.
      */
-    public void setGroupType(String groupType) {
-        if ((this.groupType == null)) {
-            this.groupType = new CodeType();
-        }
-        this.groupType.setValue(groupType);
+    public Code getGroupType() {
+        return this.groupType;
+    }
+
+    /**
+     * Getter for the PropertyDescriptor.
+     *
+     * @param propertyName the String.
+     * @return the NabuccoPropertyDescriptor.
+     */
+    public static NabuccoPropertyDescriptor getPropertyDescriptor(String propertyName) {
+        return PropertyCache.getInstance().retrieve(Group.class).getProperty(propertyName);
+    }
+
+    /**
+     * Getter for the PropertyDescriptorList.
+     *
+     * @return the List<NabuccoPropertyDescriptor>.
+     */
+    public static List<NabuccoPropertyDescriptor> getPropertyDescriptorList() {
+        return PropertyCache.getInstance().retrieve(Group.class).getAllProperties();
+    }
+
+    /**
+     * Getter for the GroupTypeCodePath.
+     *
+     * @return the CodePath.
+     */
+    public static CodePath getGroupTypeCodePath() {
+        return new CodePath(GROUPTYPE_CODEPATH);
     }
 }

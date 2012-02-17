@@ -1,12 +1,12 @@
 /*
- * Copyright 2010 PRODYNA AG
+ * Copyright 2012 PRODYNA AG
  *
  * Licensed under the Eclipse Public License (EPL), Version 1.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
  * http://www.opensource.org/licenses/eclipse-1.0.php or
- * http://www.nabucco-source.org/nabucco-license.html
+ * http://www.nabucco.org/License.html
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -16,8 +16,10 @@
  */
 package org.nabucco.framework.base.facade.datatype.property;
 
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.Set;
 
 import org.nabucco.framework.base.facade.datatype.Enumeration;
 import org.nabucco.framework.base.facade.datatype.visitor.Visitor;
@@ -25,26 +27,37 @@ import org.nabucco.framework.base.facade.datatype.visitor.VisitorException;
 
 /**
  * EnumProperty
+ * <p/>
+ * A property holding a single instance of a {@link Enumeration}.
  * 
  * @author Nicolas Moser, PRODYNA AG
  */
-public final class EnumProperty<N extends Enumeration> extends SingleProperty<N> implements
-        NabuccoProperty<N> {
+public final class EnumProperty extends PropertySupport implements NabuccoProperty {
+
+    /** The enumeration instance. */
+    private Enumeration instance;
 
     /**
      * Creates a new {@link EnumProperty} instance.
      * 
-     * @param name
-     *            the enum name
-     * @param type
-     *            the enum type
-     * @param constraints
-     *            the property constraint string
+     * @param descriptor
+     *            the property descriptor
+     * @param parent
+     *            the parent property holder
      * @param instance
-     *            the enum instance
+     *            the enumeration instance
+     * @param constraints
+     *            the dynamic constraints
      */
-    public EnumProperty(String name, Class<N> type, String constraints, N instance) {
-        super(name, type, constraints, PropertyType.ENUMERATION, instance);
+    EnumProperty(NabuccoPropertyDescriptor descriptor, PropertyOwner parent, Enumeration instance, String constraints) {
+        super(descriptor, parent, constraints, null);
+
+        this.instance = instance;
+    }
+
+    @Override
+    public Enumeration getInstance() {
+        return this.instance;
     }
 
     @Override
@@ -53,8 +66,25 @@ public final class EnumProperty<N extends Enumeration> extends SingleProperty<N>
     }
 
     @Override
-    public List<NabuccoProperty<?>> getProperties() {
-        return Collections.emptyList();
+    public Set<NabuccoProperty> getProperties() {
+        return Collections.emptySet();
+    }
+
+    /**
+     * Getter for the enumeration literals.
+     * 
+     * @return the unmodifiable list of enumeration literals
+     */
+    public List<Enumeration> getLiterals() {
+
+        @SuppressWarnings("unchecked")
+        Class<Enumeration> enumClass = (Class<Enumeration>) this.getType();
+        Enumeration[] enumConstants = enumClass.getEnumConstants();
+
+        if (enumConstants == null) {
+            return Collections.emptyList();
+        }
+        return Arrays.<Enumeration> asList(enumConstants);
     }
 
 }

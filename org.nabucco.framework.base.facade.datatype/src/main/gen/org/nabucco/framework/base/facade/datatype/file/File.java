@@ -1,9 +1,25 @@
 /*
- * NABUCCO Generator, Copyright (c) 2010, PRODYNA AG, Germany. All rights reserved.
+ * Copyright 2012 PRODYNA AG
+ *
+ * Licensed under the Eclipse Public License (EPL), Version 1.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.opensource.org/licenses/eclipse-1.0.php or
+ * http://www.nabucco.org/License.html
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 package org.nabucco.framework.base.facade.datatype.file;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import org.nabucco.framework.base.facade.datatype.Data;
 import org.nabucco.framework.base.facade.datatype.Datatype;
 import org.nabucco.framework.base.facade.datatype.NabuccoDatatype;
@@ -13,11 +29,14 @@ import org.nabucco.framework.base.facade.datatype.file.FileName;
 import org.nabucco.framework.base.facade.datatype.file.FileSize;
 import org.nabucco.framework.base.facade.datatype.file.MimeType;
 import org.nabucco.framework.base.facade.datatype.net.Uri;
-import org.nabucco.framework.base.facade.datatype.property.BasetypeProperty;
 import org.nabucco.framework.base.facade.datatype.property.NabuccoProperty;
+import org.nabucco.framework.base.facade.datatype.property.NabuccoPropertyContainer;
+import org.nabucco.framework.base.facade.datatype.property.NabuccoPropertyDescriptor;
+import org.nabucco.framework.base.facade.datatype.property.PropertyCache;
+import org.nabucco.framework.base.facade.datatype.property.PropertyDescriptorSupport;
 
 /**
- * File
+ * File<p/>A persistable file.<p/>
  *
  * @version 1.0
  * @author Dominic Trumpfheller, PRODYNA AG, 2010-12-06
@@ -26,25 +45,43 @@ public abstract class File extends NabuccoDatatype implements Datatype {
 
     private static final long serialVersionUID = 1L;
 
-    private static final String[] PROPERTY_NAMES = { "owner", "data", "fileName", "fileExtension",
-            "fileSize", "mimeType", "uri" };
+    private static final String[] PROPERTY_CONSTRAINTS = { "l3,12;u0,n;m1,1;", "l0,128;u0,n;m1,1;", "l0,n;u0,n;m1,1;",
+            "l0,n;u0,n;m0,1;", "l0,128;u0,n;m1,1;", "l0,255;u0,n;m1,1;", "l0,n;u0,n;m1,1;" };
 
-    private static final String[] PROPERTY_CONSTRAINTS = { "l0,n;m1,1;", "l0,n;m1,1;",
-            "l0,n;m1,1;", "l0,n;m1,1;", "l0,n;m0,1;", "l0,n;m1,1;", "l0,n;m1,1;" };
+    public static final String OWNER = "owner";
 
+    public static final String FILENAME = "fileName";
+
+    public static final String FILEEXTENSION = "fileExtension";
+
+    public static final String FILESIZE = "fileSize";
+
+    public static final String MIMETYPE = "mimeType";
+
+    public static final String URI = "uri";
+
+    public static final String DATA = "data";
+
+    /** Owner of the file. */
     private Owner owner;
 
-    private Data data;
-
+    /** Name of the file. */
     private FileName fileName;
 
+    /** Extension of the file. */
     private FileExtension fileExtension;
 
+    /** Size of the file. */
     private FileSize fileSize;
 
+    /** File Media Type. */
     private MimeType mimeType;
 
+    /** URI to the file. */
     private Uri uri;
+
+    /** Data of the file. */
+    private Data data;
 
     /** Constructs a new File instance. */
     public File() {
@@ -66,9 +103,6 @@ public abstract class File extends NabuccoDatatype implements Datatype {
         if ((this.getOwner() != null)) {
             clone.setOwner(this.getOwner().cloneObject());
         }
-        if ((this.getData() != null)) {
-            clone.setData(this.getData().cloneObject());
-        }
         if ((this.getFileName() != null)) {
             clone.setFileName(this.getFileName().cloneObject());
         }
@@ -84,6 +118,34 @@ public abstract class File extends NabuccoDatatype implements Datatype {
         if ((this.getUri() != null)) {
             clone.setUri(this.getUri().cloneObject());
         }
+        if ((this.getData() != null)) {
+            clone.setData(this.getData().cloneObject());
+        }
+    }
+
+    /**
+     * CreatePropertyContainer.
+     *
+     * @return the NabuccoPropertyContainer.
+     */
+    protected static NabuccoPropertyContainer createPropertyContainer() {
+        Map<String, NabuccoPropertyDescriptor> propertyMap = new HashMap<String, NabuccoPropertyDescriptor>();
+        propertyMap.putAll(PropertyCache.getInstance().retrieve(NabuccoDatatype.class).getPropertyMap());
+        propertyMap.put(OWNER,
+                PropertyDescriptorSupport.createBasetype(OWNER, Owner.class, 3, PROPERTY_CONSTRAINTS[0], false));
+        propertyMap.put(FILENAME,
+                PropertyDescriptorSupport.createBasetype(FILENAME, FileName.class, 4, PROPERTY_CONSTRAINTS[1], false));
+        propertyMap.put(FILEEXTENSION, PropertyDescriptorSupport.createBasetype(FILEEXTENSION, FileExtension.class, 5,
+                PROPERTY_CONSTRAINTS[2], false));
+        propertyMap.put(FILESIZE,
+                PropertyDescriptorSupport.createBasetype(FILESIZE, FileSize.class, 6, PROPERTY_CONSTRAINTS[3], false));
+        propertyMap.put(MIMETYPE,
+                PropertyDescriptorSupport.createBasetype(MIMETYPE, MimeType.class, 7, PROPERTY_CONSTRAINTS[4], false));
+        propertyMap.put(URI,
+                PropertyDescriptorSupport.createBasetype(URI, Uri.class, 8, PROPERTY_CONSTRAINTS[5], false));
+        propertyMap.put(DATA,
+                PropertyDescriptorSupport.createBasetype(DATA, Data.class, 9, PROPERTY_CONSTRAINTS[6], false));
+        return new NabuccoPropertyContainer(propertyMap);
     }
 
     @Override
@@ -92,23 +154,46 @@ public abstract class File extends NabuccoDatatype implements Datatype {
     }
 
     @Override
-    public List<NabuccoProperty<?>> getProperties() {
-        List<NabuccoProperty<?>> properties = super.getProperties();
-        properties.add(new BasetypeProperty<Owner>(PROPERTY_NAMES[0], Owner.class,
-                PROPERTY_CONSTRAINTS[0], this.owner));
-        properties.add(new BasetypeProperty<Data>(PROPERTY_NAMES[1], Data.class,
-                PROPERTY_CONSTRAINTS[1], this.data));
-        properties.add(new BasetypeProperty<FileName>(PROPERTY_NAMES[2], FileName.class,
-                PROPERTY_CONSTRAINTS[2], this.fileName));
-        properties.add(new BasetypeProperty<FileExtension>(PROPERTY_NAMES[3], FileExtension.class,
-                PROPERTY_CONSTRAINTS[3], this.fileExtension));
-        properties.add(new BasetypeProperty<FileSize>(PROPERTY_NAMES[4], FileSize.class,
-                PROPERTY_CONSTRAINTS[4], this.fileSize));
-        properties.add(new BasetypeProperty<MimeType>(PROPERTY_NAMES[5], MimeType.class,
-                PROPERTY_CONSTRAINTS[5], this.mimeType));
-        properties.add(new BasetypeProperty<Uri>(PROPERTY_NAMES[6], Uri.class,
-                PROPERTY_CONSTRAINTS[6], this.uri));
+    public Set<NabuccoProperty> getProperties() {
+        Set<NabuccoProperty> properties = super.getProperties();
+        properties.add(super.createProperty(File.getPropertyDescriptor(OWNER), this.owner, null));
+        properties.add(super.createProperty(File.getPropertyDescriptor(FILENAME), this.fileName, null));
+        properties.add(super.createProperty(File.getPropertyDescriptor(FILEEXTENSION), this.fileExtension, null));
+        properties.add(super.createProperty(File.getPropertyDescriptor(FILESIZE), this.fileSize, null));
+        properties.add(super.createProperty(File.getPropertyDescriptor(MIMETYPE), this.mimeType, null));
+        properties.add(super.createProperty(File.getPropertyDescriptor(URI), this.uri, null));
+        properties.add(super.createProperty(File.getPropertyDescriptor(DATA), this.data, null));
         return properties;
+    }
+
+    @Override
+    public boolean setProperty(NabuccoProperty property) {
+        if (super.setProperty(property)) {
+            return true;
+        }
+        if ((property.getName().equals(OWNER) && (property.getType() == Owner.class))) {
+            this.setOwner(((Owner) property.getInstance()));
+            return true;
+        } else if ((property.getName().equals(FILENAME) && (property.getType() == FileName.class))) {
+            this.setFileName(((FileName) property.getInstance()));
+            return true;
+        } else if ((property.getName().equals(FILEEXTENSION) && (property.getType() == FileExtension.class))) {
+            this.setFileExtension(((FileExtension) property.getInstance()));
+            return true;
+        } else if ((property.getName().equals(FILESIZE) && (property.getType() == FileSize.class))) {
+            this.setFileSize(((FileSize) property.getInstance()));
+            return true;
+        } else if ((property.getName().equals(MIMETYPE) && (property.getType() == MimeType.class))) {
+            this.setMimeType(((MimeType) property.getInstance()));
+            return true;
+        } else if ((property.getName().equals(URI) && (property.getType() == Uri.class))) {
+            this.setUri(((Uri) property.getInstance()));
+            return true;
+        } else if ((property.getName().equals(DATA) && (property.getType() == Data.class))) {
+            this.setData(((Data) property.getInstance()));
+            return true;
+        }
+        return false;
     }
 
     @Override
@@ -130,11 +215,6 @@ public abstract class File extends NabuccoDatatype implements Datatype {
             if ((other.owner != null))
                 return false;
         } else if ((!this.owner.equals(other.owner)))
-            return false;
-        if ((this.data == null)) {
-            if ((other.data != null))
-                return false;
-        } else if ((!this.data.equals(other.data)))
             return false;
         if ((this.fileName == null)) {
             if ((other.fileName != null))
@@ -161,6 +241,11 @@ public abstract class File extends NabuccoDatatype implements Datatype {
                 return false;
         } else if ((!this.uri.equals(other.uri)))
             return false;
+        if ((this.data == null)) {
+            if ((other.data != null))
+                return false;
+        } else if ((!this.data.equals(other.data)))
+            return false;
         return true;
     }
 
@@ -169,37 +254,20 @@ public abstract class File extends NabuccoDatatype implements Datatype {
         final int PRIME = 31;
         int result = super.hashCode();
         result = ((PRIME * result) + ((this.owner == null) ? 0 : this.owner.hashCode()));
-        result = ((PRIME * result) + ((this.data == null) ? 0 : this.data.hashCode()));
         result = ((PRIME * result) + ((this.fileName == null) ? 0 : this.fileName.hashCode()));
-        result = ((PRIME * result) + ((this.fileExtension == null) ? 0 : this.fileExtension
-                .hashCode()));
+        result = ((PRIME * result) + ((this.fileExtension == null) ? 0 : this.fileExtension.hashCode()));
         result = ((PRIME * result) + ((this.fileSize == null) ? 0 : this.fileSize.hashCode()));
         result = ((PRIME * result) + ((this.mimeType == null) ? 0 : this.mimeType.hashCode()));
         result = ((PRIME * result) + ((this.uri == null) ? 0 : this.uri.hashCode()));
+        result = ((PRIME * result) + ((this.data == null) ? 0 : this.data.hashCode()));
         return result;
-    }
-
-    @Override
-    public String toString() {
-        StringBuilder appendable = new StringBuilder();
-        appendable.append("<File>\n");
-        appendable.append(super.toString());
-        appendable.append((("<owner>" + this.owner) + "</owner>\n"));
-        appendable.append((("<data>" + this.data) + "</data>\n"));
-        appendable.append((("<fileName>" + this.fileName) + "</fileName>\n"));
-        appendable.append((("<fileExtension>" + this.fileExtension) + "</fileExtension>\n"));
-        appendable.append((("<fileSize>" + this.fileSize) + "</fileSize>\n"));
-        appendable.append((("<mimeType>" + this.mimeType) + "</mimeType>\n"));
-        appendable.append((("<uri>" + this.uri) + "</uri>\n"));
-        appendable.append("</File>\n");
-        return appendable.toString();
     }
 
     @Override
     public abstract File cloneObject();
 
     /**
-     * Missing description at method getOwner.
+     * Owner of the file.
      *
      * @return the Owner.
      */
@@ -208,7 +276,7 @@ public abstract class File extends NabuccoDatatype implements Datatype {
     }
 
     /**
-     * Missing description at method setOwner.
+     * Owner of the file.
      *
      * @param owner the Owner.
      */
@@ -217,49 +285,22 @@ public abstract class File extends NabuccoDatatype implements Datatype {
     }
 
     /**
-     * Missing description at method setOwner.
+     * Owner of the file.
      *
      * @param owner the String.
      */
     public void setOwner(String owner) {
         if ((this.owner == null)) {
+            if ((owner == null)) {
+                return;
+            }
             this.owner = new Owner();
         }
         this.owner.setValue(owner);
     }
 
     /**
-     * Missing description at method getData.
-     *
-     * @return the Data.
-     */
-    public Data getData() {
-        return this.data;
-    }
-
-    /**
-     * Missing description at method setData.
-     *
-     * @param data the Data.
-     */
-    public void setData(Data data) {
-        this.data = data;
-    }
-
-    /**
-     * Missing description at method setData.
-     *
-     * @param data the byte[].
-     */
-    public void setData(byte[] data) {
-        if ((this.data == null)) {
-            this.data = new Data();
-        }
-        this.data.setValue(data);
-    }
-
-    /**
-     * Missing description at method getFileName.
+     * Name of the file.
      *
      * @return the FileName.
      */
@@ -268,7 +309,7 @@ public abstract class File extends NabuccoDatatype implements Datatype {
     }
 
     /**
-     * Missing description at method setFileName.
+     * Name of the file.
      *
      * @param fileName the FileName.
      */
@@ -277,19 +318,22 @@ public abstract class File extends NabuccoDatatype implements Datatype {
     }
 
     /**
-     * Missing description at method setFileName.
+     * Name of the file.
      *
      * @param fileName the String.
      */
     public void setFileName(String fileName) {
         if ((this.fileName == null)) {
+            if ((fileName == null)) {
+                return;
+            }
             this.fileName = new FileName();
         }
         this.fileName.setValue(fileName);
     }
 
     /**
-     * Missing description at method getFileExtension.
+     * Extension of the file.
      *
      * @return the FileExtension.
      */
@@ -298,7 +342,7 @@ public abstract class File extends NabuccoDatatype implements Datatype {
     }
 
     /**
-     * Missing description at method setFileExtension.
+     * Extension of the file.
      *
      * @param fileExtension the FileExtension.
      */
@@ -307,19 +351,22 @@ public abstract class File extends NabuccoDatatype implements Datatype {
     }
 
     /**
-     * Missing description at method setFileExtension.
+     * Extension of the file.
      *
      * @param fileExtension the String.
      */
     public void setFileExtension(String fileExtension) {
         if ((this.fileExtension == null)) {
+            if ((fileExtension == null)) {
+                return;
+            }
             this.fileExtension = new FileExtension();
         }
         this.fileExtension.setValue(fileExtension);
     }
 
     /**
-     * Missing description at method getFileSize.
+     * Size of the file.
      *
      * @return the FileSize.
      */
@@ -328,7 +375,7 @@ public abstract class File extends NabuccoDatatype implements Datatype {
     }
 
     /**
-     * Missing description at method setFileSize.
+     * Size of the file.
      *
      * @param fileSize the FileSize.
      */
@@ -337,19 +384,22 @@ public abstract class File extends NabuccoDatatype implements Datatype {
     }
 
     /**
-     * Missing description at method setFileSize.
+     * Size of the file.
      *
      * @param fileSize the Long.
      */
     public void setFileSize(Long fileSize) {
         if ((this.fileSize == null)) {
+            if ((fileSize == null)) {
+                return;
+            }
             this.fileSize = new FileSize();
         }
         this.fileSize.setValue(fileSize);
     }
 
     /**
-     * Missing description at method getMimeType.
+     * File Media Type.
      *
      * @return the MimeType.
      */
@@ -358,7 +408,7 @@ public abstract class File extends NabuccoDatatype implements Datatype {
     }
 
     /**
-     * Missing description at method setMimeType.
+     * File Media Type.
      *
      * @param mimeType the MimeType.
      */
@@ -367,19 +417,22 @@ public abstract class File extends NabuccoDatatype implements Datatype {
     }
 
     /**
-     * Missing description at method setMimeType.
+     * File Media Type.
      *
      * @param mimeType the String.
      */
     public void setMimeType(String mimeType) {
         if ((this.mimeType == null)) {
+            if ((mimeType == null)) {
+                return;
+            }
             this.mimeType = new MimeType();
         }
         this.mimeType.setValue(mimeType);
     }
 
     /**
-     * Missing description at method getUri.
+     * URI to the file.
      *
      * @return the Uri.
      */
@@ -388,7 +441,7 @@ public abstract class File extends NabuccoDatatype implements Datatype {
     }
 
     /**
-     * Missing description at method setUri.
+     * URI to the file.
      *
      * @param uri the Uri.
      */
@@ -397,14 +450,69 @@ public abstract class File extends NabuccoDatatype implements Datatype {
     }
 
     /**
-     * Missing description at method setUri.
+     * URI to the file.
      *
      * @param uri the String.
      */
     public void setUri(String uri) {
         if ((this.uri == null)) {
+            if ((uri == null)) {
+                return;
+            }
             this.uri = new Uri();
         }
         this.uri.setValue(uri);
+    }
+
+    /**
+     * Data of the file.
+     *
+     * @return the Data.
+     */
+    public Data getData() {
+        return this.data;
+    }
+
+    /**
+     * Data of the file.
+     *
+     * @param data the Data.
+     */
+    public void setData(Data data) {
+        this.data = data;
+    }
+
+    /**
+     * Data of the file.
+     *
+     * @param data the byte[].
+     */
+    public void setData(byte[] data) {
+        if ((this.data == null)) {
+            if ((data == null)) {
+                return;
+            }
+            this.data = new Data();
+        }
+        this.data.setValue(data);
+    }
+
+    /**
+     * Getter for the PropertyDescriptor.
+     *
+     * @param propertyName the String.
+     * @return the NabuccoPropertyDescriptor.
+     */
+    public static NabuccoPropertyDescriptor getPropertyDescriptor(String propertyName) {
+        return PropertyCache.getInstance().retrieve(File.class).getProperty(propertyName);
+    }
+
+    /**
+     * Getter for the PropertyDescriptorList.
+     *
+     * @return the List<NabuccoPropertyDescriptor>.
+     */
+    public static List<NabuccoPropertyDescriptor> getPropertyDescriptorList() {
+        return PropertyCache.getInstance().retrieve(File.class).getAllProperties();
     }
 }

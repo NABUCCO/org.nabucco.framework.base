@@ -1,0 +1,161 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+	Copyright 2011 PRODYNA AG
+
+	Licensed under the Eclipse Public License (EPL), Version 1.0 (the "License");
+	you may not use this file except in compliance with the License.
+	You may obtain a copy of the License at
+
+	http://www.opensource.org/licenses/eclipse-1.0.php or
+	http://nabuccosource.org/License.html
+
+	Unless required by applicable law or agreed to in writing, software
+	distributed under the License is distributed on an "AS IS" BASIS,
+	WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+	See the License for the specific language governing permissions and
+	limitations under the License.
+-->
+
+<xsd:schema
+	targetNamespace="org.nabucco.aspect"
+	elementFormDefault="qualified"
+	xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+	xmlns="org.nabucco.aspect"
+	xmlns:bts="org.nabucco.bootstrap"
+	xmlns:base="org.nabucco">
+
+
+	<xsd:import
+		schemaLocation="../org.nabucco.xsd"
+		namespace="org.nabucco"></xsd:import>
+	<xsd:element
+		name="extension"
+		type="AspectExtensionType">
+
+	</xsd:element>
+
+
+
+
+
+
+
+
+	<xsd:attributeGroup
+		name="DefaultUIAttributeGroup">
+		<xsd:attribute
+			name="label"
+			type="xsd:string"
+			use="optional"></xsd:attribute>
+		<xsd:attribute
+			name="icon"
+			type="xsd:string"
+			use="required"></xsd:attribute>
+		<xsd:attribute
+			name="tooltip"
+			type="xsd:string"
+			use="optional">
+		</xsd:attribute>
+	</xsd:attributeGroup>
+
+
+
+	<xsd:complexType name="AspectExtensionType">
+		<xsd:complexContent>
+			<xsd:extension base="base:ExtensionType">
+                <xsd:choice maxOccurs="1" minOccurs="1">
+
+					<xsd:element name="aspects" type="AspectsType" maxOccurs="1" minOccurs="1">
+					</xsd:element>
+                    <xsd:sequence><xsd:element name="properties" type="PropertiesType" maxOccurs="1" minOccurs="0">
+					</xsd:element><xsd:element name="pointcut" type="PointcutType" maxOccurs="unbounded" minOccurs="1">
+					</xsd:element></xsd:sequence>
+				</xsd:choice>
+			</xsd:extension>
+		</xsd:complexContent>
+	</xsd:complexType>
+
+	<xsd:complexType name="PointcutType">
+		<xsd:sequence>
+
+		</xsd:sequence>
+		<xsd:attribute
+			name="service"
+			type="base:ClassNameType"
+			use="required">
+		</xsd:attribute>
+		<xsd:attribute
+			name="operation"
+			type="xsd:string">
+		</xsd:attribute>
+		<xsd:attribute name="advice">
+			<xsd:simpleType>
+				<xsd:restriction base="xsd:string">
+					<xsd:enumeration value="AFTER"></xsd:enumeration>
+					<xsd:enumeration value="BEFORE"></xsd:enumeration>
+					<xsd:enumeration value="AROUND"></xsd:enumeration>
+				</xsd:restriction>
+			</xsd:simpleType>
+		</xsd:attribute>
+		<xsd:attribute
+			name="class"
+			type="base:ClassNameType">
+		</xsd:attribute>
+	</xsd:complexType>
+
+	<xsd:complexType name="PropertiesType">
+		<xsd:sequence>
+			<xsd:element
+				name="property"
+				type="PropertyType" maxOccurs="unbounded" minOccurs="0">
+			</xsd:element>
+		</xsd:sequence>
+	</xsd:complexType>
+
+	<xsd:complexType name="PropertyType">
+		<xsd:attribute
+			name="id"
+			type="xsd:string">
+		</xsd:attribute>
+		<xsd:attribute
+			name="type"
+			type="xsd:string">
+		</xsd:attribute>
+		<xsd:attribute
+			name="value"
+			type="xsd:string">
+		</xsd:attribute>
+	</xsd:complexType>
+
+	<xsd:complexType name="AspectsType">
+		<xsd:sequence>
+			<xsd:element
+				name="aspect"
+				type="AspectType" maxOccurs="unbounded" minOccurs="0">
+			</xsd:element>
+		</xsd:sequence>
+	</xsd:complexType>
+
+	<xsd:complexType name="AspectType">
+		<xsd:attribute
+			name="name"
+			type="xsd:string" use="required">
+		</xsd:attribute>
+		<xsd:attribute
+			name="point"
+			type="base:ClassNameType" use="required">
+		</xsd:attribute>
+		<xsd:attribute
+			name="class"
+			type="base:ClassNameType" use="required">
+		</xsd:attribute>
+		<xsd:attribute
+			name="interface"
+			type="base:ClassNameType" use="required">
+		</xsd:attribute>
+		<xsd:attribute
+			name="slots"
+			type="xsd:string" use="required">
+		</xsd:attribute>
+	</xsd:complexType>
+</xsd:schema>

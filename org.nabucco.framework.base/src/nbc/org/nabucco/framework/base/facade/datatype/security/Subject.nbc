@@ -6,7 +6,7 @@
  * You may obtain a copy of the License at
  *
  * http://www.opensource.org/licenses/eclipse-1.0.php or
- * http://www.nabucco-source.org/nabucco-license.html
+ * http://nabuccosource.org/License.html
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -17,7 +17,8 @@
 package org.nabucco.framework.base.facade.datatype.security;
 
 import org.nabucco.framework.base.facade.datatype.Owner;
-import org.nabucco.framework.base.facade.datatype.DateTime;
+import org.nabucco.framework.base.facade.datatype.Tenant;
+import org.nabucco.framework.base.facade.datatype.date.Timestamp;
 import org.nabucco.framework.base.facade.datatype.security.User;
 import org.nabucco.framework.base.facade.datatype.security.UserId;
 import org.nabucco.framework.base.facade.datatype.security.credential.Token;
@@ -29,17 +30,20 @@ import org.nabucco.framework.base.facade.datatype.security.credential.Token;
 @Description	A Subject represents an authenticated user.
 public Datatype Subject {
 
-	@Description	ID/Name of the user
-	private Basetype UserId[1] userId;
+	@Description	Tenant of the subject
+	private Basetype Tenant[1] tenant;
 	
 	@Description	Owner of the subject
 	private Basetype Owner[1] owner;
+	
+	@Description	ID/Name of the user
+	private Basetype UserId[1] userId;
 	
 	@Description	Authentication token, is generated during authentication
 	private Basetype Token[1] token;
 	
 	@Description	Authentication time, is generated during authentication
-	private Basetype DateTime[1] loginTime;
+	private Basetype Timestamp[1] loginTime;
 	
 	@Description	The actual user object
 	private Datatype User[0..1] user;

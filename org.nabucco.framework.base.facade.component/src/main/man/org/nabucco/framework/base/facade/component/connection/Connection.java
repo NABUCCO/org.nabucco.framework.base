@@ -1,12 +1,12 @@
 /*
- * Copyright 2010 PRODYNA AG
+ * Copyright 2012 PRODYNA AG
  *
  * Licensed under the Eclipse Public License (EPL), Version 1.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
  * http://www.opensource.org/licenses/eclipse-1.0.php or
- * http://www.nabucco-source.org/nabucco-license.html
+ * http://www.nabucco.org/License.html
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -34,36 +34,38 @@ import javax.rmi.PortableRemoteObject;
  */
 public abstract class Connection {
 
+    private static final String LOCAL = "LOCAL";
+
     private Context context;
 
-    private ConnectionSpecification specification;
+    private ConnectionSpecification spec;
 
     /**
      * Connections may not be created manually. Use {@link ConnectionFactory} instead.
      * 
-     * @param context
-     *            the context to create the connection
-     * @param specification
-     *            the connection specification
+     * @param spec
+     *            the connection spec
      * 
      * @throws ConnectionException
      * 
      * @see ConnectionFactory
      */
     Connection(ConnectionSpecification specification) throws ConnectionException {
-        if (specification == null) {
-            throw new IllegalArgumentException("Connection specification must not be null.");
+
+        Context context;
+
+        if (specification != null) {
+            context = this.initContext(specification.getProperties());
+        } else {
+            context = this.initContext(null);
         }
 
-        Context context = this.initContext(specification.getProperties());
-
         if (context == null) {
-            throw new ConnectionException("Context for '"
-                    + this.getClass().getSimpleName() + "' is not initialized.");
+            throw new ConnectionException("Context for '" + this.getClass().getSimpleName() + "' is not initialized.");
         }
 
         this.context = context;
-        this.specification = specification;
+        this.spec = specification;
     }
 
     /**
@@ -86,7 +88,7 @@ public abstract class Connection {
             Object ref = this.context.lookup(jndiName);
             return (C) PortableRemoteObject.narrow(ref, narrowTo);
         } catch (NamingException e) {
-            String type = String.valueOf(this.specification.getConnectionType());
+            String type = this.spec != null ? String.valueOf(this.spec.getConnectionType()) : LOCAL;
             throw new ConnectionException("Error connecting to resource '" + type + "'.", e);
         }
     }
@@ -98,9 +100,9 @@ public abstract class Connection {
      */
     void disconnect() throws ConnectionException {
         try {
-            context.close();
+            this.context.close();
         } catch (NamingException e) {
-            String type = String.valueOf(this.specification.getConnectionType());
+            String type = this.spec != null ? String.valueOf(this.spec.getConnectionType()) : LOCAL;
             throw new ConnectionException("Error disconnecting from resource '" + type + "'.", e);
         }
     }
@@ -114,21 +116,30 @@ public abstract class Connection {
      * @return the context for the connection.
      * 
      * @throws ConnectionException
+     *             when the context cannot be created
      */
     abstract Context initContext(Properties properties) throws ConnectionException;
 
     /**
-     * @return Returns the specification.
+     * Getter for the connection spec.
+     * 
+     * @return Returns the spec.
      */
-    public ConnectionSpecification getSpecification() {
-        return this.specification;
+    public ConnectionSpecification getSpec() {
+        return this.spec;
     }
 
     @Override
     public String toString() {
         StringBuilder builder = new StringBuilder();
-        builder.append("Connection [specification=");
-        builder.append(this.specification);
+        builder.append("Connection [spec=");
+
+        if (this.spec != null) {
+            builder.append(this.spec);
+        } else {
+            builder.append(LOCAL);
+        }
+
         builder.append("]");
         return builder.toString();
     }

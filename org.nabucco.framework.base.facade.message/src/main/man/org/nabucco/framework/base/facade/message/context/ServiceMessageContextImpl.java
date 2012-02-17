@@ -1,12 +1,12 @@
 /*
- * Copyright 2010 PRODYNA AG
+ * Copyright 2012 PRODYNA AG
  *
  * Licensed under the Eclipse Public License (EPL), Version 1.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
  * http://www.opensource.org/licenses/eclipse-1.0.php or
- * http://www.nabucco-source.org/nabucco-license.html
+ * http://www.nabucco.org/License.html
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -17,7 +17,10 @@
 package org.nabucco.framework.base.facade.message.context;
 
 import java.util.HashMap;
+import java.util.Map;
 
+import org.nabucco.framework.base.facade.datatype.context.ServiceSubContext;
+import org.nabucco.framework.base.facade.datatype.context.ServiceSubContextType;
 import org.nabucco.framework.base.facade.datatype.security.Subject;
 import org.nabucco.framework.base.facade.message.tracing.InvocationIdentifier;
 
@@ -35,7 +38,7 @@ final class ServiceMessageContextImpl implements ServiceMessageContext {
 
     private Subject subject;
 
-    private HashMap<String, Object> contextMap;
+    private Map<ServiceSubContextType, ServiceSubContext> subContextMap;
 
     /**
      * Creates a new {@link ServiceMessageContextImpl} instance.
@@ -51,7 +54,8 @@ final class ServiceMessageContextImpl implements ServiceMessageContext {
         }
         this.subject = subject;
         this.invocationIdentifier = identifier;
-        this.contextMap = new HashMap<String, Object>();
+        this.subContextMap = new HashMap<ServiceSubContextType, ServiceSubContext>();
+
     }
 
     @Override
@@ -60,17 +64,56 @@ final class ServiceMessageContextImpl implements ServiceMessageContext {
     }
 
     @Override
+    public String getUserId() {
+        if (this.subject == null) {
+            return null;
+        }
+        if (this.subject.getUserId() == null) {
+            return null;
+        }
+        return this.subject.getUserId().getValue();
+    }
+
+    @Override
+    public String getOwner() {
+        if (this.subject == null) {
+            return null;
+        }
+        if (this.subject.getOwner() == null) {
+            return null;
+        }
+        return this.subject.getOwner().getValue();
+    }
+
+    @Override
+    public String getTenant() {
+        if (this.subject == null) {
+            return null;
+        }
+        if (this.subject.getTenant() == null) {
+            return null;
+        }
+        return this.subject.getTenant().getValue();
+    }
+
+    @Override
     public Subject getSubject() {
         return this.subject;
     }
 
     @Override
-    public Object get(String contextKey) {
-        return this.contextMap.get(contextKey);
+    public void put(ServiceSubContextType subType, ServiceSubContext context) {
+        this.subContextMap.put(subType, context);
+
     }
 
     @Override
-    public void put(String contextKey, Object contextObject) {
-        this.contextMap.put(contextKey, contextObject);
+    public ServiceSubContext get(ServiceSubContextType subType) {
+        return this.subContextMap.get(subType);
+    }
+
+    @Override
+    public ServiceSubContext remove(ServiceSubContextType subType) {
+        return this.subContextMap.remove(subType);
     }
 }

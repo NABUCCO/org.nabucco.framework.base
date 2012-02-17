@@ -1,12 +1,12 @@
 /*
- * Copyright 2010 PRODYNA AG
+ * Copyright 2012 PRODYNA AG
  *
  * Licensed under the Eclipse Public License (EPL), Version 1.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
  * http://www.opensource.org/licenses/eclipse-1.0.php or
- * http://www.nabucco-source.org/nabucco-license.html
+ * http://www.nabucco.org/License.html
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -16,16 +16,13 @@
  */
 package org.nabucco.framework.base.impl.service.maintain;
 
-import java.util.List;
+import java.util.Set;
 
 import org.nabucco.framework.base.facade.datatype.Datatype;
-import org.nabucco.framework.base.facade.datatype.DatatypeState;
-import org.nabucco.framework.base.facade.datatype.NType;
-import org.nabucco.framework.base.facade.datatype.NabuccoDatatype;
 import org.nabucco.framework.base.facade.datatype.collection.NabuccoCollectionAccessor;
-import org.nabucco.framework.base.facade.datatype.property.ListProperty;
+import org.nabucco.framework.base.facade.datatype.property.CollectionProperty;
+import org.nabucco.framework.base.facade.datatype.property.DatatypeProperty;
 import org.nabucco.framework.base.facade.datatype.property.NabuccoProperty;
-import org.nabucco.framework.base.facade.datatype.property.PropertyType;
 import org.nabucco.framework.base.facade.datatype.visitor.VisitorException;
 import org.nabucco.framework.base.facade.message.visitor.ServiceMessageVisitor;
 
@@ -42,31 +39,77 @@ public class PersistenceCleaner extends ServiceMessageVisitor {
 
     @Override
     public void visit(Datatype datatype) throws VisitorException {
-        this.cleanDatatype(datatype);
-
-        this.resetDatatypeState(datatype);
+        this.checkDatatype(datatype);
 
         super.visit(datatype);
     }
 
     /**
-     * Replaces lazy initialized persistence provider specific collections by empty
-     * {@link java.util.Collection} implementations.
+     * Replaces lazy initialized persistence provider specific datatype proxies and collections by
+     * clean accessible implementations.
      * 
      * @param datatype
      *            the datatype to clean
      */
-    private void cleanDatatype(Datatype datatype) {
-        List<NabuccoProperty<?>> properties = datatype.getProperties();
-        if (properties == null) {
+    private void checkDatatype(Datatype datatype) {
+        Set<NabuccoProperty> properties = datatype.getProperties();
+        if (properties == null || properties.isEmpty()) {
             return;
         }
 
-        for (NabuccoProperty<?> property : properties) {
-            if (property.getPropertyType() == PropertyType.LIST) {
-                this.cleanList((ListProperty<?>) property);
+        for (NabuccoProperty property : properties) {
+
+            switch (property.getPropertyType()) {
+
+            case DATATYPE: {
+                if (property.getInstance() != null && !this.isDatatype(property.getInstance())) {
+                    this.cleanDatatype((DatatypeProperty) property);
+                }
+                break;
+            }
+
+            case COLLECTION: {
+                this.cleanList((CollectionProperty) property);
+                break;
+            }
+
             }
         }
+    }
+
+    /**
+     * Check whether a datatype is a real NABUCCO datatype or only a reflection proxy. The original
+     * generated NABUCCO {@link Datatype} instances have a direct interface realization.
+     * 
+     * @param datatype
+     *            the datatype to check for authenticity
+     * 
+     * @return <b>true</b> if the datatype is a real NABUCCO datatype, <b>false</b> if not (e.g. a
+     *         {@link java.lang.reflect.Proxy}).
+     */
+    private boolean isDatatype(Object datatype) {
+        if (!(datatype instanceof Datatype)) {
+            return false;
+        }
+
+        Class<?> datatypeClass = datatype.getClass();
+        for (Class<?> intf : datatypeClass.getInterfaces()) {
+            if (intf == Datatype.class) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
+     * Clean JPA lazy proxies and replace them by <code>null</code>.
+     * 
+     * @param property
+     *            the property to clean
+     */
+    private void cleanDatatype(DatatypeProperty property) {
+        NabuccoProperty newProperty = property.createProperty(null);
+        newProperty.getParent().setProperty(newProperty);
     }
 
     /**
@@ -76,25 +119,8 @@ public class PersistenceCleaner extends ServiceMessageVisitor {
      * @param property
      *            the list property to clean
      */
-    private <T extends NType> void cleanList(ListProperty<T> property) {
+    private void cleanList(CollectionProperty property) {
         NabuccoCollectionAccessor.getInstance().detachCollection(property.getInstance());
-    }
-
-    /**
-     * Reset the datatype state from constructed to persistent in order to set datatypes loaded from
-     * DB to persistent.
-     * 
-     * @param datatype
-     *            the datatype to reset
-     */
-    private void resetDatatypeState(Datatype datatype) {
-        if (datatype.getDatatypeState() == DatatypeState.CONSTRUCTED) {
-            if (datatype instanceof NabuccoDatatype) {
-                if (((NabuccoDatatype) datatype).getId() != null) {
-                    datatype.setDatatypeState(DatatypeState.PERSISTENT);
-                }
-            }
-        }
     }
 
 }

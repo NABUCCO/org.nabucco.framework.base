@@ -1,12 +1,12 @@
 /*
- * Copyright 2010 PRODYNA AG
+ * Copyright 2012 PRODYNA AG
  *
  * Licensed under the Eclipse Public License (EPL), Version 1.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
  * http://www.opensource.org/licenses/eclipse-1.0.php or
- * http://www.nabucco-source.org/nabucco-license.html
+ * http://www.nabucco.org/License.html
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -16,87 +16,197 @@
  */
 package org.nabucco.framework.base.facade.datatype.property;
 
+import org.nabucco.framework.base.facade.datatype.validation.constraint.ConstraintFacade;
+import org.nabucco.framework.base.facade.datatype.validation.constraint.dynamic.DynamicConstraintProperty;
+import org.nabucco.framework.base.facade.datatype.validation.constraint.element.Constraint;
+import org.nabucco.framework.base.facade.datatype.validation.constraint.element.ConstraintType;
+import org.nabucco.framework.base.facade.datatype.validation.constraint.element.EditableConstraint;
+import org.nabucco.framework.base.facade.datatype.validation.constraint.element.VisibilityConstraint;
+import org.nabucco.framework.base.facade.datatype.validation.constraint.parser.ConstraintContainer;
+import org.nabucco.framework.base.facade.datatype.validation.constraint.parser.ConstraintParser;
+
 /**
  * PropertySupport
  * 
  * @author Nicolas Moser, PRODYNA AG
  */
-abstract class PropertySupport<N extends Object> implements NabuccoProperty<N> {
+abstract class PropertySupport implements NabuccoPropertyDescriptor, NabuccoProperty, DynamicConstraintProperty {
 
-    /** The property name. */
-    private String name;
+    /** The static information of this property. */
+    private NabuccoPropertyDescriptor descriptor;
 
-    /** The property class. */
-    private Class<N> type;
+    /** The dynamic constraints of the datatype instance. */
+    private String dynamicConstraints;
 
-    /** The property constraints. */
-    private String constraints;
+    /** The parent of this property. */
+    private PropertyOwner parent;
 
-    /** Type of the property. */
-    private PropertyType propertyType;
+    /** The reference ID of the component relation. */
+    private Long refId;
 
     /**
      * Creates a new {@link PropertySupport} instance.
      * 
-     * @param name
-     *            the property name
-     * @param type
-     *            the property class
-     * @param constraints
-     *            the property constraint string
-     * @param propertyType
-     *            the property type
+     * @param descriptor
+     *            the delegating descriptor
+     * @param parent
+     *            the property owner
+     * @param dynamicConstraints
+     *            the dynamic constraints of the property instance.
+     * @param refId
+     *            the component ref id
      */
-    PropertySupport(String name, Class<N> type, String constraints, PropertyType propertyType) {
-        if (name == null) {
-            throw new IllegalArgumentException("Cannot create NabuccoProperty with name [null].");
-        }
-        if (type == null) {
-            throw new IllegalArgumentException("Cannot create NabuccoProperty with type [null].");
-        }
-        if (constraints == null) {
-            throw new IllegalArgumentException(
-                    "Cannot create NabuccoProperty with constraints [null].");
-        }
-        if (propertyType == null) {
-            throw new IllegalArgumentException(
-                    "Cannot create NabuccoProperty with propertyType [null].");
+    PropertySupport(NabuccoPropertyDescriptor descriptor, PropertyOwner parent, String dynamicConstraints, Long refId) {
+        if (descriptor == null) {
+            throw new IllegalArgumentException("Cannot create Property for descriptor [null].");
         }
 
-        this.name = name;
-        this.type = type;
-        this.constraints = constraints;
-        this.propertyType = propertyType;
+        this.parent = parent;
+        this.descriptor = descriptor;
+        this.dynamicConstraints = dynamicConstraints;
+        this.refId = refId;
     }
 
     @Override
-    public String getName() {
-        return this.name;
+    public PropertyOwner getParent() {
+        return this.parent;
     }
 
     @Override
-    public Class<N> getType() {
-        return this.type;
+    public final String getName() {
+        return this.descriptor.getName();
     }
 
     @Override
-    public String getConstraints() {
-        return this.constraints;
+    public final Class<?> getType() {
+        return this.descriptor.getType();
     }
 
     @Override
-    public PropertyType getPropertyType() {
-        return this.propertyType;
+    public int getIndex() {
+        return this.descriptor.getIndex();
+    }
+
+    @Override
+    public final ConstraintContainer getConstraints() {
+        ConstraintContainer staticConstraints = this.descriptor.getConstraints();
+        ConstraintContainer dynamicConstraints = ConstraintParser.getInstance()
+                .parseConstraintsWithIndex(this.dynamicConstraints).get(this.descriptor.getIndex());
+        ConstraintContainer parentConstraints = ConstraintParser.getInstance()
+                .parseConstraintsWithIndex(this.dynamicConstraints).get(ConstraintFacade.ROOT_INDEX);
+
+        if (dynamicConstraints != null) {
+            staticConstraints.addAll(dynamicConstraints);
+        }
+
+        if (parentConstraints != null) {
+            staticConstraints.addAll(parentConstraints);
+        }
+
+        return staticConstraints;
+    }
+
+    @Override
+    public final NabuccoPropertyType getPropertyType() {
+        return this.descriptor.getPropertyType();
+    }
+
+    @Override
+    public Long getReferenceId() {
+        return this.refId;
+    }
+
+    @Override
+    public final PropertyAssociationType getAssociationType() {
+        return this.descriptor.getAssociationType();
+    }
+
+    @Override
+    public String getCodePath() {
+        return this.descriptor.getCodePath();
+    }
+
+    @Override
+    public boolean isTechnical() {
+        return this.descriptor.isTechnical();
+    }
+
+    @Override
+    public boolean isCollection() {
+        return this.descriptor.isCollection();
+    }
+
+    @Override
+    public NabuccoProperty createProperty(Object instance) {
+        return this.createProperty(this.parent, instance, this.dynamicConstraints, this.refId);
+    }
+
+    @Override
+    public NabuccoProperty createProperty(PropertyOwner parent, Object instance, String dynamicConstraints) {
+        return this.descriptor.createProperty(parent, instance, dynamicConstraints);
+    }
+
+    @Override
+    public NabuccoProperty createProperty(PropertyOwner parent, Object instance, String dynamicConstraints, Long refId) {
+        return this.descriptor.createProperty(parent, instance, dynamicConstraints, refId);
+    }
+
+    @Override
+    public boolean isEditable() {
+        ConstraintContainer constraintContainer = this.getDynamicConstraints();
+
+        if (constraintContainer == null) {
+            return true;
+        }
+
+        for (Constraint constraint : constraintContainer) {
+            if (constraint.getType() == ConstraintType.EDIT) {
+                return ((EditableConstraint) constraint).isEditable();
+            }
+        }
+        return true;
+    }
+
+    @Override
+    public boolean isVisible() {
+        ConstraintContainer constraintContainer = this.getDynamicConstraints();
+
+        if (constraintContainer == null) {
+            return true;
+        }
+
+        for (Constraint constraint : constraintContainer) {
+            if (constraint.getType() == ConstraintType.VISIBILITY) {
+                return ((VisibilityConstraint) constraint).isVisible();
+            }
+        }
+        return true;
+    }
+
+    @Override
+    public String toString() {
+        return String.valueOf(this.descriptor.toString() + " : " + this.getInstance());
+    }
+
+    /**
+     * Resolve the dynamic constraints for the given string.
+     * 
+     * @return the constraint container holding the dynamic constraints
+     */
+    private ConstraintContainer getDynamicConstraints() {
+        if (this.dynamicConstraints == null) {
+            return null;
+        }
+        return ConstraintParser.getInstance().parseConstraints(this.dynamicConstraints);
     }
 
     @Override
     public int hashCode() {
         final int prime = 31;
         int result = 1;
-        result = prime * result + ((this.constraints == null) ? 0 : this.constraints.hashCode());
-        result = prime * result + ((this.name == null) ? 0 : this.name.hashCode());
-        result = prime * result + ((this.propertyType == null) ? 0 : this.propertyType.hashCode());
-        result = prime * result + ((this.type == null) ? 0 : this.type.hashCode());
+        result = prime * result + ((this.descriptor == null) ? 0 : this.descriptor.hashCode());
+//        result = prime * result + ((this.parent == null) ? 0 : this.parent.hashCode());
+        result = prime * result + ((this.refId == null) ? 0 : this.refId.hashCode());
         return result;
     }
 
@@ -108,37 +218,23 @@ abstract class PropertySupport<N extends Object> implements NabuccoProperty<N> {
             return false;
         if (getClass() != obj.getClass())
             return false;
-        PropertySupport<?> other = (PropertySupport<?>) obj;
-        if (this.constraints == null) {
-            if (other.constraints != null)
+        PropertySupport other = (PropertySupport) obj;
+        if (this.descriptor == null) {
+            if (other.descriptor != null)
                 return false;
-        } else if (!this.constraints.equals(other.constraints))
+        } else if (!this.descriptor.equals(other.descriptor))
             return false;
-        if (this.name == null) {
-            if (other.name != null)
+//        if (this.parent == null) {
+//            if (other.parent != null)
+//                return false;
+//        } else if (!this.parent.equals(other.parent))
+//            return false;
+        if (this.refId == null) {
+            if (other.refId != null)
                 return false;
-        } else if (!this.name.equals(other.name))
-            return false;
-        if (this.propertyType != other.propertyType)
-            return false;
-        if (this.type == null) {
-            if (other.type != null)
-                return false;
-        } else if (!this.type.equals(other.type))
+        } else if (!this.refId.equals(other.refId))
             return false;
         return true;
-    }
-
-    @Override
-    public String toString() {
-        StringBuilder builder = new StringBuilder();
-        builder.append(this.propertyType);
-        builder.append("<");
-        builder.append(this.type.getSimpleName());
-        builder.append("> (");
-        builder.append(this.name);
-        builder.append(")");
-        return builder.toString();
     }
 
 }

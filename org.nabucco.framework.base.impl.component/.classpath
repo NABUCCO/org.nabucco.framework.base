@@ -13,5 +13,8 @@
 	<classpathentry combineaccessrules="false" kind="src" path="/org.nabucco.framework.base.facade.message"/>
 	<classpathentry kind="lib" path="/org.nabucco.framework.base/lib/impl/ejb3-persistence.jar"/>
 	<classpathentry kind="lib" path="/org.nabucco.framework.base/lib/impl/log4j.jar"/>
-	<classpathentry kind="output" path="out"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/org.nabucco.framework.base.impl.service"/>
+	<classpathentry kind="lib" path="/org.nabucco.framework.base/lib/impl/org.nabucco.common.cache.jar" sourcepath="/org.nabucco.common.extension"/>
+	<classpathentry kind="lib" path="/org.nabucco.framework.base/lib/impl/org.nabucco.common.extension.jar" sourcepath="/org.nabucco.common.extension"/>
+	<classpathentry kind="output" path="out/ide"/>
 </classpath>

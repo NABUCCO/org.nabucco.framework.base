@@ -1,0 +1,263 @@
+/*
+* Copyright 2011 PRODYNA AG
+*
+* Licensed under the Eclipse Public License (EPL), Version 1.0 (the "License");
+* you may not use this file except in compliance with the License.
+* You may obtain a copy of the License at
+*
+* http://www.opensource.org/licenses/eclipse-1.0.php or
+* http://nabuccosource.org/License.html
+*
+* Unless required by applicable law or agreed to in writing, software
+* distributed under the License is distributed on an "AS IS" BASIS,
+* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+* See the License for the specific language governing permissions and
+* limitations under the License.
+*/
+package org.nabucco.framework.base.facade.datatype.extension;
+
+@Author			Frank Ratschinski
+@Company		PRODYNA AG
+@Date			2011-03-04
+@Version		1.0
+@Description	Enumeration of available extension points.
+public Enumeration ExtensionPointType {
+	 
+	@Description 	Bootstrap extension for NABUCCO extension mechanism.
+	@LiteralId 		org.nabucco.bootstrap
+	ORG_NABUCCO_BOOTSTRAP
+
+	@Description	Extension point for defining aspects.
+	@LiteralId		org.nabucco.aspect
+	ORG_NABUCCO_ASPECT
+	
+	@Description	Extension point for defining interceptors.
+	@LiteralId		org.nabucco.interceptor
+	ORG_NABUCCO_INTERCEPTOR
+	
+	@Description	Extension point for defining jmx mbeans.
+	@LiteralId		org.nabucco.management
+	ORG_NABUCCO_MANAGEMENT
+	
+	@Description	Extension point for monitoring adapters.
+	@LiteralId		org.nabucco.management.adapter
+	ORG_NABUCCO_MANAGEMENT_ADAPTER
+	
+	@Description	Extension point for initializing aspect.
+	@LiteralId		org.nabucco.aspect.initializing
+	ORG_NABUCCO_ASPECT_INITIALIZING
+	
+	@Description	Extension point for indexing aspect.
+	@LiteralId		org.nabucco.aspect.indexing
+	ORG_NABUCCO_ASPECT_INDEXING
+	
+	@Description	Extension point for validating aspect.
+	@LiteralId		org.nabucco.aspect.validating
+	ORG_NABUCCO_ASPECT_VALIDATING
+	
+	@Description	Extension point for constraining aspect.
+	@LiteralId		org.nabucco.aspect.constraining
+	ORG_NABUCCO_ASPECT_CONSTRAINING
+	
+	@Description	Extension point for relating aspect.
+	@LiteralId		org.nabucco.aspect.relating
+	ORG_NABUCCO_ASPECT_RELATING
+	
+	@Description	Extension point for resolving aspect.
+	@LiteralId		org.nabucco.aspect.resolving
+	ORG_NABUCCO_ASPECT_RESOLVING
+	
+	@Description	Extension point for transitioning aspect.
+	@LiteralId		org.nabucco.aspect.transitioning
+	ORG_NABUCCO_ASPECT_TRANSITIONING
+	
+	@Description	Extension point for permissioning aspect.
+	@LiteralId		org.nabucco.aspect.permissioning
+	ORG_NABUCCO_ASPECT_PERMISSIONING
+	
+	@Description	Extension point for caching aspect.
+	@LiteralId		org.nabucco.aspect.caching
+	ORG_NABUCCO_ASPECT_CACHING
+		
+	@Description	Extension point for journaling aspect.
+	@LiteralId		org.nabucco.aspect.journaling
+	ORG_NABUCCO_ASPECT_JOURNALING
+		
+	@Description	Extension point for linking aspect.
+	@LiteralId		org.nabucco.aspect.linking
+	ORG_NABUCCO_ASPECT_LINKING
+	
+	@Description	Extension point for server connection configuration.
+	@LiteralId		org.nabucco.connection
+	ORG_NABUCCO_CONNECTION
+	
+	@Description 	Extension point for filter definitions.
+	@LiteralId 		org.nabucco.queryfilter
+	ORG_NABUCCO_QUERYFILTER
+	
+	@Description	Extension point for authentication.
+	@LiteralId		org.nabucco.framework.authorization.authentication
+	ORG_NABUCCO_FRAMEWORK_AUTHORIZATION_AUTHENTICATION
+	
+	@Description	Extension point for password policies.
+	@LiteralId		org.nabucco.framework.authorization.password.policy
+	ORG_NABUCCO_FRAMEWORK_AUTHORIZATION_PASSWORD_POLICY
+	
+	@Description 	Extension point exception to message conversion.
+	@LiteralId 		org.nabucco.framework.messageset
+	ORG_NABUCCO_FRAMEWORK_MESSAGESET
+	
+	@Description 	Extension point for index definitions.
+	@LiteralId 		org.nabucco.framework.search.index
+	ORG_NABUCCO_FRAMEWORK_SEARCH_INDEX
+	
+	@Description 	Extension point for search configurations.
+	@LiteralId 		org.nabucco.framework.search.config
+	ORG_NABUCCO_FRAMEWORK_SEARCH_CONFIG
+	
+	@Description 	Extension point for search result configurations.
+	@LiteralId 		org.nabucco.framework.search.result
+	ORG_NABUCCO_FRAMEWORK_SEARCH_RESULT
+	
+	@Description 	Extension point for search query configurations.
+	@LiteralId 		org.nabucco.framework.search.query
+	ORG_NABUCCO_FRAMEWORK_SEARCH_QUERY
+	
+	@Description 	Extension point for agents.
+	@LiteralId 		org.nabucco.framework.setup.agent
+	ORG_NABUCCO_FRAMEWORK_SETUP_AGENT
+	
+	@Description 	Extension point for journaling.
+	@LiteralId 		org.nabucco.framework.setup.journal
+	ORG_NABUCCO_FRAMEWORK_SETUP_JOURNAL
+	
+	@Description 	Extension point for sequence generators.
+	@LiteralId 		org.nabucco.framework.setup.sequence
+	ORG_NABUCCO_FRAMEWORK_SETUP_SEQUENCE
+	
+	@Description 	Extension point for system variables schema.
+	@LiteralId 		org.nabucco.framework.setup.sysvar.schema
+	ORG_NABUCCO_FRAMEWORK_SETUP_SYSVAR_SCHEMA
+	
+	@Description 	Extension point for user variables schema.
+	@LiteralId 		org.nabucco.framework.setup.usrvar.schema
+	ORG_NABUCCO_FRAMEWORK_SETUP_USRVAR_SCHEMA
+	
+	@Description 	Extension point for geo configuration.
+	@LiteralId 		org.nabucco.framework.setup.geo.config
+	ORG_NABUCCO_FRAMEWORK_SETUP_GEO_CONFIG
+	
+	@Description	Extension point for template mapping.
+	@LiteralId		org.nabucco.framework.template.mapping
+	ORG_NABUCCO_FRAMEWORK_TEMPLATE_MAPPING
+	
+	@Description 	Extension point for workflow configurations.
+	@LiteralId 		org.nabucco.framework.workflow
+	ORG_NABUCCO_FRAMEWORK_WORKFLOW
+	
+	@Description	Extension point for bussiness object schema configurations.
+	@LiteralId		org.nabucco.business.schema
+	ORG_NABUCCO_BUSINESS_SCHEMA
+	
+	@Description	Extension point for the application of the user interface.
+	@LiteralId		org.nabucco.ui.application
+	ORG_NABUCCO_UI_APPLICATION
+	
+	@Description	Extension point for the titlebar of the user interface.
+	@LiteralId		org.nabucco.ui.titlebar
+	ORG_NABUCCO_UI_TITLEBAR
+	
+	@Description	Extension point for the perspective area of the user interface.
+	@LiteralId		org.nabucco.ui.perspectivearea
+	ORG_NABUCCO_UI_PERSPECTIVEAREA
+	
+	@Description	Extension point for the perspective of the user interface.
+	@LiteralId		org.nabucco.ui.perspective
+	ORG_NABUCCO_UI_PERSPECTIVE
+	
+	@Description	Extension point for the navigation area of the user interface.
+	@LiteralId		org.nabucco.ui.navigationarea
+	ORG_NABUCCO_UI_NAVIGATIONAREA
+	
+	@Description	Extension point for the navigators of the user interface.
+	@LiteralId		org.nabucco.ui.navigator
+	ORG_NABUCCO_UI_NAVIGATOR
+	
+	@Description	Extension point for the browser area of the user interface.
+	@LiteralId		org.nabucco.ui.browserarea
+	ORG_NABUCCO_UI_BROWSERAREA
+	
+	@Description	Extension point for the browsers of the user interface.
+	@LiteralId		org.nabucco.ui.browser
+	ORG_NABUCCO_UI_BROWSER
+	
+	@Description	Extension point for work area of the user interface.
+	@LiteralId		org.nabucco.ui.workarea
+	ORG_NABUCCO_UI_WORKAREA
+	
+	@Description	Extension point for an editor of the user interface.
+	@LiteralId		org.nabucco.ui.editor
+	ORG_NABUCCO_UI_EDITOR
+	
+	@Description	Extension point for an dashboard of the user interface.
+	@LiteralId		org.nabucco.ui.dashboard
+	ORG_NABUCCO_UI_DASHBOARD
+	
+	@Description	Extension point for a list of the user interface.
+	@LiteralId		org.nabucco.ui.list
+	ORG_NABUCCO_UI_LIST
+	
+	@Description	Extension point for actions of the user interface.
+	@LiteralId		org.nabucco.ui.action
+	ORG_NABUCCO_UI_ACTION
+	
+	@Description	Extension point for dialogs on the user interface
+	@LiteralId		org.nabucco.ui.dialog
+	ORG_NABUCCO_UI_DIALOG
+	
+	@Description	Extension point for picker dialogs on the user interface
+	@LiteralId		org.nabucco.ui.pickerdialog
+	ORG_NABUCCO_UI_PICKER_DIALOG
+	
+	@Description	Extension point for the statusbar of the user interface.
+	@LiteralId		org.nabucco.ui.statusbar
+	ORG_NABUCCO_UI_STATUSBAR
+	
+	@Description	Extension point for the widgets in the user interface
+	@LiteralId		org.nabucco.ui.widget
+	ORG_NABUCCO_UI_WIDGET
+
+	@Description	Extension point for the error container
+	@LiteralId		org.nabucco.ui.error
+	ORG_NABUCCO_UI_ERROR
+			
+	@Description	Extension point for colorshemes in the ui
+	@LiteralId		org.nabucco.ui.colorscheme
+	ORG_NABUCCO_UI_COLORSCHEME
+	
+	@Description	Extension point for the dashboard widgets in the ui
+	@LiteralId		org.nabucco.ui.dashboard.widget
+	ORG_NABUCCO_UI_DASHBOARD_WIDGET
+
+	@Description	Extension point for testautomation test engines
+	@LiteralId		org.nabucco.testautomation.testengine.pool
+	ORG_NABUCCO_TESTAUTOMATION_TESTENGINE_POOL
+	
+	@Description	Extension point for testautomation refresh interval
+	@LiteralId		org.nabucco.testautomation.testresult
+	ORG_NABUCCO_TESTAUTOMATION_TESTRESULT
+	
+	@Description	Extension point for testautomation engine
+	@LiteralId		org.nabucco.testautomation.testengine
+	ORG_NABUCCO_TESTAUTOMATION_TESTENGINE
+
+	@Description	Extension point for ui message pushing
+	@LiteralId		org.nabucco.ui.messagequeue
+	ORG_NABUCCO_UI_MESSAGE_QUEUE
+
+	@Description	Extension point for working item validation error mapping
+	@LiteralId		org.nabucco.ui.messageset
+	ORG_NABUCCO_UI_MESSAGE_SET
+
+}
+

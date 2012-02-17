@@ -1,0 +1,46 @@
+/*
+* Copyright 2011 PRODYNA AG
+*
+* Licensed under the Eclipse Public License (EPL), Version 1.0 (the "License");
+* you may not use this file except in compliance with the License.
+* You may obtain a copy of the License at
+*
+* http://www.opensource.org/licenses/eclipse-1.0.php or
+* http://nabuccosource.org/License.html
+*
+* Unless required by applicable law or agreed to in writing, software
+* distributed under the License is distributed on an "AS IS" BASIS,
+* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+* See the License for the specific language governing permissions and
+* limitations under the License.
+*/
+
+package org.nabucco.framework.base.facade.datatype.extension.schema.msgset;
+
+import org.nabucco.framework.base.facade.datatype.extension.NabuccoExtensionComposite;
+import org.nabucco.framework.base.facade.datatype.extension.property.StringProperty;
+import org.nabucco.framework.base.facade.datatype.extension.schema.msgset.MessageCodeExtension;
+import org.nabucco.framework.base.facade.datatype.extension.schema.msgset.MessageExtension;
+
+@Author			Frank Ratschinski
+@Version		1.0
+@Date			2011-04-05
+@Company		PRODYNA AG
+@Description	Extension for providing error messages for exceptions.
+public Datatype MessageSetExtension extends NabuccoExtensionComposite {
+
+	@Description	The language of the message set.
+	private Datatype StringProperty[1] language;
+	
+	@Description	The package of the service.
+	private Datatype StringProperty[1] pkg;
+	
+	@Description	The name of the service or '*' for matching all services
+	private Datatype StringProperty[1] service;
+	
+	@Description	List of messages in a message set.
+	private Datatype MessageExtension[1..*] messageList;
+
+	@Description	The list of error codes for each message in the list.
+	private Datatype MessageCodeExtension[0..*] codeList;  
+}

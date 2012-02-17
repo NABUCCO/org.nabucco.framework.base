@@ -1,0 +1,45 @@
+/*
+ * Copyright 2011 PRODYNA AG
+ *
+ * Licensed under the Eclipse Public License (EPL), Version 1.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.opensource.org/licenses/eclipse-1.0.php or
+ * http://nabuccosource.org/License.html
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+package org.nabucco.framework.base.facade.message.componentrelation;
+
+import org.nabucco.framework.base.facade.datatype.FullQualifiedClassName;
+import org.nabucco.framework.base.facade.datatype.Identifier;
+import org.nabucco.framework.base.facade.datatype.NabuccoDatatype;
+import org.nabucco.framework.base.facade.datatype.relation.RelationType;
+
+
+@Author			Nicolas Moser
+@Company		PRODYNA AG
+@Date			2011-09-27
+@Version		1.0
+@Description	Request message for a Component Relation production.
+public Message ComponentRelationProduceRq {
+
+	@Description		The full qualified relation type name.
+	private Basetype FullQualifiedClassName[1] type; 
+
+	@Description		The component relation source ID.
+	private Basetype Identifier[0..1] sourceId; 
+
+	@Description		The component relation target.
+	private Datatype NabuccoDatatype[1] target; 
+
+	@Default			HAS
+	@Description		The relation type.
+	private Enumeration RelationType[1] relationType; 
+
+}

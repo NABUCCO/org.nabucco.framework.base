@@ -1,10 +1,21 @@
 /*
- * NABUCCO Generator, Copyright (c) 2010, PRODYNA AG, Germany. All rights reserved.
+ * Copyright 2012 PRODYNA AG
+ *
+ * Licensed under the Eclipse Public License (EPL), Version 1.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.opensource.org/licenses/eclipse-1.0.php or
+ * http://www.nabucco.org/License.html
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 package org.nabucco.framework.base.facade.exception.persistence;
 
-import java.util.HashMap;
-import java.util.Map;
 import org.nabucco.framework.base.facade.exception.persistence.PersistenceException;
 
 /**
@@ -17,21 +28,9 @@ public class NonUniqueResultException extends PersistenceException {
 
     private static final long serialVersionUID = 1L;
 
-    private Map<String, String> parameterMap = new HashMap<String, String>();
-
     /** Constructs a new NonUniqueResultException instance. */
     public NonUniqueResultException() {
         super();
-    }
-
-    /**
-     * Constructs a new NonUniqueResultException instance.
-     *
-     * @param throwable the Throwable.
-     * @param message the String.
-     */
-    public NonUniqueResultException(String message, Throwable throwable) {
-        super(message, throwable);
     }
 
     /**
@@ -46,18 +45,19 @@ public class NonUniqueResultException extends PersistenceException {
     /**
      * Constructs a new NonUniqueResultException instance.
      *
-     * @param throwable the Throwable.
+     * @param cause the Throwable.
      */
-    public NonUniqueResultException(Throwable throwable) {
-        super(throwable);
+    public NonUniqueResultException(Throwable cause) {
+        super(cause);
     }
 
     /**
-     * Getter for the Parameters.
+     * Constructs a new NonUniqueResultException instance.
      *
-     * @return the Map<String, String>.
+     * @param cause the Throwable.
+     * @param message the String.
      */
-    public Map<String, String> getParameters() {
-        return new HashMap<String, String>(this.parameterMap);
+    public NonUniqueResultException(String message, Throwable cause) {
+        super(message, cause);
     }
 }

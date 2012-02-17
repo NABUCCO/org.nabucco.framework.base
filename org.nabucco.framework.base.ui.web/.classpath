@@ -5,15 +5,36 @@
 	<classpathentry kind="src" output="out/ide/test/gen" path="src/test/gen"/>
 	<classpathentry kind="src" output="out/ide/test/man" path="src/test/man"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
+	<classpathentry kind="con" path="org.eclipse.jdt.junit.JUNIT_CONTAINER/4"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/org.nabucco.framework.base.facade.component"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/org.nabucco.framework.base.facade.datatype"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/org.nabucco.framework.base.facade.exception"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/org.nabucco.framework.base.facade.message"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/org.nabucco.framework.base.facade.service"/>
-	<classpathentry kind="lib" path="/org.nabucco.framework.base/lib/web/vaadin.jar"/>
-	<classpathentry kind="lib" path="/org.nabucco.framework.base/lib/web/jsp-api.jar"/>
 	<classpathentry kind="lib" path="/org.nabucco.framework.base/lib/web/log4j.jar"/>
 	<classpathentry kind="lib" path="/org.nabucco.framework.base/lib/web/servlet-api.jar"/>
-	<classpathentry kind="lib" path="/org.nabucco.framework.base/lib/web/jsf-api.jar"/>
-	<classpathentry kind="output" path="out"/>
+	<classpathentry kind="lib" path="/org.nabucco.framework.base/lib/test/jetty-ajp.jar"/>
+	<classpathentry kind="lib" path="/org.nabucco.framework.base/lib/test/jetty-annotations.jar"/>
+	<classpathentry kind="lib" path="/org.nabucco.framework.base/lib/test/jetty-client.jar"/>
+	<classpathentry kind="lib" path="/org.nabucco.framework.base/lib/test/jetty-continuation.jar"/>
+	<classpathentry kind="lib" path="/org.nabucco.framework.base/lib/test/jetty-deploy.jar"/>
+	<classpathentry kind="lib" path="/org.nabucco.framework.base/lib/test/jetty-http.jar"/>
+	<classpathentry kind="lib" path="/org.nabucco.framework.base/lib/test/jetty-io.jar"/>
+	<classpathentry kind="lib" path="/org.nabucco.framework.base/lib/test/jetty-jmx.jar"/>
+	<classpathentry kind="lib" path="/org.nabucco.framework.base/lib/test/jetty-jndi.jar"/>
+	<classpathentry kind="lib" path="/org.nabucco.framework.base/lib/test/jetty-plus.jar"/>
+	<classpathentry kind="lib" path="/org.nabucco.framework.base/lib/test/jetty-policy.jar"/>
+	<classpathentry kind="lib" path="/org.nabucco.framework.base/lib/test/jetty-rewrite.jar"/>
+	<classpathentry kind="lib" path="/org.nabucco.framework.base/lib/test/jetty-security.jar"/>
+	<classpathentry kind="lib" path="/org.nabucco.framework.base/lib/test/jetty-server.jar"/>
+	<classpathentry kind="lib" path="/org.nabucco.framework.base/lib/test/jetty-servlet.jar"/>
+	<classpathentry kind="lib" path="/org.nabucco.framework.base/lib/test/jetty-servlets.jar"/>
+	<classpathentry kind="lib" path="/org.nabucco.framework.base/lib/test/jetty-util.jar"/>
+	<classpathentry kind="lib" path="/org.nabucco.framework.base/lib/test/jetty-webapp.jar"/>
+	<classpathentry kind="lib" path="/org.nabucco.framework.base/lib/test/jetty-websocket.jar"/>
+	<classpathentry kind="lib" path="/org.nabucco.framework.base/lib/test/jetty-xml.jar"/>
+	<classpathentry kind="lib" path="/org.nabucco.framework.base/lib/web/jsp-api.jar"/>
+	<classpathentry kind="lib" path="/org.nabucco.framework.base/lib/web/org.nabucco.common.cache.jar"/>
+	<classpathentry kind="lib" path="/org.nabucco.framework.base/lib/web/org.nabucco.common.extension.jar"/>
+	<classpathentry kind="output" path="out/ide"/>
 </classpath>

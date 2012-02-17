@@ -1,0 +1,45 @@
+/*
+* Copyright 2011 PRODYNA AG
+*
+* Licensed under the Eclipse Public License (EPL), Version 1.0 (the "License");
+* you may not use this file except in compliance with the License.
+* You may obtain a copy of the License at
+*
+* http://www.opensource.org/licenses/eclipse-1.0.php or
+* http://nabuccosource.org/License.html
+*
+* Unless required by applicable law or agreed to in writing, software
+* distributed under the License is distributed on an "AS IS" BASIS,
+* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+* See the License for the specific language governing permissions and
+* limitations under the License.
+*/
+package org.nabucco.framework.base.facade.datatype.setup.journal;
+
+import org.nabucco.framework.base.facade.datatype.FullQualifiedClassName;
+import org.nabucco.framework.base.facade.datatype.Identifier;
+import org.nabucco.framework.base.facade.datatype.Name;
+import org.nabucco.framework.base.facade.datatype.date.Timestamp;
+
+
+
+@Author			Frank Ratschinski
+@Version		1.0
+@Date			2011-03-21
+@Company		PRODYNA AG
+@Description	One entry of a journal. 
+public Datatype JournalRef {
+
+	@Description 	The fqn of the references datatype.
+	private Basetype FullQualifiedClassName[1] className;
+	
+	@Description	The primary key of the datatype.
+	private Basetype Identifier[1] refId; 
+
+	@Description	The timestamp of the journal.
+	private Basetype Timestamp[1] timestamp;
+	
+	@Description	The title initended to be displayed with a client
+	@Default		""
+	private Basetype Name[1] title; 
+}

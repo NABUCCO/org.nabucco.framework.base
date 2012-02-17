@@ -1,0 +1,16 @@
+/*
+ *  PRODYNA NABUCCO
+ *  Copyright 2010, PRODYNA AG
+ */
+package org.nabucco.framework.base.facade.datatype.extension.schema.template; 
+
+import org.nabucco.framework.base.facade.datatype.extension.schema.template.TemplateStructureItem;
+
+@Author         Holger Librenz
+@Company        PRODYNA AG
+@Date           2011-03-29
+@Version        1.1
+@Description    Base for template structre elements
+public abstract Datatype TemplateElement extends TemplateStructureItem {
+	
+}

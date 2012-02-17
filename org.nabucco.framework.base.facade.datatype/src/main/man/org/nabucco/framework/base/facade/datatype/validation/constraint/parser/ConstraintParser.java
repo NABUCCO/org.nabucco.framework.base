@@ -1,12 +1,12 @@
 /*
- * Copyright 2010 PRODYNA AG
+ * Copyright 2012 PRODYNA AG
  *
  * Licensed under the Eclipse Public License (EPL), Version 1.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
  * http://www.opensource.org/licenses/eclipse-1.0.php or
- * http://www.nabucco-source.org/nabucco-license.html
+ * http://www.nabucco.org/License.html
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -17,13 +17,13 @@
 package org.nabucco.framework.base.facade.datatype.validation.constraint.parser;
 
 import java.lang.ref.SoftReference;
-import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
-import java.util.List;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
+import java.util.TreeMap;
 
-import org.nabucco.framework.base.facade.datatype.property.NabuccoProperty;
-import org.nabucco.framework.base.facade.datatype.validation.Validatable;
 import org.nabucco.framework.base.facade.datatype.validation.constraint.element.Constraint;
 import org.nabucco.framework.base.facade.datatype.validation.constraint.element.ConstraintFactory;
 
@@ -34,9 +34,11 @@ import org.nabucco.framework.base.facade.datatype.validation.constraint.element.
  */
 public class ConstraintParser {
 
-    private Map<Class<? extends Validatable>, SoftReference<ConstraintContainer>> containerMap;
+    /** Constraint Separator */
+    static final String CONSTRAINT_SEPARATOR = ";";
 
-    private static final String SEPARATOR = ";";
+    /** Cached Constraints */
+    private Map<String, SoftReference<ConstraintContainer>> containerMap;
 
     /**
      * Singleton instance.
@@ -47,7 +49,7 @@ public class ConstraintParser {
      * Private constructor.
      */
     private ConstraintParser() {
-        this.containerMap = new HashMap<Class<? extends Validatable>, SoftReference<ConstraintContainer>>();
+        this.containerMap = new HashMap<String, SoftReference<ConstraintContainer>>();
     }
 
     /**
@@ -63,72 +65,102 @@ public class ConstraintParser {
     }
 
     /**
-     * Parses a datatype for static constraints and puts them into an appropriate constraint
-     * container.
+     * Parses the constraint string of a property and adds them to the constraint container.
      * 
-     * @param validatable
-     *            the validatable datatype to parse
+     * @param constraintString
+     *            the string to parse
      * 
-     * @return the extracted constraint container
+     * @return the constraint container
      */
-    public synchronized ConstraintContainer parseConstraint(Validatable validatable) {
+    public synchronized ConstraintContainer parseConstraints(String constraintString) {
+        if (constraintString == null || constraintString.isEmpty()) {
+            return new ConstraintContainer();
+        }
 
         ConstraintContainer container = null;
 
-        if (validatable == null) {
-            throw new IllegalArgumentException("Validatable is not valid.");
+        if (this.containerMap.get(constraintString) == null || this.containerMap.get(constraintString).get() == null) {
+            container = this.parseConstraintString(constraintString);
+            this.containerMap.put(constraintString, new SoftReference<ConstraintContainer>(container));
         }
 
-        if (this.containerMap.get(validatable.getClass()) == null
-                || this.containerMap.get(validatable.getClass()).get() == null) {
-            container = this.parseAllConstraints(validatable);
-            this.containerMap.put(validatable.getClass(), new SoftReference<ConstraintContainer>(
-                    container));
-
-        } else {
-            container = this.containerMap.get(validatable.getClass()).get();
-        }
+        container = this.containerMap.get(constraintString).get();
+        container.clear();
 
         return container;
     }
 
     /**
-     * Parses the constraint string of a validatable and maps them to the constraint container
-     * containing the appropriate constraints.
+     * Parses the constraint string with indexes and returns all constraints per property index.
      * 
-     * @param validatable
-     *            the validatable to
+     * @param constraints
+     *            the constraints string including indexes to parse
      * 
-     * @return the parsed constraint container
+     * @return the constraint containers per property index
      */
-    private ConstraintContainer parseAllConstraints(Validatable validatable) {
+    public synchronized Map<Integer, ConstraintContainer> parseConstraintsWithIndex(String constraints) {
 
-        List<NabuccoProperty<?>> properties = validatable.getProperties();
-        ConstraintContainer container = new ConstraintContainer();
-        for (int i = 0; i < properties.size(); i++) {
-            NabuccoProperty<?> property = properties.get(i);
-            container.put(i, this.parseConstraintsForIndex(property.getConstraints()));
+        if (constraints == null || constraints.isEmpty()) {
+            return Collections.emptyMap();
         }
-        return container;
+
+        String[] properties = constraints.split("\\s");
+
+        Map<Integer, ConstraintContainer> constraintMap = new TreeMap<Integer, ConstraintContainer>();
+
+        for (String propertyConstraints : properties) {
+            if (propertyConstraints == null || propertyConstraints.isEmpty()) {
+                continue;
+            }
+
+            char first = propertyConstraints.charAt(0);
+            if (!Character.isDigit(first) && first != '-') {
+                continue;
+            }
+
+            StringBuilder indexBuffer = new StringBuilder();
+            indexBuffer.append(first);
+
+            for (int i = 1; i < propertyConstraints.length(); i++) {
+                char character = propertyConstraints.charAt(i);
+                if (!Character.isDigit(character)) {
+                    break;
+                }
+                indexBuffer.append(character);
+            }
+
+            int index = Integer.parseInt(indexBuffer.toString());
+
+            ConstraintContainer constraintContainer = this.parseConstraints(propertyConstraints.substring(indexBuffer
+                    .length()));
+
+            ConstraintContainer container = new ConstraintContainer();
+            container.addAll(constraintContainer);
+
+            constraintMap.put(index, container);
+        }
+
+        return constraintMap;
     }
 
     /**
-     * Parses the constraints for a single index.
+     * Parses the constraints string and creates a constraint container.
      * 
      * @param constraintString
      *            the constraint string of one index
      * 
      * @return the parsed constraints
      */
-    private List<Constraint> parseConstraintsForIndex(String constraintString) {
-        List<Constraint> constraintList = new ArrayList<Constraint>();
-        String[] tokens = constraintString.split(SEPARATOR);
+    private ConstraintContainer parseConstraintString(String constraintString) {
+        Set<Constraint> constraintList = new HashSet<Constraint>();
+        String[] tokens = constraintString.split(CONSTRAINT_SEPARATOR);
 
         for (String token : tokens) {
-            constraintList.add(ConstraintFactory.getInstance().getConstraint(token));
+            Constraint constraint = ConstraintFactory.getInstance().getConstraint(token);
+            constraintList.add(constraint);
         }
 
-        return constraintList;
+        return new ConstraintContainer(constraintList);
     }
 
 }

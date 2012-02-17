@@ -1,0 +1,17 @@
+/*
+ *  PRODYNA NABUCCO
+ *  Copyright 2010, PRODYNA AG
+ */
+package org.nabucco.framework.base.facade.datatype.extension.schema.template.fields; 
+
+import org.nabucco.framework.base.facade.datatype.extension.schema.template.TemplateComposite;
+
+
+@Author         Holger Librenz
+@Company        PRODYNA AG
+@Date           2011-03-29
+@Version        1.0
+@Description    One item within a selection group 
+public Datatype ItemComposite extends TemplateComposite {
+
+}

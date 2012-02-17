@@ -1,12 +1,12 @@
 /*
- * Copyright 2010 PRODYNA AG
+ * Copyright 2012 PRODYNA AG
  *
  * Licensed under the Eclipse Public License (EPL), Version 1.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
  * http://www.opensource.org/licenses/eclipse-1.0.php or
- * http://www.nabucco-source.org/nabucco-license.html
+ * http://www.nabucco.org/License.html
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -16,10 +16,10 @@
  */
 package org.nabucco.framework.base.facade.component;
 
-import java.io.Serializable;
-
+import org.nabucco.framework.base.facade.component.locator.Locatable;
 import org.nabucco.framework.base.facade.exception.service.ServiceException;
 import org.nabucco.framework.base.facade.service.componentrelation.ComponentRelationService;
+import org.nabucco.framework.base.facade.service.queryfilter.QueryFilterService;
 
 /**
  * Component
@@ -29,9 +29,22 @@ import org.nabucco.framework.base.facade.service.componentrelation.ComponentRela
  * 
  * @author Frank Ratschinski, PRODYNA AG
  * @author Nicolas Moser, PRODYNA AG
- * @author Dominic Trumpfheller, PRODYNA AG
  */
-public interface Component extends Serializable {
+public interface Component extends Locatable {
+
+    /**
+     * Returns the ID of the component.
+     * 
+     * @return the component id
+     */
+    String getId();
+
+    /**
+     * Returns the name of the component.
+     * 
+     * @return the component name
+     */
+    String getName();
 
     /**
      * Getter for the component relation service containing business operations about inter
@@ -42,5 +55,16 @@ public interface Component extends Serializable {
      * @throws ServiceException
      *             when the service cannot be obtained
      */
-     ComponentRelationService getComponentRelationService() throws ServiceException;;
+    ComponentRelationService getComponentRelationService() throws ServiceException;
+
+    /**
+     * Getter for the filter service containing search operations about component specific filters.
+     * 
+     * @return the service for filtering
+     * 
+     * @throws ServiceException
+     *             when the service cannot be obtained
+     */
+    QueryFilterService getQueryFilterService() throws ServiceException;
+
 }

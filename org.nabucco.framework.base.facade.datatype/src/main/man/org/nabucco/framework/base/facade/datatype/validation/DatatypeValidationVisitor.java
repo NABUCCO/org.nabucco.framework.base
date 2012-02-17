@@ -1,12 +1,12 @@
 /*
- * Copyright 2010 PRODYNA AG
+ * Copyright 2012 PRODYNA AG
  *
  * Licensed under the Eclipse Public License (EPL), Version 1.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
  * http://www.opensource.org/licenses/eclipse-1.0.php or
- * http://www.nabucco-source.org/nabucco-license.html
+ * http://www.nabucco.org/License.html
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -16,12 +16,8 @@
  */
 package org.nabucco.framework.base.facade.datatype.validation;
 
-import java.util.List;
-
 import org.nabucco.framework.base.facade.datatype.Datatype;
 import org.nabucco.framework.base.facade.datatype.property.NabuccoProperty;
-import org.nabucco.framework.base.facade.datatype.validation.constraint.parser.ConstraintContainer;
-import org.nabucco.framework.base.facade.datatype.validation.constraint.parser.ConstraintParser;
 import org.nabucco.framework.base.facade.datatype.visitor.DatatypeVisitor;
 import org.nabucco.framework.base.facade.datatype.visitor.Visitor;
 import org.nabucco.framework.base.facade.datatype.visitor.VisitorException;
@@ -34,7 +30,7 @@ import org.nabucco.framework.base.facade.datatype.visitor.VisitorException;
 public class DatatypeValidationVisitor extends DatatypeVisitor implements Visitor {
 
     private ValidationResult result;
-    
+
     private final ValidationType depth;
 
     /**
@@ -55,18 +51,12 @@ public class DatatypeValidationVisitor extends DatatypeVisitor implements Visito
 
     @Override
     public void visit(Datatype datatype) throws VisitorException {
-        ConstraintContainer container = ConstraintParser.getInstance().parseConstraint(datatype);
 
-        if (container != null && !container.isEmpty()) {
-
-            List<NabuccoProperty<?>> properties = datatype.getProperties();
-            for (int index = 0; index < properties.size(); index++) {
-                NabuccoProperty<?> property = properties.get(index);
-                container.check(datatype, property.getInstance(), index, this.result);
-            }
+        for (NabuccoProperty property : datatype.getProperties()) {
+            property.getConstraints().check(datatype, property, this.result);
         }
 
-        if (depth != ValidationType.SHALLOW) {
+        if (this.depth != ValidationType.SHALLOW) {
             super.visit(datatype);
         }
     }
