@@ -71,8 +71,6 @@ public abstract class NabuccoExtensionParserSupport extends ExtensionParserSuppo
         }
     }
 
-
-
     /**
      * Load all child elements of the given parent xml element.
      * 
@@ -313,8 +311,33 @@ public abstract class NabuccoExtensionParserSupport extends ExtensionParserSuppo
     protected EnumerationProperty getEnumerationProperty(Element element, String attribute)
             throws ExtensionParserException {
 
+        return this.getEnumerationProperty(element, attribute, null);
+    }
+
+    /**
+     * Resolve an attribute of an XML Element as a enumeration property.
+     * 
+     * @param element
+     *            the element to parse
+     * @param attribute
+     *            the attribute name
+     * @param standard
+     *            the default value to set if no value found
+     * 
+     * @return the parsed enumeration property
+     * 
+     * @throws ExtensionParserException
+     *             when the attribute cannot be parsed
+     */
+    protected EnumerationProperty getEnumerationProperty(Element element, String attribute, String standard)
+            throws ExtensionParserException {
+
         try {
             String literal = super.getAttribute(element, attribute);
+
+            if ((literal == null || literal.isEmpty()) && (standard != null)) {
+                literal = standard;
+            }
             EnumerationProperty property = new EnumerationProperty();
             property.setValue(new EnumerationPropertyValue(literal));
             return property;
@@ -323,5 +346,4 @@ public abstract class NabuccoExtensionParserSupport extends ExtensionParserSuppo
             throw new ExtensionParserException(e);
         }
     }
-
 }

@@ -16,7 +16,6 @@
  */
 package org.nabucco.framework.base.facade.datatype.business.organization;
 
-import org.nabucco.framework.base.facade.datatype.Description;
 import org.nabucco.framework.base.facade.datatype.FunctionalIdentifier;
 import org.nabucco.framework.base.facade.datatype.NabuccoDatatype;
 import org.nabucco.framework.base.facade.datatype.Name;
@@ -24,6 +23,7 @@ import org.nabucco.framework.base.facade.datatype.Owner;
 import org.nabucco.framework.base.facade.datatype.StatusType;
 import org.nabucco.framework.base.facade.datatype.code.Code;
 import org.nabucco.framework.base.facade.datatype.security.UserId;
+import org.nabucco.framework.base.facade.datatype.text.LongDescription;
 
 @Author			Dominic Trumpfheller
 @Company		PRODYNA AG
@@ -38,11 +38,11 @@ public Datatype Organization extends NabuccoDatatype {
 	@Description		The Organization Name.
 	private Basetype Name[1] name;
 	
-	@Description		Additinal Organization Information
-	private Basetype Name[0..1] additional;
-	
 	@Description		The Organization Description.
-	private Basetype Description[0..1] description;
+	private Basetype LongDescription[0..1] description;
+	
+	@Description		Additinal Organization Information
+	private Basetype LongDescription[0..1] additional;
 	
 	@TechnicalProperty
 	@Default			ACTIVE

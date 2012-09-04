@@ -33,5 +33,11 @@ public Datatype ActionWidgetExtension extends WidgetExtension {
 
 	@Description		The text to show
 	private Datatype StringProperty[1] text;	
+	
+	@Description		The tooltip to show
+	private Datatype StringProperty[1] tooltip;
+	
+	@Description		The icon to show
+	private Datatype StringProperty[1] icon;		
 		
 }

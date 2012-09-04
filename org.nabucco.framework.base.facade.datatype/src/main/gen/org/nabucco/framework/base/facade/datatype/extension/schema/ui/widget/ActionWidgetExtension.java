@@ -1,18 +1,16 @@
 /*
  * Copyright 2012 PRODYNA AG
- *
- * Licensed under the Eclipse Public License (EPL), Version 1.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
+ * 
+ * Licensed under the Eclipse Public License (EPL), Version 1.0 (the "License"); you may not use
+ * this file except in compliance with the License. You may obtain a copy of the License at
+ * 
  * http://www.opensource.org/licenses/eclipse-1.0.php or
  * http://www.nabucco.org/License.html
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+ * 
+ * Unless required by applicable law or agreed to in writing, software distributed under the
+ * License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND,
+ * either express or implied. See the License for the specific language governing permissions
+ * and limitations under the License.
  */
 package org.nabucco.framework.base.facade.datatype.extension.schema.ui.widget;
 
@@ -40,17 +38,27 @@ public class ActionWidgetExtension extends WidgetExtension implements Datatype {
 
     private static final long serialVersionUID = 1L;
 
-    private static final String[] PROPERTY_CONSTRAINTS = { "m1,1;", "m1,1;" };
+    private static final String[] PROPERTY_CONSTRAINTS = { "m1,1;", "m1,1;", "m1,1;", "m1,1;" };
 
     public static final String ACTION = "action";
 
     public static final String TEXT = "text";
+
+    public static final String TOOLTIP = "tooltip";
+
+    public static final String ICON = "icon";
 
     /** The action to fire */
     private StringProperty action;
 
     /** The text to show */
     private StringProperty text;
+
+    /** The tooltip to show */
+    private StringProperty tooltip;
+
+    /** The icon to show */
+    private StringProperty icon;
 
     /** Constructs a new ActionWidgetExtension instance. */
     public ActionWidgetExtension() {
@@ -75,6 +83,12 @@ public class ActionWidgetExtension extends WidgetExtension implements Datatype {
         if ((this.getText() != null)) {
             clone.setText(this.getText().cloneObject());
         }
+        if ((this.getTooltip() != null)) {
+            clone.setTooltip(this.getTooltip().cloneObject());
+        }
+        if ((this.getIcon() != null)) {
+            clone.setIcon(this.getIcon().cloneObject());
+        }
     }
 
     /**
@@ -89,6 +103,10 @@ public class ActionWidgetExtension extends WidgetExtension implements Datatype {
                 PROPERTY_CONSTRAINTS[0], false, PropertyAssociationType.COMPOSITION));
         propertyMap.put(TEXT, PropertyDescriptorSupport.createDatatype(TEXT, StringProperty.class, 7,
                 PROPERTY_CONSTRAINTS[1], false, PropertyAssociationType.COMPOSITION));
+        propertyMap.put(TOOLTIP, PropertyDescriptorSupport.createDatatype(TOOLTIP, StringProperty.class, 8,
+                PROPERTY_CONSTRAINTS[2], false, PropertyAssociationType.COMPOSITION));
+        propertyMap.put(ICON, PropertyDescriptorSupport.createDatatype(ICON, StringProperty.class, 9,
+                PROPERTY_CONSTRAINTS[3], false, PropertyAssociationType.COMPOSITION));
         return new NabuccoPropertyContainer(propertyMap);
     }
 
@@ -103,6 +121,9 @@ public class ActionWidgetExtension extends WidgetExtension implements Datatype {
         properties
                 .add(super.createProperty(ActionWidgetExtension.getPropertyDescriptor(ACTION), this.getAction(), null));
         properties.add(super.createProperty(ActionWidgetExtension.getPropertyDescriptor(TEXT), this.getText(), null));
+        properties.add(super.createProperty(ActionWidgetExtension.getPropertyDescriptor(TOOLTIP), this.getTooltip(),
+                null));
+        properties.add(super.createProperty(ActionWidgetExtension.getPropertyDescriptor(ICON), this.getIcon(), null));
         return properties;
     }
 
@@ -116,6 +137,12 @@ public class ActionWidgetExtension extends WidgetExtension implements Datatype {
             return true;
         } else if ((property.getName().equals(TEXT) && (property.getType() == StringProperty.class))) {
             this.setText(((StringProperty) property.getInstance()));
+            return true;
+        } else if ((property.getName().equals(TOOLTIP) && (property.getType() == StringProperty.class))) {
+            this.setTooltip(((StringProperty) property.getInstance()));
+            return true;
+        } else if ((property.getName().equals(ICON) && (property.getType() == StringProperty.class))) {
+            this.setIcon(((StringProperty) property.getInstance()));
             return true;
         }
         return false;
@@ -146,6 +173,16 @@ public class ActionWidgetExtension extends WidgetExtension implements Datatype {
                 return false;
         } else if ((!this.text.equals(other.text)))
             return false;
+        if ((this.tooltip == null)) {
+            if ((other.tooltip != null))
+                return false;
+        } else if ((!this.tooltip.equals(other.tooltip)))
+            return false;
+        if ((this.icon == null)) {
+            if ((other.icon != null))
+                return false;
+        } else if ((!this.icon.equals(other.icon)))
+            return false;
         return true;
     }
 
@@ -155,6 +192,8 @@ public class ActionWidgetExtension extends WidgetExtension implements Datatype {
         int result = super.hashCode();
         result = ((PRIME * result) + ((this.action == null) ? 0 : this.action.hashCode()));
         result = ((PRIME * result) + ((this.text == null) ? 0 : this.text.hashCode()));
+        result = ((PRIME * result) + ((this.tooltip == null) ? 0 : this.tooltip.hashCode()));
+        result = ((PRIME * result) + ((this.icon == null) ? 0 : this.icon.hashCode()));
         return result;
     }
 
@@ -199,6 +238,42 @@ public class ActionWidgetExtension extends WidgetExtension implements Datatype {
      */
     public StringProperty getText() {
         return this.text;
+    }
+
+    /**
+     * The tooltip to show
+     *
+     * @param tooltip the StringProperty.
+     */
+    public void setTooltip(StringProperty tooltip) {
+        this.tooltip = tooltip;
+    }
+
+    /**
+     * The tooltip to show
+     *
+     * @return the StringProperty.
+     */
+    public StringProperty getTooltip() {
+        return this.tooltip;
+    }
+
+    /**
+     * The icon to show
+     *
+     * @param icon the StringProperty.
+     */
+    public void setIcon(StringProperty icon) {
+        this.icon = icon;
+    }
+
+    /**
+     * The icon to show
+     *
+     * @return the StringProperty.
+     */
+    public StringProperty getIcon() {
+        return this.icon;
     }
 
     /**

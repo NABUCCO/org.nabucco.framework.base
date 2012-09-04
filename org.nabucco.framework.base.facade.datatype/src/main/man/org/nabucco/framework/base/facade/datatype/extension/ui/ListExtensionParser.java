@@ -28,6 +28,8 @@ import org.nabucco.framework.base.facade.datatype.extension.NabuccoExtensionPars
 import org.nabucco.framework.base.facade.datatype.extension.NabucoExtensionContainer;
 import org.nabucco.framework.base.facade.datatype.extension.schema.ui.common.ColumnExtension;
 import org.nabucco.framework.base.facade.datatype.extension.schema.ui.common.ListButtonExtension;
+import org.nabucco.framework.base.facade.datatype.extension.schema.ui.common.ListButtonGroupExtension;
+import org.nabucco.framework.base.facade.datatype.extension.schema.ui.common.MenuButtonExtension;
 import org.nabucco.framework.base.facade.datatype.extension.schema.ui.common.filter.FilterReferenceExtension;
 import org.nabucco.framework.base.facade.datatype.extension.schema.ui.work.WorkItemActionExtension;
 import org.nabucco.framework.base.facade.datatype.extension.schema.ui.work.WorkItemActionsExtension;
@@ -45,11 +47,15 @@ import org.w3c.dom.Element;
  */
 public class ListExtensionParser extends NabuccoExtensionParserSupport implements ExtensionParser {
 
+    private static final String DEFAULT_MODIFICATION = "NONE";
+
     private static final String ELEMENT_LIST = "list";
 
     private static final String ELEMENT_WORK_ITEM_ACTIONS = "workItemActions";
 
     private static final String ELEMENT_BROWSER = "browser";
+
+    private static final String ELEMENT_BUTTON_GROUP = "buttonGroup";
 
     private static final String ELEMENT_BUTTON = "button";
 
@@ -68,7 +74,7 @@ public class ListExtensionParser extends NabuccoExtensionParserSupport implement
     private static final String ATTR_LAYOUT = "layout";
 
     private static final String ATTR_ID = "id";
-    
+
     private static final String ATTR_TYPE = "type";
 
     private static final String ATTR_REFID = "refId";
@@ -90,7 +96,7 @@ public class ListExtensionParser extends NabuccoExtensionParserSupport implement
     private static final String ATTR_DEFAULT = "default";
 
     private static final String ATTR_WIDTH = "width";
-    
+
     private static final String ATTR_DOUBLECLICK_ACTION = "doubleclickAction";
 
     private static final String ATTR_LOAD_ACTION = "loadAction";
@@ -100,6 +106,8 @@ public class ListExtensionParser extends NabuccoExtensionParserSupport implement
     private static final String ATTR_MODIFICATION = "modification";
 
     private static final String ATTR_SELECTION = "selection";
+
+    private static final Object MENU_ELEMENT = "menu";
 
     private static NabuccoLogger logger = NabuccoLoggingFactory.getInstance().getLogger(ListExtensionParser.class);
 
@@ -120,36 +128,35 @@ public class ListExtensionParser extends NabuccoExtensionParserSupport implement
             extension.setIcon(super.getStringProperty(listElement, ATTR_ICON));
             extension.setDoubleclickAction(super.getStringProperty(listElement, ATTR_DOUBLECLICK_ACTION));
 
-            List<Element> workItemActionsElements = super.getElementsByTagName(listElement, ELEMENT_WORK_ITEM_ACTIONS);
+            List<Element> listChildren = super.getChildren(listElement);
+            for (Element childElement : listChildren) {
+                String tagName = childElement.getTagName();
 
-            if (!workItemActionsElements.isEmpty()) {
-                Element actionElement = workItemActionsElements.get(0);
-                WorkItemActionsExtension actionExtension = this.parseWorkItemActionsExtension(actionElement);
-                extension.setActions(actionExtension);
-            }
+                if (tagName.equals(ELEMENT_WORK_ITEM_ACTIONS)) {
+                    WorkItemActionsExtension actionExtension = this.parseWorkItemActionsExtension(childElement);
+                    extension.setActions(actionExtension);
+                } else if (tagName.equals(ELEMENT_BROWSER)) {
+                    WorkItemBrowserExtension browserExtension = this.parseBrowserExtension(childElement);
+                    extension.getBrowsers().add(browserExtension);
+                } else if (tagName.equals(ELEMENT_BUTTON)) {
+                    ListButtonExtension buttonExtension = this.parseListButtonExtension(childElement);
+                    extension.getButtons().add(buttonExtension);
+                } else if (tagName.equals(ELEMENT_BUTTON_GROUP)) {
+                    ListButtonGroupExtension buttonGroupExtension = this.parseListButtonGroupExtension(childElement);
+                    extension.getButtons().add(buttonGroupExtension);
+                } else if (tagName.equals(ELEMENT_COLUMN)) {
+                    ColumnExtension columnExtension = this.parseColumnExtension(childElement);
+                    extension.getColumns().add(columnExtension);
+                } else if (tagName.equals(ELEMENT_FILTER)) {
+                    FilterReferenceExtension filterExtension = this.parseFilterReferenceExtension(childElement);
+                    extension.getFilters().add(filterExtension);
+                } else if (tagName.equals(MENU_ELEMENT)) {
+                    MenuButtonExtension menuExt = this.parseMenuExtension(childElement);
+                    extension.setMenuButton(menuExt);
+                } else {
+                    throw new ExtensionParserException("List has unallowed content '" + tagName + "'.");
+                }
 
-            List<Element> browserElements = super.getElementsByTagName(listElement, ELEMENT_BROWSER);
-            for (Element browserElement : browserElements) {
-                WorkItemBrowserExtension browserExtension = this.parseBrowserExtension(browserElement);
-                extension.getBrowsers().add(browserExtension);
-            }
-
-            List<Element> buttonElements = super.getElementsByTagName(listElement, ELEMENT_BUTTON);
-            for (Element buttonElement : buttonElements) {
-                ListButtonExtension buttonExtension = this.parseActionExtension(buttonElement);
-                extension.getButtons().add(buttonExtension);
-            }
-
-            List<Element> columnElements = super.getElementsByTagName(listElement, ELEMENT_COLUMN);
-            for (Element relationElement : columnElements) {
-                ColumnExtension columnExtension = this.parseColumnExtension(relationElement);
-                extension.getColumns().add(columnExtension);
-            }
-
-            List<Element> filterElements = super.getElementsByTagName(listElement, ELEMENT_FILTER);
-            for (Element filterElement : filterElements) {
-                FilterReferenceExtension filterExtension = this.parseFilterReferenceExtension(filterElement);
-                extension.getFilters().add(filterExtension);
             }
 
             return new NabucoExtensionContainer(extension);
@@ -157,6 +164,69 @@ public class ListExtensionParser extends NabuccoExtensionParserSupport implement
         } catch (ExtensionException ex) {
             throw new ExtensionParserException(ex);
         }
+    }
+
+    /**
+     * Parses the given element and returns the list of buttons for the menu
+     * 
+     * @param element
+     *            the element to be parsed
+     * @return list with buttons and button groups
+     * 
+     * @throws ExtensionException
+     * @throws ExtensionParserException
+     */
+    private MenuButtonExtension parseMenuExtension(Element element) throws ExtensionParserException, ExtensionException {
+        MenuButtonExtension retVal = new MenuButtonExtension();
+
+        List<Element> menuChildren = super.getChildren(element);
+        for (Element menuElement : menuChildren) {
+            String tagName = menuElement.getTagName();
+
+            if (tagName.equals(ELEMENT_BUTTON)) {
+                ListButtonExtension buttonExtension = this.parseListButtonExtension(menuElement);
+                retVal.getButtons().add(buttonExtension);
+            } else if (tagName.equals(ELEMENT_BUTTON_GROUP)) {
+                ListButtonGroupExtension buttonGroupExtension = this.parseListButtonGroupExtension(menuElement);
+                retVal.getButtons().add(buttonGroupExtension);
+            }
+        }
+        return retVal;
+    }
+
+    /**
+     * Parse the action reference element.
+     * 
+     * @param actionElement
+     *            the action element to parse
+     * @return the parsed action extension
+     * 
+     * @throws ExtensionParserException
+     *             when the xml attributes cannot be parsed
+     * @throws ExtensionException
+     *             when the tab fields cannot be parsed
+     */
+    private ListButtonGroupExtension parseListButtonGroupExtension(Element actionElement)
+            throws ExtensionParserException, ExtensionException {
+
+        ListButtonGroupExtension buttonGroupExtension = new ListButtonGroupExtension();
+
+        String buttonId = actionElement.getAttribute(ATTR_ID);
+        buttonGroupExtension.setIdentifier(buttonId);
+        buttonGroupExtension.setLabel(super.getStringProperty(actionElement, ATTR_LABEL));
+        buttonGroupExtension.setTooltip(super.getStringProperty(actionElement, ATTR_TOOLTIP));
+        buttonGroupExtension.setIcon(super.getStringProperty(actionElement, ATTR_ICON));
+        buttonGroupExtension.setSelection(super.getBooleanProperty(actionElement, ATTR_SELECTION, false));
+        buttonGroupExtension.setModification(super.getEnumerationProperty(actionElement, ATTR_MODIFICATION,
+                DEFAULT_MODIFICATION));
+
+        List<Element> buttons = super.getChildren(actionElement, ELEMENT_BUTTON);
+        for (Element button : buttons) {
+            ListButtonExtension buttonExt = this.parseListButtonExtension(button);
+            buttonGroupExtension.getButtonList().add(buttonExt);
+        }
+
+        return buttonGroupExtension;
     }
 
     /**
@@ -253,7 +323,7 @@ public class ListExtensionParser extends NabuccoExtensionParserSupport implement
      * @throws ExtensionException
      *             when the tab fields cannot be parsed
      */
-    private ListButtonExtension parseActionExtension(Element actionElement) throws ExtensionParserException,
+    private ListButtonExtension parseListButtonExtension(Element actionElement) throws ExtensionParserException,
             ExtensionException {
 
         ListButtonExtension buttonExtension = new ListButtonExtension();

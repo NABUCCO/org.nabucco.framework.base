@@ -1,0 +1,65 @@
+/*
+ * Copyright 2011 PRODYNA AG
+ *
+ * Licensed under the Eclipse Public License (EPL), Version 1.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.opensource.org/licenses/eclipse-1.0.php or
+ * http://www.nabucco-source.org/nabucco-license.html
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+package org.nabucco.framework.base.facade.datatype.collaboration; 
+
+import org.nabucco.framework.base.facade.datatype.Key;
+import org.nabucco.framework.base.facade.datatype.NabuccoDatatype;
+import org.nabucco.framework.base.facade.datatype.Name;
+import org.nabucco.framework.base.facade.datatype.collaboration.Attachment;
+import org.nabucco.framework.base.facade.datatype.collaboration.Attendee;
+import org.nabucco.framework.base.facade.datatype.date.Date;
+import org.nabucco.framework.base.facade.datatype.mail.Body;
+import org.nabucco.framework.base.facade.datatype.mail.Subject;
+
+@Author         Leonid Agranosvkiy
+@Company        PRODYNA AG
+@Date           2012-06-18
+@Version        1.0
+@Description    The calendar entry item
+public Datatype CalendarEntry extends NabuccoDatatype {
+	
+	@Description		The unique id of the email
+	private Basetype Key[0..1] uniqueId;
+	
+	@Description		The subject
+	private Basetype Subject[1] subject;
+	
+	@Description		The message of the calendar entry
+	private Basetype Body[1] message;
+	
+	@Description		The location of the meeting
+	private Basetype Name[1] location; 
+	
+	@Description		The start date of the entry
+	private Basetype Date[1] startDate;
+	
+	@Description		The end date of the entry
+	private Basetype Date[1] endDate;
+	
+	@Description		The list of required attendees
+	private Datatype  Attendee[0..*] requiredAttendeesList;
+	
+	@Description		The list of optional attendees
+	private Datatype Attendee[0..*] optionalAttendeesList;
+	
+	@Description		The list of reserved resources
+	private Datatype Attendee[0..*] resourcesList;
+	
+	@Description		The list of attachments	
+	private Datatype Attachment[0..*] attachmentList; 
+	
+}

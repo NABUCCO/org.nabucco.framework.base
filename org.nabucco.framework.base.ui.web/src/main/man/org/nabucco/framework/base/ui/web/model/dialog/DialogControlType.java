@@ -31,6 +31,16 @@ public enum DialogControlType {
     TEXT,
 
     /**
+     * The Date field
+     */
+    DATE,
+
+    /**
+     * DROPDOWN FIELD
+     */
+    DROPDOWN,
+
+    /**
      * Link
      */
     TEXTLINK,

@@ -47,7 +47,7 @@ public class SearchResultLabelProvider extends WebLabelProvider<FulltextDocument
             return DEFAULT_LABEL;
         }
 
-        for (FulltextField field : fulltextDocument.getFieldList()) {
+        for (FulltextField field : this.fulltextDocument.getFieldList()) {
             if (field.getFieldName() == null || field.getFieldName().getValue() == null) {
                 continue;
             }

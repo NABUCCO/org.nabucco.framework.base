@@ -85,6 +85,8 @@ public class WidgetExtensionParser extends NabuccoExtensionParserSupport impleme
 
     private static final String ATTR_DIALOG_ID = "dialogId";
 
+    private static final String ATTR_ICON = "icon";
+
     private static NabuccoLogger logger = NabuccoLoggingFactory.getInstance().getLogger(StatusBarExtensionParser.class);
 
     @Override
@@ -154,6 +156,8 @@ public class WidgetExtensionParser extends NabuccoExtensionParserSupport impleme
             ActionWidgetExtension ext = new ActionWidgetExtension();
             ext.setAction(super.getStringProperty(widgetElement, ATTR_ACTION));
             ext.setText(super.getStringProperty(widgetElement, ATTR_TEXT));
+            ext.setTooltip(super.getStringProperty(widgetElement, ATTR_TOOLTIP));
+            ext.setIcon(super.getStringProperty(widgetElement, ATTR_ICON));
             extension = ext;
         } else if (tagName.equalsIgnoreCase(ELEMENT_SEARCH)) {
             SearchWidgetExtension ext = new SearchWidgetExtension();

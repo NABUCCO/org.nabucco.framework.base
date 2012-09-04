@@ -71,6 +71,11 @@ public class OpenSaveDialogHandler extends WebActionHandlerSupport {
             elementType = NabuccoServletPathType.DASHBOARD;
             break;
         }
+        case BULKEDITOR: {
+            elementType = NabuccoServletPathType.BULKEDITOR;
+            break;
+
+        }
         default: {
             throw new ClientException("The type of the working Item cannot be saved by SaveWorkItemHandler");
         }

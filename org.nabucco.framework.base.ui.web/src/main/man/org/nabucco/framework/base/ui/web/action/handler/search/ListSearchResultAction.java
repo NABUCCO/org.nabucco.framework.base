@@ -30,8 +30,6 @@ import org.nabucco.framework.base.facade.datatype.logger.NabuccoLoggingFactory;
 import org.nabucco.framework.base.facade.datatype.search.fulltext.FulltextDocument;
 import org.nabucco.framework.base.facade.datatype.search.query.FulltextQuery;
 import org.nabucco.framework.base.facade.exception.client.ClientException;
-import org.nabucco.framework.base.ui.web.action.WebAction;
-import org.nabucco.framework.base.ui.web.action.WebActionRegistry;
 import org.nabucco.framework.base.ui.web.action.handler.OpenListActionHandler;
 import org.nabucco.framework.base.ui.web.action.parameter.WebActionParameter;
 import org.nabucco.framework.base.ui.web.action.result.WebActionResult;
@@ -115,7 +113,7 @@ public abstract class ListSearchResultAction extends OpenListActionHandler<Fullt
             parameter.setParameter(NabuccoServletPathType.LIST, list.getInstanceId());
             parameter.setParameter(NabuccoServletPathType.ROW, FIRST_ROW);
 
-            WebActionResult result = this.executeAction(openAction, parameter);
+            WebActionResult result = super.executeAction(openAction, parameter);
 
             NabuccoServletUtil.getWorkArea().closeItem(list.getInstanceId());
 
@@ -209,46 +207,6 @@ public abstract class ListSearchResultAction extends OpenListActionHandler<Fullt
         } catch (Exception e) {
             logger.error(e, "Error during fulltext search.");
             throw new ClientException("Error during fulltext search.");
-        }
-    }
-
-    /**
-     * Execute the action with the given action id.
-     * 
-     * @param actionId
-     *            id of the action to execute
-     * @param parameter
-     *            web action parameter for the action
-     * 
-     * @return the action result of the executed action
-     * 
-     * @throws ClientException
-     *             when the action cannot be executed or raises an exception
-     */
-    public final WebActionResult executeAction(String actionId, WebActionParameter parameter) throws ClientException {
-
-        if (actionId == null || actionId.isEmpty()) {
-            logger.warning("Cannot execute action with id 'null'.");
-        }
-
-        try {
-            WebAction action = WebActionRegistry.getInstance().newAction(actionId);
-
-            if (action == null) {
-                logger.warning("No action configured for ID '", actionId, "'.");
-                return null;
-            }
-
-            WebActionResult result = action.execute(parameter);
-
-            return result;
-
-        } catch (ClientException ce) {
-            logger.error(ce, "Error executing NABUCCO Action '", actionId, "'.");
-            throw ce;
-        } catch (Exception e) {
-            logger.error(e, "Error executing NABUCCO Action '", actionId, "'.");
-            throw new ClientException("Error executing NABUCCO Action '" + actionId + "'.", e);
         }
     }
 

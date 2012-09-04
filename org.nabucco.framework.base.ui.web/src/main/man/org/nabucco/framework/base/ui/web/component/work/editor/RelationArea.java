@@ -24,9 +24,12 @@ import org.nabucco.framework.base.facade.datatype.extension.schema.ui.work.edito
 import org.nabucco.framework.base.facade.datatype.extension.schema.ui.work.editor.EditorRelationExtension;
 import org.nabucco.framework.base.facade.datatype.logger.NabuccoLogger;
 import org.nabucco.framework.base.facade.datatype.logger.NabuccoLoggingFactory;
+import org.nabucco.framework.base.facade.datatype.visitor.VisitorException;
 import org.nabucco.framework.base.ui.web.component.WebComposite;
 import org.nabucco.framework.base.ui.web.component.WebElement;
 import org.nabucco.framework.base.ui.web.component.WebElementType;
+import org.nabucco.framework.base.ui.web.component.work.visitor.WebElementVisitor;
+import org.nabucco.framework.base.ui.web.component.work.visitor.WebElementVisitorContext;
 import org.nabucco.framework.base.ui.web.json.JsonList;
 import org.nabucco.framework.base.ui.web.json.JsonMap;
 
@@ -47,6 +50,8 @@ public class RelationArea extends WebComposite {
 
     private static final String JSON_FOCUS = "focus";
 
+    private static final String JSON_SIZE = "size";
+
     /** The logger */
     private static NabuccoLogger logger = NabuccoLoggingFactory.getInstance().getLogger(EditorItem.class);
 
@@ -55,6 +60,9 @@ public class RelationArea extends WebComposite {
 
     /** The Editor Extension */
     private EditorExtension extension;
+
+    /** The actual configured page size */
+    private int pageSize = 15;
 
     /**
      * Creates a new {@link EditArea} instance.
@@ -72,7 +80,7 @@ public class RelationArea extends WebComposite {
 
     @Override
     public void init() throws ExtensionException {
-        for (EditorRelationExtension relationExtension : this.extension.getRelations()) {
+        for (EditorRelationExtension relationExtension : extension.getRelations()) {
             RelationTab relationTab = new RelationTab(relationExtension);
             super.addElement(relationTab.getId(), relationTab);
             relationTab.init();
@@ -116,6 +124,7 @@ public class RelationArea extends WebComposite {
 
         return retVal;
     }
+
     /**
      * Getter for the currently opened work item.
      * 
@@ -123,7 +132,7 @@ public class RelationArea extends WebComposite {
      */
     public RelationTab getFocusedTab() {
 
-        WebElement current = super.getElement(this.focusedTabId);
+        WebElement current = super.getElement(focusedTabId);
         if (current instanceof RelationTab) {
             return (RelationTab) current;
         }
@@ -133,7 +142,7 @@ public class RelationArea extends WebComposite {
             WebElement element = super.getElement(elementIds[i]);
             if (element instanceof RelationTab) {
                 RelationTab tab = (RelationTab) element;
-                this.focusedTabId = tab.getId();
+                focusedTabId = tab.getId();
                 return tab;
             }
         }
@@ -155,7 +164,7 @@ public class RelationArea extends WebComposite {
 
         WebElement element = this.getElement(tabId);
         if (element instanceof RelationTab) {
-            this.focusedTabId = tabId;
+            focusedTabId = tabId;
             return;
         }
 
@@ -179,6 +188,42 @@ public class RelationArea extends WebComposite {
         return tabs;
     }
 
+    /**
+     * Setter for the pageSize.
+     * 
+     * @param pageSize
+     *            The pageSize to set.
+     */
+    public void setPageSize(int pageSize) {
+        this.pageSize = pageSize;
+
+        for (RelationTab tab : this.getAllTabs()) {
+            tab.getModel().getTableModel().setPageSize(pageSize);
+        }
+    }
+
+    /**
+     * Getter for the pageSize.
+     * 
+     * @return Returns the pageSize.
+     */
+    public int getPageSize() {
+        return pageSize;
+    }
+
+    /**
+     * Accepts the web element visitor. Overload this function to let element be visited
+     * 
+     * @param visitor
+     */
+    @Override
+    public <T extends WebElementVisitorContext> void accept(WebElementVisitor<T> visitor, T context)
+            throws VisitorException {
+        if (visitor != null) {
+            visitor.visit(this, context);
+        }
+    }
+
     @Override
     public JsonMap toJson() {
         JsonMap json = new JsonMap();
@@ -196,6 +241,7 @@ public class RelationArea extends WebComposite {
         if (focus != null) {
             json.add(JSON_FOCUS, focus.getId());
         }
+        json.add(JSON_SIZE, this.getPageSize());
 
         return json;
     }

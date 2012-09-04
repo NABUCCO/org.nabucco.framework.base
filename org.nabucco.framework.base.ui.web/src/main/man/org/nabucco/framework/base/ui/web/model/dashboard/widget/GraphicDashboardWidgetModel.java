@@ -17,8 +17,10 @@
 package org.nabucco.framework.base.ui.web.model.dashboard.widget;
 
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.nabucco.framework.base.facade.datatype.NabuccoDatatype;
 import org.nabucco.framework.base.facade.exception.client.ClientException;
@@ -45,6 +47,8 @@ public class GraphicDashboardWidgetModel extends DashboardWidgetModel {
     private Map<String, String> colorMap = new HashMap<String, String>();
 
     private WidgetAnalyserResult data;
+
+    private Set<WidgetDataPack> cache = new HashSet<WidgetDataPack>();
 
     /**
      * 
@@ -82,8 +86,16 @@ public class GraphicDashboardWidgetModel extends DashboardWidgetModel {
     }
 
     @Override
-    public void setContent(List<NabuccoDatatype> values) throws ClientException {
-        this.data = this.evaluateElements(values);
+    public void setContent(String filterid, List<NabuccoDatatype> values, String viewName) throws ClientException {
+        WidgetDataPack data = new WidgetDataPack(filterid, values, viewName);
+
+        if (cache.contains(data)) {
+            return;
+        }
+
+        cache.add(data);
+
+        this.data = this.evaluateElements(values, viewName);
     }
 
     /**
@@ -91,14 +103,17 @@ public class GraphicDashboardWidgetModel extends DashboardWidgetModel {
      * 
      * @param elements
      *            the elements to be analysed
+     * @param viewname
+     *            the name of the view if any
      * @return the result of statictic evaluation
      * @throws ClientException
      *             if problems in the evaluation
      */
-    private WidgetAnalyserResult evaluateElements(List<NabuccoDatatype> elements) throws ClientException {
+    private WidgetAnalyserResult evaluateElements(List<NabuccoDatatype> elements, String viewName)
+            throws ClientException {
 
         // The original result
-        WidgetAnalyserResult evaluationResult = this.analyser.evaluate(elements);
+        WidgetAnalyserResult evaluationResult = this.analyser.evaluate(elements, viewName);
 
         // The normalized result
         // TODO: Correct algorithmus to normalize results
@@ -152,6 +167,5 @@ public class GraphicDashboardWidgetModel extends DashboardWidgetModel {
         }
         return retVal;
     }
-
 
 }

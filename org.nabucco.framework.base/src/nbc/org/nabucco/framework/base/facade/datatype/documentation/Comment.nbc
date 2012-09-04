@@ -21,6 +21,7 @@ package org.nabucco.framework.base.facade.datatype.documentation;
 @Date			2011-05-24
 @Description	Large NABUCCO documentation text.
 @MaxLength		100000
+@Deprecated	Dont use this type because of compability with oracle
 public Basetype Comment extends NText {
 
 }

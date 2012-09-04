@@ -110,18 +110,23 @@ class MessageBundle implements Comparable<MessageBundle> {
 
     @Override
     public boolean equals(Object obj) {
-        if (this == obj)
+        if (this == obj) {
             return true;
-        if (obj == null)
+        }
+        if (obj == null) {
             return false;
-        if (getClass() != obj.getClass())
+        }
+        if (this.getClass() != obj.getClass()) {
             return false;
+        }
         MessageBundle other = (MessageBundle) obj;
         if (this.name == null) {
-            if (other.name != null)
+            if (other.name != null) {
                 return false;
-        } else if (!this.name.equals(other.name))
+            }
+        } else if (!this.name.equals(other.name)) {
             return false;
+        }
         return true;
     }
 
@@ -145,6 +150,8 @@ class MessageBundle implements Comparable<MessageBundle> {
     public String localize(String key) {
         if (this.isInitialized() && this.bundle.containsKey(key)) {
             return this.bundle.getString(key);
+        } else {
+            logger.error(key + " -> Is not localized.");
         }
         return null;
     }

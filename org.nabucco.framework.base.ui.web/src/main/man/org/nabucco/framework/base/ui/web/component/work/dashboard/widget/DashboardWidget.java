@@ -28,19 +28,22 @@ import org.nabucco.framework.base.facade.datatype.collection.NabuccoList;
 import org.nabucco.framework.base.facade.datatype.extension.property.PropertyLoader;
 import org.nabucco.framework.base.facade.datatype.extension.schema.queryfilter.QueryFilterExtension;
 import org.nabucco.framework.base.facade.datatype.extension.schema.ui.common.ColumnExtension;
-import org.nabucco.framework.base.facade.datatype.extension.schema.ui.common.filter.FilterReferenceExtension;
+import org.nabucco.framework.base.facade.datatype.extension.schema.ui.work.dashboard.widget.DashboardFilterViewExtension;
 import org.nabucco.framework.base.facade.datatype.extension.schema.ui.work.dashboard.widget.DashboardWidgetExtension;
 import org.nabucco.framework.base.facade.datatype.extension.schema.ui.work.dashboard.widget.DashboardWidgetSkaleItemExtension;
 import org.nabucco.framework.base.facade.datatype.extension.schema.ui.work.dashboard.widget.GraphDashboardWidgetExtension;
 import org.nabucco.framework.base.facade.datatype.extension.schema.ui.work.dashboard.widget.TableDashboardWidgetExtension;
 import org.nabucco.framework.base.facade.datatype.logger.NabuccoLogger;
 import org.nabucco.framework.base.facade.datatype.logger.NabuccoLoggingFactory;
+import org.nabucco.framework.base.facade.datatype.visitor.VisitorException;
 import org.nabucco.framework.base.ui.web.component.WebComponent;
 import org.nabucco.framework.base.ui.web.component.WebElementType;
 import org.nabucco.framework.base.ui.web.component.common.color.ColorScheme;
 import org.nabucco.framework.base.ui.web.component.common.color.ColorSchemeLocator;
 import org.nabucco.framework.base.ui.web.component.work.list.FilterItem;
 import org.nabucco.framework.base.ui.web.component.work.util.QueryFilterExtensionUtil;
+import org.nabucco.framework.base.ui.web.component.work.visitor.WebElementVisitor;
+import org.nabucco.framework.base.ui.web.component.work.visitor.WebElementVisitorContext;
 import org.nabucco.framework.base.ui.web.json.JsonElement;
 import org.nabucco.framework.base.ui.web.json.JsonList;
 import org.nabucco.framework.base.ui.web.json.JsonMap;
@@ -98,8 +101,6 @@ public class DashboardWidget extends WebComponent {
             if (widgetType == null) {
                 throw new ExtensionException("The dashboard widget type is 'null'");
             }
-
-
 
             switch (widgetType) {
             case BARGRAPH: {
@@ -201,7 +202,7 @@ public class DashboardWidget extends WebComponent {
 
         // Validate if the filter exists
         for (FilterItem item : this.getFilters()) {
-            if (item.getRefId().equals(filterId)) {
+            if (item.getId().equals(filterId)) {
                 this.activeFilterId = filterId;
                 break;
             }
@@ -213,7 +214,7 @@ public class DashboardWidget extends WebComponent {
      * 
      * @return filter id or null if no filter exist
      */
-    public String getActiveFilterId() {
+    public String getCurrentFilterId() {
         if (this.activeFilterId != null) {
             return this.activeFilterId;
         }
@@ -230,10 +231,40 @@ public class DashboardWidget extends WebComponent {
 
         // If no default filter set, take simply the first one if any
         if (this.activeFilterId == null && !filters.isEmpty()) {
-            this.setActiveFilterId(filters.get(0).getRefId());
+            this.setActiveFilterId(filters.get(0).getId());
         }
 
         return this.activeFilterId;
+    }
+
+    /**
+     * Getter for the active filter or default filter if no custom filter selected
+     * 
+     * @return filter id or null if no filter exist
+     */
+    public String getQueryFilterId(String id) {
+        FilterItem filterItem = this.filterMap.get(id);
+
+        if (filterItem != null) {
+            return filterItem.getRefId();
+        }
+
+        return null;
+    }
+
+    /**
+     * Returns the optional view name -> the type of evaluating of data
+     * 
+     * @return
+     */
+    public String getActiveFilterViewName() {
+        String fitlerId = this.getCurrentFilterId();
+        FilterItem filterItem = this.filterMap.get(fitlerId);
+        if (filterItem != null) {
+            String viewName = filterItem.getViewName();
+            return viewName;
+        }
+        return null;
     }
 
     /**
@@ -245,21 +276,30 @@ public class DashboardWidget extends WebComponent {
 
         if (this.filterMap.isEmpty()) {
 
-            NabuccoList<FilterReferenceExtension> filterExtList = this.ext.getFilters();
+            NabuccoList<DashboardFilterViewExtension> filterExtList = this.ext.getFilters();
 
-            for (FilterReferenceExtension filterExt : filterExtList) {
+            for (DashboardFilterViewExtension filterExt : filterExtList) {
                 String refId = PropertyLoader.loadProperty(filterExt.getRefId());
                 try {
                     QueryFilterExtension filterExtension = QueryFilterExtensionUtil.getFilterExtension(refId);
                     FilterItem filterItem = null;
 
+                    String id = PropertyLoader.loadProperty(filterExt.getId());
+
                     if (filterExtension == null) {
-                        filterItem = new FilterItem(filterExt);
+                        filterItem = new FilterItem(id, filterExt);
                     } else {
-                        filterItem = new FilterItem(filterExt, filterExtension);
+                        filterItem = new FilterItem(id, filterExt, filterExtension);
                     }
 
-                    this.filterMap.put(filterItem.getRefId(), filterItem);
+                    // Add view name if any
+                    if (filterExt instanceof DashboardFilterViewExtension) {
+                        DashboardFilterViewExtension view = filterExt;
+                        String viewName = PropertyLoader.loadProperty(view.getViewName());
+                        filterItem.setViewName(viewName);
+                    }
+
+                    this.filterMap.put(id, filterItem);
 
                 } catch (ExtensionException e) {
                     this.logger.debug("Cannot initialize the filter with id " + refId, e);
@@ -342,6 +382,7 @@ public class DashboardWidget extends WebComponent {
      * 
      * @return the id
      */
+    @Override
     public String getId() {
         return this.ext.getIdentifier().getValue();
     }
@@ -353,6 +394,22 @@ public class DashboardWidget extends WebComponent {
      */
     public DashboardWidgetModel getModel() {
         return this.model;
+    }
+
+    /**
+     * Accepts the web element visitor. Overload this function to let element be visited
+     * 
+     * @param visitor
+     *            visitor to be accepted
+     * @param context
+     *            context of the visitor
+     */
+    @Override
+    public <T extends WebElementVisitorContext> void accept(WebElementVisitor<T> visitor, T context)
+            throws VisitorException {
+        if (visitor != null) {
+            visitor.visit(this, context);
+        }
     }
 
     @Override
@@ -369,7 +426,7 @@ public class DashboardWidget extends WebComponent {
             filters.add(filterItem.toJson());
         }
         retVal.add(JSON_FILTERS, filters);
-        retVal.add(JSON_ACTIVE_FILTER, this.getActiveFilterId());
+        retVal.add(JSON_ACTIVE_FILTER, this.getCurrentFilterId());
         retVal.add(JSON_TYPE, this.getModel().getType());
 
         return retVal;

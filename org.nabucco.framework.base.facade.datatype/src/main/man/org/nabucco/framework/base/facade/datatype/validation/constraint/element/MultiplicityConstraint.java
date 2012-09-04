@@ -313,6 +313,16 @@ public class MultiplicityConstraint extends Constraint {
                 result.getErrorList().add(new ValidationError(owner, property.getName(), message));
             }
         }
+
+        if (this.multiplicity == MultiplicityType.ONE) {
+            Integer isMultiplicity = this.getMultiplicity(property);
+            if (isMultiplicity != 1) {
+                Object[] arguments = new Object[] { ownerName, property.getName(), isMultiplicity,
+                        this.multiplicity.getName() };
+                String message = MessageFormat.format(MESSAGE, arguments);
+                result.getErrorList().add(new ValidationError(owner, property.getName(), message));
+            }
+        }
     }
 
     /**

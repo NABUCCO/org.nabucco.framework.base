@@ -143,6 +143,12 @@ public class WebActionParameter {
         if (parameter.equalsIgnoreCase(VALUE_UNDEFINED) || parameter.equalsIgnoreCase(VALUE_NULL)) {
             return this.additionalParameter.get(key);
         }
+
+        // Make it possible to override parameters in the standard get
+        if (this.additionalParameter.get(key) != null) {
+            return this.additionalParameter.get(key);
+        }
+
         return parameter;
     }
 

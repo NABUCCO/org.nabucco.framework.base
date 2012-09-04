@@ -24,10 +24,13 @@ import org.nabucco.framework.base.facade.datatype.extension.property.PropertyLoa
 import org.nabucco.framework.base.facade.datatype.extension.schema.ui.widget.WidgetReferenceExtension;
 import org.nabucco.framework.base.facade.datatype.extension.schema.ui.work.dashboard.DashboardExtension;
 import org.nabucco.framework.base.facade.datatype.extension.schema.ui.work.dashboard.widget.DashboardWidgetExtension;
+import org.nabucco.framework.base.facade.datatype.visitor.VisitorException;
 import org.nabucco.framework.base.ui.web.component.WebElement;
 import org.nabucco.framework.base.ui.web.component.work.WorkItem;
 import org.nabucco.framework.base.ui.web.component.work.WorkItemType;
 import org.nabucco.framework.base.ui.web.component.work.dashboard.widget.DashboardWidget;
+import org.nabucco.framework.base.ui.web.component.work.visitor.WebElementVisitor;
+import org.nabucco.framework.base.ui.web.component.work.visitor.WebElementVisitorContext;
 import org.nabucco.framework.base.ui.web.json.JsonList;
 import org.nabucco.framework.base.ui.web.json.JsonMap;
 import org.nabucco.framework.base.ui.web.model.dashboard.DashboardItemModel;
@@ -54,7 +57,6 @@ public final class DashboardItem extends WorkItem {
 
     /** The default serial version UID */
     private static final long serialVersionUID = 1L;
-
 
     private static final String JSON_WIDGETS = "widgets";
 
@@ -86,8 +88,6 @@ public final class DashboardItem extends WorkItem {
         }
     }
 
-
-
     @Override
     protected DashboardExtension getExtension() {
         return (DashboardExtension) super.getExtension();
@@ -96,6 +96,22 @@ public final class DashboardItem extends WorkItem {
     @Override
     public DashboardItemModel getModel() {
         return (DashboardItemModel) super.getModel();
+    }
+
+    /**
+     * Accepts the web element visitor. Overload this function to let element be visited
+     * 
+     * @param visitor
+     *            visitor to be accepted
+     * @param context
+     *            context of the visitor
+     */
+    @Override
+    public <T extends WebElementVisitorContext> void accept(WebElementVisitor<T> visitor, T context)
+            throws VisitorException {
+        if (visitor != null) {
+            visitor.visit(this, context);
+        }
     }
 
     @Override

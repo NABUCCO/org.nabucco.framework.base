@@ -27,18 +27,23 @@ import org.nabucco.framework.base.facade.datatype.NabuccoSystem;
 import org.nabucco.framework.base.facade.datatype.extension.ExtensionPointType;
 import org.nabucco.framework.base.facade.datatype.extension.property.PropertyLoader;
 import org.nabucco.framework.base.facade.datatype.extension.schema.ui.work.WorkAreaExtension;
+import org.nabucco.framework.base.facade.datatype.extension.schema.ui.work.bulkeditor.BulkEditorExtension;
 import org.nabucco.framework.base.facade.datatype.extension.schema.ui.work.dashboard.DashboardExtension;
 import org.nabucco.framework.base.facade.datatype.extension.schema.ui.work.editor.EditorExtension;
 import org.nabucco.framework.base.facade.datatype.extension.schema.ui.work.list.ListExtension;
 import org.nabucco.framework.base.facade.datatype.logger.NabuccoLogger;
 import org.nabucco.framework.base.facade.datatype.logger.NabuccoLoggingFactory;
+import org.nabucco.framework.base.facade.datatype.visitor.VisitorException;
 import org.nabucco.framework.base.ui.web.component.WebComposite;
 import org.nabucco.framework.base.ui.web.component.WebElement;
 import org.nabucco.framework.base.ui.web.component.WebElementType;
 import org.nabucco.framework.base.ui.web.component.browser.Browser;
+import org.nabucco.framework.base.ui.web.component.work.bulkeditor.BulkEditorItem;
 import org.nabucco.framework.base.ui.web.component.work.dashboard.DashboardItem;
 import org.nabucco.framework.base.ui.web.component.work.editor.EditorItem;
 import org.nabucco.framework.base.ui.web.component.work.list.ListItem;
+import org.nabucco.framework.base.ui.web.component.work.visitor.WebElementVisitor;
+import org.nabucco.framework.base.ui.web.component.work.visitor.WebElementVisitorContext;
 import org.nabucco.framework.base.ui.web.json.JsonElement;
 import org.nabucco.framework.base.ui.web.json.JsonList;
 import org.nabucco.framework.base.ui.web.json.JsonMap;
@@ -106,7 +111,7 @@ public class WorkArea extends WebComposite {
     @Override
     public void clear() {
         super.clear();
-        this.closedItems.clear();
+        closedItems.clear();
     }
 
     /**
@@ -132,7 +137,7 @@ public class WorkArea extends WebComposite {
      * @return the id of the close dialog
      */
     public String getCloseDialogId() {
-        return PropertyLoader.loadProperty(this.extension.getCloseDialog());
+        return PropertyLoader.loadProperty(extension.getCloseDialog());
     }
 
     /**
@@ -166,6 +171,21 @@ public class WorkArea extends WebComposite {
      */
     public EditorItem newEditor(String itemId, String instanceId) throws ExtensionException {
         return (EditorItem) this.newItem(WorkItemType.EDITOR, itemId, instanceId);
+    }
+
+    /**
+     * Creates a new bulk editor work item with given id
+     * 
+     * @param itemId
+     *            the id of the bulk editor
+     * @param instanceId
+     *            the instance id
+     * @return the newly created bulk editor
+     * @throws ExtensionException
+     *             when a new bulk editor work item with the given ids is not configured correctly
+     */
+    public BulkEditorItem newBulkEditor(String itemId, String instanceId) throws ExtensionException {
+        return (BulkEditorItem) this.newItem(WorkItemType.BULKEDITOR, itemId, instanceId);
     }
 
     /**
@@ -302,16 +322,27 @@ public class WorkArea extends WebComposite {
                 break;
             }
 
+            case BULKEDITOR: {
+                BulkEditorExtension bulkEditorExtension = (BulkEditorExtension) NabuccoSystem.getExtensionResolver()
+                        .resolveExtension(ExtensionPointType.ORG_NABUCCO_UI_BULK_EDITOR, itemId);
+
+                item = new BulkEditorItem(uniqueInstanceId, bulkEditorExtension);
+                this.addElement(uniqueInstanceId, item);
+                item.init();
+
+                break;
+            }
+
             default:
                 throw new IllegalStateException("WorkItem Type [" + type + "] is not supported.");
             }
 
-            this.stack.push(itemId, uniqueInstanceId);
-            this.history.put(uniqueInstanceId, item);
+            stack.push(itemId, uniqueInstanceId);
+            history.put(uniqueInstanceId, item);
 
-            if (this.history.size() > 50) {
-                String[] keys = this.history.keySet().toArray(new String[this.history.size()]);
-                this.history.remove(keys[0]);
+            if (history.size() > 50) {
+                String[] keys = history.keySet().toArray(new String[history.size()]);
+                history.remove(keys[0]);
             }
 
             return item;
@@ -348,6 +379,11 @@ public class WorkArea extends WebComposite {
 
         String uniqueInstanceId = UniqueInstanceIdGenerator.generateUniqueId(itemId, instanceId);
 
+        WorkItem oldEditor = this.getItem(uniqueInstanceId);
+        if (oldEditor != null) {
+            this.selectItem(uniqueInstanceId);
+            return oldEditor;
+        }
         WorkItem retVal = this.newItem(type, uniqueInstanceId);
 
         return retVal;
@@ -388,6 +424,7 @@ public class WorkArea extends WebComposite {
         try {
             WorkItem newItem = this.newItem(item.getItemType(), item.getId(), newInstanceId);
             newItem.setSource(item.getSource());
+            newItem.setSourceWebElement(item.getSourceWebElement());
 
             return newItem;
         } catch (ExtensionException e) {
@@ -410,7 +447,7 @@ public class WorkArea extends WebComposite {
     private WorkItem openItem(String itemId, String instanceId) {
         // When item is already initialized.
         if (this.hasItem(itemId, instanceId)) {
-            this.stack.push(itemId, instanceId);
+            stack.push(itemId, instanceId);
             return (WorkItem) this.getElement(instanceId);
         }
         return null;
@@ -427,7 +464,7 @@ public class WorkArea extends WebComposite {
      * @return <b>true</b> if the work area holds the given item, <b>false</b> if not
      */
     private boolean hasItem(String itemId, String instanceId) {
-        return this.stack.contains(itemId, instanceId);
+        return stack.contains(itemId, instanceId);
     }
 
     /**
@@ -445,11 +482,11 @@ public class WorkArea extends WebComposite {
 
         WebElement element = this.getElement(uniqueInstanceId);
         if (element instanceof WorkItem) {
-            this.stack.push(((WorkItem) element).getId(), uniqueInstanceId);
+            stack.push(((WorkItem) element).getId(), uniqueInstanceId);
             return;
         }
 
-        WorkItem item = this.history.get(uniqueInstanceId);
+        WorkItem item = history.get(uniqueInstanceId);
 
         if (item != null) {
             try {
@@ -477,14 +514,14 @@ public class WorkArea extends WebComposite {
         if (element instanceof WorkItem) {
 
             WorkItem removedElement = (WorkItem) element;
-            this.closedItems.put(uniqueInstanceId, removedElement);
+            closedItems.put(uniqueInstanceId, removedElement);
 
             // Skip when no tab is selected.
-            if (this.stack.peek() == null) {
+            if (stack.peek() == null) {
                 return;
             }
 
-            this.stack.remove(removedElement.getId(), uniqueInstanceId);
+            stack.remove(removedElement.getId(), uniqueInstanceId);
 
             this.removeBrowserEntries(uniqueInstanceId, removedElement);
         }
@@ -498,7 +535,7 @@ public class WorkArea extends WebComposite {
      */
     public WorkItem getCurrentItem() {
 
-        WorkItemStackEntry current = this.stack.peek();
+        WorkItemStackEntry current = stack.peek();
         if (current != null) {
             WebElement currentItem = super.getElement(current.getInstanceId());
             if (currentItem instanceof WorkItem) {
@@ -511,7 +548,7 @@ public class WorkArea extends WebComposite {
             WebElement element = super.getElement(elementId);
             if (element instanceof WorkItem) {
                 WorkItem item = (WorkItem) element;
-                this.stack.push(item.getId(), elementId);
+                stack.push(item.getId(), elementId);
                 return item;
             }
         }
@@ -525,7 +562,7 @@ public class WorkArea extends WebComposite {
      * @return the layout
      */
     public String getLayout() {
-        return PropertyLoader.loadProperty(this.extension.getLayout());
+        return PropertyLoader.loadProperty(extension.getLayout());
     }
 
     /**
@@ -577,6 +614,19 @@ public class WorkArea extends WebComposite {
         }
     }
 
+    /**
+     * Accepts the web element visitor. Overload this function to let element be visited
+     * 
+     * @param visitor
+     */
+    @Override
+    public <T extends WebElementVisitorContext> void accept(WebElementVisitor<T> visitor, T context)
+            throws VisitorException {
+        if (visitor != null) {
+            visitor.visit(this, context);
+        }
+    }
+
     @Override
     public JsonElement toJson() {
 
@@ -594,7 +644,7 @@ public class WorkArea extends WebComposite {
             tabEntry.add(JSON_TYPE, item.getType());
             tabEntry.add(JSON_ID, item.getId());
             tabEntry.add(JSON_INSTANCEID, elementId);
-            tabEntry.add(JSON_ORDER, this.stack.indexOf(item));
+            tabEntry.add(JSON_ORDER, stack.indexOf(item));
             tabEntry.add(JSON_MODEL, item.getModel().toJson());
 
             tabList.add(tabEntry);
@@ -603,7 +653,7 @@ public class WorkArea extends WebComposite {
         // Closed Tabs
 
         JsonList closedList = new JsonList();
-        for (Entry<String, WorkItem> entry : this.closedItems.entrySet()) {
+        for (Entry<String, WorkItem> entry : closedItems.entrySet()) {
             JsonMap closedEntry = new JsonMap();
             closedEntry.add(JSON_ID, entry.getValue().getId());
             closedEntry.add(JSON_INSTANCEID, entry.getKey());
@@ -613,7 +663,7 @@ public class WorkArea extends WebComposite {
 
         // Current Tab
 
-        WorkItemStackEntry current = this.stack.peek();
+        WorkItemStackEntry current = stack.peek();
         if (current != null) {
             JsonMap currentTab = new JsonMap();
             currentTab.add(JSON_ID, current.getItemId());

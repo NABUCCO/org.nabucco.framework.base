@@ -43,7 +43,7 @@ public class WebActionResult implements Jsonable {
      * @param item
      */
     public void addItem(WebActionResultItem item) {
-        this.itemList.add(item);
+        itemList.add(item);
     }
 
     /**
@@ -56,7 +56,19 @@ public class WebActionResult implements Jsonable {
         if (result == null || result.getItemList() == null) {
             throw new IllegalArgumentException("Cannot append the result. Resultlist is 'null'");
         }
-        this.itemList.addAll(result.getItemList());
+        itemList.addAll(result.getItemList());
+    }
+
+    /**
+     * Removes the given item from the actual result
+     * 
+     * @param item
+     *            item to remove
+     */
+    public void removeItemFromResult(WebActionResultItem item) {
+        if (itemList.contains(item)) {
+            itemList.remove(item);
+        }
     }
 
     /**
@@ -66,14 +78,14 @@ public class WebActionResult implements Jsonable {
      * @return Returns a copy of the item list.
      */
     public List<WebActionResultItem> getItemList() {
-        return new ArrayList<WebActionResultItem>(this.itemList);
+        return new ArrayList<WebActionResultItem>(itemList);
     }
 
     @Override
     public JsonElement toJson() {
         JsonList jsonList = new JsonList();
 
-        for (WebActionResultItem item : this.itemList) {
+        for (WebActionResultItem item : itemList) {
             if (item.isValid()) {
                 jsonList.add(item.toJson());
             }
@@ -81,7 +93,6 @@ public class WebActionResult implements Jsonable {
 
         return new JsonMap(JSON_ITEMS, jsonList);
     }
-
 
     @Override
     public String toString() {

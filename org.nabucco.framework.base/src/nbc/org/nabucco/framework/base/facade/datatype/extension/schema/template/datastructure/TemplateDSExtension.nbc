@@ -1,0 +1,45 @@
+/*
+* Copyright 2011 PRODYNA AG
+*
+* Licensed under the Eclipse Public License (EPL), Version 1.0 (the "License");
+* you may not use this file except in compliance with the License.
+* You may obtain a copy of the License at
+*
+* http://www.opensource.org/licenses/eclipse-1.0.php or
+* http://nabuccosource.org/License.html
+*
+* Unless required by applicable law or agreed to in writing, software
+* distributed under the License is distributed on an "AS IS" BASIS,
+* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+* See the License for the specific language governing permissions and
+* limitations under the License.
+*/
+package org.nabucco.framework.base.facade.datatype.extension.schema.template.datastructure; 
+
+import org.nabucco.framework.base.facade.datatype.Name;
+import org.nabucco.framework.base.facade.datatype.Version;
+import org.nabucco.framework.base.facade.datatype.extension.NabuccoExtensionComposite;
+import org.nabucco.framework.base.facade.datatype.extension.schema.template.datastructure.TemplateDSElement;
+import org.nabucco.framework.base.facade.datatype.extension.schema.template.datastructure.TemplateDSKeyExtension;
+
+
+@Author         Leonid Agranovskiy
+@Company        PRODYNA AG
+@Date           2012-07-03
+@Version        1.0
+@Description	Template Datastructure Extension.
+public Datatype TemplateDSExtension extends NabuccoExtensionComposite {
+	
+	@Description		The name of the extension
+	private Basetype Name[1] name;
+	
+	@Description		The version of the extension
+	private Basetype Version[1] version; 
+	
+	@Description		The datatstructure
+	private Datatype TemplateDSElement[1] structure; 
+	
+	@Description		The list of the keys that can be referenced in the datastructure
+	private Datatype TemplateDSKeyExtension[0..*] keyList; 
+	 
+}

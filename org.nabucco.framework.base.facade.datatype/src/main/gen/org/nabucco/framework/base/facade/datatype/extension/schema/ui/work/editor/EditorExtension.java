@@ -1,18 +1,16 @@
 /*
  * Copyright 2012 PRODYNA AG
- *
- * Licensed under the Eclipse Public License (EPL), Version 1.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
+ * 
+ * Licensed under the Eclipse Public License (EPL), Version 1.0 (the "License"); you may not use
+ * this file except in compliance with the License. You may obtain a copy of the License at
+ * 
  * http://www.opensource.org/licenses/eclipse-1.0.php or
  * http://www.nabucco.org/License.html
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+ * 
+ * Unless required by applicable law or agreed to in writing, software distributed under the
+ * License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND,
+ * either express or implied. See the License for the specific language governing permissions
+ * and limitations under the License.
  */
 package org.nabucco.framework.base.facade.datatype.extension.schema.ui.work.editor;
 
@@ -24,6 +22,7 @@ import org.nabucco.framework.base.facade.datatype.Datatype;
 import org.nabucco.framework.base.facade.datatype.collection.NabuccoCollectionState;
 import org.nabucco.framework.base.facade.datatype.collection.NabuccoList;
 import org.nabucco.framework.base.facade.datatype.collection.NabuccoListImpl;
+import org.nabucco.framework.base.facade.datatype.extension.property.ClassProperty;
 import org.nabucco.framework.base.facade.datatype.extension.schema.ui.common.EditorButtonExtension;
 import org.nabucco.framework.base.facade.datatype.extension.schema.ui.work.WorkItemExtension;
 import org.nabucco.framework.base.facade.datatype.extension.schema.ui.work.editor.EditorRelationExtension;
@@ -45,13 +44,18 @@ public class EditorExtension extends WorkItemExtension implements Datatype {
 
     private static final long serialVersionUID = 1L;
 
-    private static final String[] PROPERTY_CONSTRAINTS = { "m0,n;", "m0,n;", "m0,n;" };
+    private static final String[] PROPERTY_CONSTRAINTS = { "m0,1;", "m0,n;", "m0,n;", "m0,n;" };
+
+    public static final String RESOLVER = "resolver";
 
     public static final String BUTTONS = "buttons";
 
     public static final String TABS = "tabs";
 
     public static final String RELATIONS = "relations";
+
+    /** The Resolver instance to use for editor binding */
+    private ClassProperty resolver;
 
     /** The Editor Actions. */
     private NabuccoList<EditorButtonExtension> buttons;
@@ -79,6 +83,9 @@ public class EditorExtension extends WorkItemExtension implements Datatype {
      */
     protected void cloneObject(EditorExtension clone) {
         super.cloneObject(clone);
+        if ((this.getResolver() != null)) {
+            clone.setResolver(this.getResolver().cloneObject());
+        }
         if ((this.buttons != null)) {
             clone.buttons = this.buttons.cloneCollection();
         }
@@ -170,12 +177,14 @@ public class EditorExtension extends WorkItemExtension implements Datatype {
     protected static NabuccoPropertyContainer createPropertyContainer() {
         Map<String, NabuccoPropertyDescriptor> propertyMap = new HashMap<String, NabuccoPropertyDescriptor>();
         propertyMap.putAll(PropertyCache.getInstance().retrieve(WorkItemExtension.class).getPropertyMap());
-        propertyMap.put(BUTTONS, PropertyDescriptorSupport.createCollection(BUTTONS, EditorButtonExtension.class, 11,
+        propertyMap.put(RESOLVER, PropertyDescriptorSupport.createDatatype(RESOLVER, ClassProperty.class, 11,
                 PROPERTY_CONSTRAINTS[0], false, PropertyAssociationType.COMPOSITION));
-        propertyMap.put(TABS, PropertyDescriptorSupport.createCollection(TABS, EditorTabExtension.class, 12,
+        propertyMap.put(BUTTONS, PropertyDescriptorSupport.createCollection(BUTTONS, EditorButtonExtension.class, 12,
                 PROPERTY_CONSTRAINTS[1], false, PropertyAssociationType.COMPOSITION));
+        propertyMap.put(TABS, PropertyDescriptorSupport.createCollection(TABS, EditorTabExtension.class, 13,
+                PROPERTY_CONSTRAINTS[2], false, PropertyAssociationType.COMPOSITION));
         propertyMap.put(RELATIONS, PropertyDescriptorSupport.createCollection(RELATIONS, EditorRelationExtension.class,
-                13, PROPERTY_CONSTRAINTS[2], false, PropertyAssociationType.COMPOSITION));
+                14, PROPERTY_CONSTRAINTS[3], false, PropertyAssociationType.COMPOSITION));
         return new NabuccoPropertyContainer(propertyMap);
     }
 
@@ -187,6 +196,7 @@ public class EditorExtension extends WorkItemExtension implements Datatype {
     @Override
     public Set<NabuccoProperty> getProperties() {
         Set<NabuccoProperty> properties = super.getProperties();
+        properties.add(super.createProperty(EditorExtension.getPropertyDescriptor(RESOLVER), this.getResolver(), null));
         properties.add(super.createProperty(EditorExtension.getPropertyDescriptor(BUTTONS), this.buttons, null));
         properties.add(super.createProperty(EditorExtension.getPropertyDescriptor(TABS), this.tabs, null));
         properties.add(super.createProperty(EditorExtension.getPropertyDescriptor(RELATIONS), this.relations, null));
@@ -199,7 +209,10 @@ public class EditorExtension extends WorkItemExtension implements Datatype {
         if (super.setProperty(property)) {
             return true;
         }
-        if ((property.getName().equals(BUTTONS) && (property.getType() == EditorButtonExtension.class))) {
+        if ((property.getName().equals(RESOLVER) && (property.getType() == ClassProperty.class))) {
+            this.setResolver(((ClassProperty) property.getInstance()));
+            return true;
+        } else if ((property.getName().equals(BUTTONS) && (property.getType() == EditorButtonExtension.class))) {
             this.buttons = ((NabuccoList<EditorButtonExtension>) property.getInstance());
             return true;
         } else if ((property.getName().equals(TABS) && (property.getType() == EditorTabExtension.class))) {
@@ -213,10 +226,59 @@ public class EditorExtension extends WorkItemExtension implements Datatype {
     }
 
     @Override
+    public boolean equals(Object obj) {
+        if ((this == obj)) {
+            return true;
+        }
+        if ((obj == null)) {
+            return false;
+        }
+        if ((this.getClass() != obj.getClass())) {
+            return false;
+        }
+        if ((!super.equals(obj))) {
+            return false;
+        }
+        final EditorExtension other = ((EditorExtension) obj);
+        if ((this.resolver == null)) {
+            if ((other.resolver != null))
+                return false;
+        } else if ((!this.resolver.equals(other.resolver)))
+            return false;
+        return true;
+    }
+
+    @Override
+    public int hashCode() {
+        final int PRIME = 31;
+        int result = super.hashCode();
+        result = ((PRIME * result) + ((this.resolver == null) ? 0 : this.resolver.hashCode()));
+        return result;
+    }
+
+    @Override
     public EditorExtension cloneObject() {
         EditorExtension clone = new EditorExtension();
         this.cloneObject(clone);
         return clone;
+    }
+
+    /**
+     * The Resolver instance to use for editor binding
+     *
+     * @param resolver the ClassProperty.
+     */
+    public void setResolver(ClassProperty resolver) {
+        this.resolver = resolver;
+    }
+
+    /**
+     * The Resolver instance to use for editor binding
+     *
+     * @return the ClassProperty.
+     */
+    public ClassProperty getResolver() {
+        return this.resolver;
     }
 
     /**

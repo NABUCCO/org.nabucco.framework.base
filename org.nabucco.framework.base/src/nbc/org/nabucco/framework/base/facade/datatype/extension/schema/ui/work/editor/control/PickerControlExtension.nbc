@@ -35,10 +35,13 @@ public Datatype PickerControlExtension extends EditorControlExtension {
 	private Datatype StringProperty[1] pickerDialog;
 			
 	@Description	Support of multiple selection
-	private Datatype BooleanProperty[1] multipleSelection; 			
+	private Datatype BooleanProperty[1] multipleSelection;
 	
 	@Description	Path of bound element to be displayd in the picker
-	private Datatype StringProperty[1] displayPath; 
+	private Datatype StringProperty[1] displayPath;
+	
+	@Description	Auto-Completion filter name.
+	private Datatype StringProperty[0..1] autoCompletionFilter;
 	
 	@Description	The mapping for query filter parameters if any
 	private Datatype QueryParameterMappingExtension[0..1] queryParameterMapping;

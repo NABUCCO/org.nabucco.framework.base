@@ -34,7 +34,7 @@ import org.nabucco.framework.base.ui.web.json.JsonMap;
  * 
  * @author Leonid Agranovskiy, PRODYNA AG
  */
-class WidgetAnalyserResultImpl implements WidgetAnalyserResult {
+class WidgetAnalyserResultImpl implements WidgetAnalyserResult, Cloneable {
 
     private static final String JSON_WEIGHT = "weight";
 
@@ -97,23 +97,23 @@ class WidgetAnalyserResultImpl implements WidgetAnalyserResult {
     public void addChild(WidgetAnalyserResult item) {
         WidgetAnalyserResult clonedItem = item.clone();
         clonedItem.setParent(this);
-        this.childrenMap.put(item.getLabel(), clonedItem);
+        childrenMap.put(item.getLabel(), clonedItem);
     }
 
     @Override
     public final void appendResult(WidgetAnalyserResult newResult) throws ClientException {
         if (newResult.isParent()) {
             for (WidgetAnalyserResult child : newResult.getChildren()) {
-                if (this.childrenMap.containsKey(child.getLabel())) {
-                    WidgetAnalyserResult foundChild = this.childrenMap.get(child.getLabel());
+                if (childrenMap.containsKey(child.getLabel())) {
+                    WidgetAnalyserResult foundChild = childrenMap.get(child.getLabel());
                     foundChild.appendResult(child);
                 } else {
                     this.addChild(child);
                 }
             }
         } else {
-            if (this.childrenMap.containsKey(newResult.getLabel())) {
-                WidgetAnalyserResult foundChild = this.childrenMap.get(newResult.getLabel());
+            if (childrenMap.containsKey(newResult.getLabel())) {
+                WidgetAnalyserResult foundChild = childrenMap.get(newResult.getLabel());
                 foundChild.incrementCount(newResult.getCount());
             } else {
                 this.addChild(newResult);
@@ -125,17 +125,17 @@ class WidgetAnalyserResultImpl implements WidgetAnalyserResult {
     public WidgetAnalyserResult clone() {
         WidgetAnalyserResultImpl retVal = null;
 
-        if (this.parent != null) {
-            retVal = new WidgetAnalyserResultImpl(this.parent, this.label);
+        if (parent != null) {
+            retVal = new WidgetAnalyserResultImpl(parent, label);
         } else {
-            retVal = new WidgetAnalyserResultImpl(this.label);
+            retVal = new WidgetAnalyserResultImpl(label);
         }
 
         for (WidgetAnalyserResult child : this.getChildren()) {
             retVal.addChild(child.clone());
         }
 
-        retVal.setCount(this.count);
+        retVal.setCount(count);
 
         return retVal;
     }
@@ -147,7 +147,7 @@ class WidgetAnalyserResultImpl implements WidgetAnalyserResult {
      */
     @Override
     public final List<WidgetAnalyserResult> getChildren() {
-        return new ArrayList<WidgetAnalyserResult>(this.childrenMap.values());
+        return new ArrayList<WidgetAnalyserResult>(childrenMap.values());
     }
 
     /**
@@ -158,12 +158,12 @@ class WidgetAnalyserResultImpl implements WidgetAnalyserResult {
     @Override
     public int getCount() {
         if (this.isParent()) {
-            this.count = 0;
-            for (WidgetAnalyserResult child : this.childrenMap.values()) {
-                this.count += child.getCount();
+            count = 0;
+            for (WidgetAnalyserResult child : childrenMap.values()) {
+                count += child.getCount();
             }
         }
-        return this.count;
+        return count;
     }
 
     /**
@@ -173,12 +173,12 @@ class WidgetAnalyserResultImpl implements WidgetAnalyserResult {
      */
     @Override
     public String getLabel() {
-        return this.label;
+        return label;
     }
 
     @Override
     public WidgetAnalyserResult getParent() {
-        return this.parent;
+        return parent;
     }
 
     /**
@@ -189,8 +189,8 @@ class WidgetAnalyserResultImpl implements WidgetAnalyserResult {
     @Override
     public double getWeight() {
 
-        if (this.parent != null) {
-            int parentCount = this.parent.getCount();
+        if (parent != null) {
+            int parentCount = parent.getCount();
             if (parentCount == 0) {
                 return 0;
             }
@@ -200,7 +200,7 @@ class WidgetAnalyserResultImpl implements WidgetAnalyserResult {
             count = count.setScale(2, RoundingMode.HALF_EVEN);
             return count.doubleValue();
         }
-        
+
         BigDecimal retVal = new BigDecimal(100);
         retVal = retVal.setScale(2, RoundingMode.HALF_EVEN);
         return retVal.doubleValue();
@@ -209,7 +209,7 @@ class WidgetAnalyserResultImpl implements WidgetAnalyserResult {
     @Override
     public void incrementCount(int value) throws ClientException {
         if (!this.isParent()) {
-            this.count += value;
+            count += value;
         } else {
             throw new ClientException("Cannot increment result item that has children.");
         }
@@ -217,7 +217,7 @@ class WidgetAnalyserResultImpl implements WidgetAnalyserResult {
 
     @Override
     public boolean isParent() {
-        return !this.childrenMap.isEmpty();
+        return !childrenMap.isEmpty();
     }
 
     /**
@@ -227,25 +227,25 @@ class WidgetAnalyserResultImpl implements WidgetAnalyserResult {
      *            count
      */
     public void setCount(int value) {
-        this.count = value;
+        count = value;
     }
 
     @Override
     public void setColor(String colorId) {
-        this.color = colorId;
+        color = colorId;
     }
 
     @Override
     public JsonElement toJson() {
         JsonMap retVal = new JsonMap();
 
-        retVal.add(JSON_LABEL, this.label);
+        retVal.add(JSON_LABEL, label);
         retVal.add(JSON_WEIGHT, this.getWeight());
         retVal.add(JSON_COUNT, this.getCount());
-        retVal.add(JSON_COLOR, this.color);
+        retVal.add(JSON_COLOR, color);
 
         JsonList children = new JsonList();
-        for (WidgetAnalyserResult child : this.childrenMap.values()) {
+        for (WidgetAnalyserResult child : childrenMap.values()) {
             children.add(child.toJson());
         }
 

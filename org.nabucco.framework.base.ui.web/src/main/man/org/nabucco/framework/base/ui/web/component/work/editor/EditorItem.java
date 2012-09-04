@@ -20,24 +20,29 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.nabucco.common.extension.ExtensionException;
+import org.nabucco.framework.base.facade.datatype.Datatype;
 import org.nabucco.framework.base.facade.datatype.extension.property.PropertyLoader;
 import org.nabucco.framework.base.facade.datatype.extension.schema.ui.common.EditorButtonExtension;
 import org.nabucco.framework.base.facade.datatype.extension.schema.ui.work.WorkItemBrowserEntryExtension;
 import org.nabucco.framework.base.facade.datatype.extension.schema.ui.work.WorkItemBrowserExtension;
 import org.nabucco.framework.base.facade.datatype.extension.schema.ui.work.editor.EditorExtension;
+import org.nabucco.framework.base.facade.datatype.property.NabuccoPropertyResolver;
+import org.nabucco.framework.base.facade.datatype.property.PropertyAccessor;
+import org.nabucco.framework.base.facade.datatype.visitor.VisitorException;
 import org.nabucco.framework.base.ui.web.component.WebElement;
 import org.nabucco.framework.base.ui.web.component.WebElementType;
 import org.nabucco.framework.base.ui.web.component.common.button.Button;
 import org.nabucco.framework.base.ui.web.component.common.button.EditorButton;
 import org.nabucco.framework.base.ui.web.component.work.WorkItem;
 import org.nabucco.framework.base.ui.web.component.work.WorkItemType;
-import org.nabucco.framework.base.ui.web.component.work.editor.control.EditorControl;
+import org.nabucco.framework.base.ui.web.component.work.visitor.WebElementVisitor;
+import org.nabucco.framework.base.ui.web.component.work.visitor.WebElementVisitorContext;
 import org.nabucco.framework.base.ui.web.json.JsonList;
 import org.nabucco.framework.base.ui.web.json.JsonMap;
 import org.nabucco.framework.base.ui.web.model.browser.BindableBrowserEntry;
 import org.nabucco.framework.base.ui.web.model.browser.BrowserEntry;
-import org.nabucco.framework.base.ui.web.model.control.ControlModel;
-import org.nabucco.framework.base.ui.web.model.control.util.dependency.DependencyController;
+import org.nabucco.framework.base.ui.web.model.editor.EditorGridElementModel;
+import org.nabucco.framework.base.ui.web.model.editor.util.dependency.DependencyController;
 import org.nabucco.framework.base.ui.web.model.work.EditorModel;
 
 /**
@@ -73,6 +78,10 @@ public final class EditorItem extends WorkItem {
     public void init() throws ExtensionException {
         super.init();
 
+        // Set the specifical property accessor for the concrete editor according to the extension
+        PropertyAccessor accessor = this.getPropertyAccessor();
+        this.getModel().setPropertyAccessor(accessor);
+
         for (EditorButtonExtension actionExtension : this.getExtension().getButtons()) {
             EditorButton button = new EditorButton(actionExtension);
             this.addElement(button.getId(), button);
@@ -88,8 +97,9 @@ public final class EditorItem extends WorkItem {
         relationArea.init();
 
         for (EditTab tab : editArea.getAllTabs()) {
-            for (EditorControl control : tab.getAllControls()) {
-                ControlModel<?> controlModel = control.getModel();
+            for (EditorGridElement gridElement : tab.getAllGridElements()) {
+
+                EditorGridElementModel controlModel = gridElement.getGridElementModel();
                 this.getModel().addControl(controlModel);
 
                 // Add dependency notifications
@@ -107,7 +117,7 @@ public final class EditorItem extends WorkItem {
 
         for (RelationTab tab : relationArea.getAllTabs()) {
             if (tab.getProperty() != null) {
-                this.getModel().addRelationTable(tab.getProperty(), tab.getModel());
+                this.getModel().addRelationTable(tab.getModel());
 
                 // Add dependency notifications
                 DependencyController dependencyController = tab.getModel().getDependencyController();
@@ -122,6 +132,45 @@ public final class EditorItem extends WorkItem {
             }
         }
 
+    }
+
+    /**
+     * Instanciates the resolver for the editor
+     * 
+     * @return accessor instance of the editor
+     */
+    private PropertyAccessor getPropertyAccessor() {
+        Class<Object> accessorClass = null;
+
+        if (this.getExtension().getResolver().getValue() != null
+                && this.getExtension().getResolver().getValue().getValue() != null) {
+            accessorClass = PropertyLoader.loadProperty(this.getExtension().getResolver());
+        }
+
+        PropertyAccessor retVal = null;
+
+        if (accessorClass == null) {
+            retVal = new NabuccoPropertyResolver<Datatype>();
+        } else {
+            try {
+                Object resolver = accessorClass.newInstance();
+                if (resolver instanceof PropertyAccessor) {
+                    retVal = (PropertyAccessor) resolver;
+                } else {
+                    throw new IllegalArgumentException(
+                            "Cannot set editor resolver. The given resolver doesnt implement PropertyAccessor interface");
+                }
+
+            } catch (InstantiationException e) {
+                throw new IllegalArgumentException("Cannot instanciate special resolver configured for the editor "
+                        + this.getId());
+            } catch (IllegalAccessException e) {
+                throw new IllegalArgumentException("Cannot access special resolver configured for the editor "
+                        + this.getId());
+            }
+        }
+
+        return retVal;
     }
 
     @Override
@@ -199,7 +248,6 @@ public final class EditorItem extends WorkItem {
         return null;
     }
 
-
     /**
      * Getter for all configured editor buttons.
      * 
@@ -255,6 +303,19 @@ public final class EditorItem extends WorkItem {
     @Override
     public EditorModel getModel() {
         return (EditorModel) super.getModel();
+    }
+
+    /**
+     * Accepts the web element visitor. Overload this function to let element be visited
+     * 
+     * @param visitor
+     */
+    @Override
+    public <T extends WebElementVisitorContext> void accept(WebElementVisitor<T> visitor, T context)
+            throws VisitorException {
+        if (visitor != null) {
+            visitor.visit(this, context);
+        }
     }
 
     @Override

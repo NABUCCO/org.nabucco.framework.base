@@ -23,8 +23,8 @@ import org.nabucco.common.extension.ExtensionException;
 import org.nabucco.common.extension.NabuccoExtension;
 import org.nabucco.common.extension.parser.ExtensionParser;
 import org.nabucco.common.extension.parser.ExtensionParserException;
-import org.nabucco.framework.base.facade.datatype.extension.NabucoExtensionContainer;
 import org.nabucco.framework.base.facade.datatype.extension.NabuccoExtensionParserSupport;
+import org.nabucco.framework.base.facade.datatype.extension.NabucoExtensionContainer;
 import org.nabucco.framework.base.facade.datatype.extension.property.EnumerationProperty;
 import org.nabucco.framework.base.facade.datatype.extension.schema.workflow.WorkflowConditionExtension;
 import org.nabucco.framework.base.facade.datatype.extension.schema.workflow.WorkflowConfigurationExtension;
@@ -34,6 +34,7 @@ import org.nabucco.framework.base.facade.datatype.extension.schema.workflow.Work
 import org.nabucco.framework.base.facade.datatype.extension.schema.workflow.WorkflowStateExtension;
 import org.nabucco.framework.base.facade.datatype.extension.schema.workflow.WorkflowTransitionExtension;
 import org.nabucco.framework.base.facade.datatype.extension.schema.workflow.WorkflowTriggerExtension;
+import org.nabucco.framework.base.facade.datatype.extension.schema.workflow.effect.ConstraintEffectExtension;
 import org.nabucco.framework.base.facade.datatype.extension.schema.workflow.effect.InstantiationEffectExtension;
 import org.nabucco.framework.base.facade.datatype.extension.schema.workflow.effect.LogEffectExtension;
 import org.nabucco.framework.base.facade.datatype.extension.schema.workflow.effect.SubWorkflowEffectExtension;
@@ -50,8 +51,30 @@ import org.w3c.dom.NodeList;
  */
 public class WorkflowConfigParser extends NabuccoExtensionParserSupport implements ExtensionParser {
 
+    private static final String ATTR_MAX = "max";
+
+    private static final String ATTR_MIN = "min";
+
+    private static final String ATTR_VISIBILITY_CONSTRAINT = "visibilityConstraint";
+
+    private static final String ATTR_EDITABILITY_CONSTRAINT = "editabilityConstraint";
+
+    private static final String ATTR_LENGTH_CONSTRAINT = "lengthConstraint";
+
+    private static final String ATTR_MULTIPLICITY_CONSTRAINT = "multiplicityConstraint";
+
+    private static final String ATTR_PROPERTY = "property";
+
+    private static final String ELEMENT_LOG = "log";
+
+    private static final String ELEMENT_CONSTRAINT = "constraint";
+
+    private static final String ELEMENT_INSTANTIABLE = "instantiable";
+
     /* XML Attributes */
-    
+
+    private static final String ELEMENT_SUB_WORKFLOW = "subWorkflow";
+
     private static final String ATTR_NAME = "name";
 
     private static final String ATTR_TYPE = "type";
@@ -77,9 +100,9 @@ public class WorkflowConfigParser extends NabuccoExtensionParserSupport implemen
     private static final String ATTR_SIGNAL = "signal" + "";
 
     private static final String ATTR_OPERATOR = "operator";
-    
+
     private static final String ATTR_SUMMARY = "summary";
-    
+
     private static final String ATTR_WORKFLOW_NAME = "workflowName";
 
     private static final String ATTR_ASSIGNED_GROUP = "assignedGroup";
@@ -89,7 +112,7 @@ public class WorkflowConfigParser extends NabuccoExtensionParserSupport implemen
     private static final String ATTR_ASSIGNED_ROLE = "assignedRole";
 
     /* XML Tags */
-    
+
     private static final String TAG_WORKFLOW = "workflow";
 
     private static final String TAG_STATE = "state";
@@ -110,17 +133,13 @@ public class WorkflowConfigParser extends NabuccoExtensionParserSupport implemen
 
     private static final String TAG_CONDITION_COMPOSITE = "conditionComposite";
 
-    private static final String TAG_EFFECT = "effect";
-
     private static final String TAG_EFFECT_LIST = "effectList";
 
+    private static final String ATTR_EDITABLE = "editable";
+
+    private static final String ATTR_VISIBLE = "visible";
+
     /* Effect Types */
-    
-    private static final String EFFECT_LOG = "LOG";
-
-    private static final String EFFECT_INSTANTIABLE = "INSTANTIABLE";
-
-    private static final String EFFECT_SUBWORKFLOW = "SUB_WORKFLOW";
 
     private static NabuccoLogger logger = NabuccoLoggingFactory.getInstance().getLogger(WorkflowConfigParser.class);
 
@@ -249,11 +268,11 @@ public class WorkflowConfigParser extends NabuccoExtensionParserSupport implemen
             extension.setDescription(super.getStringProperty(element, ATTR_DESCRIPTION));
 
             String source = super.getAttribute(element, ATTR_SOURCE);
-            WorkflowStateExtension sourceState = getState(workflowExtension, source);
+            WorkflowStateExtension sourceState = this.getState(workflowExtension, source);
             extension.setSource(sourceState);
 
             String target = super.getAttribute(element, ATTR_TARGET);
-            WorkflowStateExtension targetState = getState(workflowExtension, target);
+            WorkflowStateExtension targetState = this.getState(workflowExtension, target);
             extension.setTarget(targetState);
 
             this.parseTrigger(element, extension, workflowExtension);
@@ -425,27 +444,14 @@ public class WorkflowConfigParser extends NabuccoExtensionParserSupport implemen
             return;
         }
 
-        List<Element> effectsList = super.getElementsByTagName(effectListElement, TAG_EFFECT);
+        List<Element> effectsList = super.getChildren(effectListElement);
 
         for (Element element : effectsList) {
 
-            WorkflowEffectExtension effectExtension;
+            String tagName = element.getTagName();
+            WorkflowEffectExtension effectExtension = null;
 
-            EnumerationProperty type = super.getEnumerationProperty(element, ATTR_TYPE);
-
-            if (type.getValue().getValue().equalsIgnoreCase(EFFECT_LOG)) {
-                LogEffectExtension logExtension = new LogEffectExtension();
-                logExtension.setMessage(super.getStringProperty(element, ATTR_MESSAGE));
-
-                effectExtension = logExtension;
-
-            } else if (type.getValue().getValue().equalsIgnoreCase(EFFECT_INSTANTIABLE)) {
-                InstantiationEffectExtension instanceExtension = new InstantiationEffectExtension();
-                instanceExtension.setClassName(super.getClassProperty(element, ATTR_CLASS));
-
-                effectExtension = instanceExtension;
-
-            } else if (type.getValue().getValue().equalsIgnoreCase(EFFECT_SUBWORKFLOW)) {
+            if (tagName.equals(ELEMENT_SUB_WORKFLOW)) {
                 SubWorkflowEffectExtension subWorkflowExtension = new SubWorkflowEffectExtension();
                 subWorkflowExtension.setSummary(super.getStringProperty(element, ATTR_SUMMARY));
                 subWorkflowExtension.setDefinitionName(super.getStringProperty(element, ATTR_WORKFLOW_NAME));
@@ -454,7 +460,40 @@ public class WorkflowConfigParser extends NabuccoExtensionParserSupport implemen
                 subWorkflowExtension.setAssignedRole(super.getStringProperty(element, ATTR_ASSIGNED_ROLE));
 
                 effectExtension = subWorkflowExtension;
+            } else if (tagName.equals(ELEMENT_INSTANTIABLE)) {
+                InstantiationEffectExtension instanceExtension = new InstantiationEffectExtension();
+                instanceExtension.setClassName(super.getClassProperty(element, ATTR_CLASS));
 
+                effectExtension = instanceExtension;
+            } else if (tagName.equals(ELEMENT_CONSTRAINT)) {
+                ConstraintEffectExtension constraintEffectExtension = new ConstraintEffectExtension();
+                constraintEffectExtension.setPropertyName(super.getStringProperty(element, ATTR_PROPERTY));
+
+                List<Element> constraintElements = super.getChildren(element);
+                for (Element constraint : constraintElements) {
+                    String constraintType = constraint.getTagName();
+
+                    if (constraintType.equals(ATTR_MULTIPLICITY_CONSTRAINT)) {
+                        constraintEffectExtension.setMinMultiplicity(super.getIntegerProperty(constraint, ATTR_MIN, 0));
+                        constraintEffectExtension.setMaxMultiplicity(super.getIntegerProperty(constraint, ATTR_MAX, 1));
+                    } else if (constraintType.equals(ATTR_LENGTH_CONSTRAINT)) {
+                        constraintEffectExtension.setMinLength(super.getIntegerProperty(constraint, ATTR_MIN, 0));
+                        constraintEffectExtension.setMaxLength(super.getIntegerProperty(constraint, ATTR_MAX, 255));
+                    } else if (constraintType.equals(ATTR_EDITABILITY_CONSTRAINT)) {
+                        constraintEffectExtension.setEditable(super.getBooleanProperty(constraint, ATTR_EDITABLE));
+                    } else if (constraintType.equals(ATTR_VISIBILITY_CONSTRAINT)) {
+                        constraintEffectExtension.setVisible(super.getBooleanProperty(constraint, ATTR_VISIBLE));
+                    } else {
+                        throw new ExtensionParserException("Not supported constraint, " + constraintType);
+                    }
+                }
+                effectExtension = constraintEffectExtension;
+
+            } else if (tagName.equals(ELEMENT_LOG)) {
+                LogEffectExtension logExtension = new LogEffectExtension();
+                logExtension.setMessage(super.getStringProperty(element, ATTR_MESSAGE));
+
+                effectExtension = logExtension;
             } else {
                 effectExtension = new WorkflowEffectExtension();
             }
@@ -462,6 +501,8 @@ public class WorkflowConfigParser extends NabuccoExtensionParserSupport implemen
             effectExtension.setName(super.getStringProperty(element, ATTR_NAME));
             effectExtension.setOwner(super.getStringProperty(element, ATTR_OWNER));
             effectExtension.setDescription(super.getStringProperty(element, ATTR_DESCRIPTION));
+            EnumerationProperty type = new EnumerationProperty();
+            type.setValue(tagName);
             effectExtension.setType(type);
 
             transitionExtension.getEffectList().add(effectExtension);

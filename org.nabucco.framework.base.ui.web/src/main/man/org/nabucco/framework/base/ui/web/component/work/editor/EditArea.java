@@ -24,9 +24,12 @@ import org.nabucco.framework.base.facade.datatype.extension.schema.ui.work.edito
 import org.nabucco.framework.base.facade.datatype.extension.schema.ui.work.editor.EditorTabExtension;
 import org.nabucco.framework.base.facade.datatype.logger.NabuccoLogger;
 import org.nabucco.framework.base.facade.datatype.logger.NabuccoLoggingFactory;
+import org.nabucco.framework.base.facade.datatype.visitor.VisitorException;
 import org.nabucco.framework.base.ui.web.component.WebComposite;
 import org.nabucco.framework.base.ui.web.component.WebElement;
 import org.nabucco.framework.base.ui.web.component.WebElementType;
+import org.nabucco.framework.base.ui.web.component.work.visitor.WebElementVisitor;
+import org.nabucco.framework.base.ui.web.component.work.visitor.WebElementVisitorContext;
 import org.nabucco.framework.base.ui.web.json.JsonList;
 import org.nabucco.framework.base.ui.web.json.JsonMap;
 
@@ -158,6 +161,22 @@ public class EditArea extends WebComposite {
             }
         }
         return tabs;
+    }
+
+    /**
+     * Accepts the web element visitor. Overload this function to let element be visited
+     * 
+     * @param visitor
+     *            visitor to be accepted
+     * @param context
+     *            context of the visitor
+     */
+    @Override
+    public <T extends WebElementVisitorContext> void accept(WebElementVisitor<T> visitor, T context)
+            throws VisitorException {
+        if (visitor != null) {
+            visitor.visit(this, context);
+        }
     }
 
     @Override

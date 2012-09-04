@@ -1,18 +1,16 @@
 /*
  * Copyright 2012 PRODYNA AG
- *
- * Licensed under the Eclipse Public License (EPL), Version 1.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
+ * 
+ * Licensed under the Eclipse Public License (EPL), Version 1.0 (the "License"); you may not use
+ * this file except in compliance with the License. You may obtain a copy of the License at
+ * 
  * http://www.opensource.org/licenses/eclipse-1.0.php or
  * http://www.nabucco.org/License.html
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+ * 
+ * Unless required by applicable law or agreed to in writing, software distributed under the
+ * License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND,
+ * either express or implied. See the License for the specific language governing permissions
+ * and limitations under the License.
  */
 package org.nabucco.framework.base.facade.datatype.extension.schema.ui.work.editor.control;
 
@@ -42,7 +40,7 @@ public class PickerControlExtension extends EditorControlExtension implements Da
 
     private static final long serialVersionUID = 1L;
 
-    private static final String[] PROPERTY_CONSTRAINTS = { "m1,1;", "m1,1;", "m1,1;", "m1,1;", "m0,1;" };
+    private static final String[] PROPERTY_CONSTRAINTS = { "m1,1;", "m1,1;", "m1,1;", "m1,1;", "m0,1;", "m0,1;" };
 
     public static final String OPENACTION = "openAction";
 
@@ -51,6 +49,8 @@ public class PickerControlExtension extends EditorControlExtension implements Da
     public static final String MULTIPLESELECTION = "multipleSelection";
 
     public static final String DISPLAYPATH = "displayPath";
+
+    public static final String AUTOCOMPLETIONFILTER = "autoCompletionFilter";
 
     public static final String QUERYPARAMETERMAPPING = "queryParameterMapping";
 
@@ -65,6 +65,9 @@ public class PickerControlExtension extends EditorControlExtension implements Da
 
     /** Path of bound element to be displayd in the picker */
     private StringProperty displayPath;
+
+    /** Auto-Completion filter name. */
+    private StringProperty autoCompletionFilter;
 
     /** The mapping for query filter parameters if any */
     private QueryParameterMappingExtension queryParameterMapping;
@@ -98,6 +101,9 @@ public class PickerControlExtension extends EditorControlExtension implements Da
         if ((this.getDisplayPath() != null)) {
             clone.setDisplayPath(this.getDisplayPath().cloneObject());
         }
+        if ((this.getAutoCompletionFilter() != null)) {
+            clone.setAutoCompletionFilter(this.getAutoCompletionFilter().cloneObject());
+        }
         if ((this.getQueryParameterMapping() != null)) {
             clone.setQueryParameterMapping(this.getQueryParameterMapping().cloneObject());
         }
@@ -119,8 +125,10 @@ public class PickerControlExtension extends EditorControlExtension implements Da
                 BooleanProperty.class, 14, PROPERTY_CONSTRAINTS[2], false, PropertyAssociationType.COMPOSITION));
         propertyMap.put(DISPLAYPATH, PropertyDescriptorSupport.createDatatype(DISPLAYPATH, StringProperty.class, 15,
                 PROPERTY_CONSTRAINTS[3], false, PropertyAssociationType.COMPOSITION));
+        propertyMap.put(AUTOCOMPLETIONFILTER, PropertyDescriptorSupport.createDatatype(AUTOCOMPLETIONFILTER,
+                StringProperty.class, 16, PROPERTY_CONSTRAINTS[4], false, PropertyAssociationType.COMPOSITION));
         propertyMap.put(QUERYPARAMETERMAPPING, PropertyDescriptorSupport.createDatatype(QUERYPARAMETERMAPPING,
-                QueryParameterMappingExtension.class, 16, PROPERTY_CONSTRAINTS[4], false,
+                QueryParameterMappingExtension.class, 17, PROPERTY_CONSTRAINTS[5], false,
                 PropertyAssociationType.COMPOSITION));
         return new NabuccoPropertyContainer(propertyMap);
     }
@@ -141,6 +149,8 @@ public class PickerControlExtension extends EditorControlExtension implements Da
                 this.getMultipleSelection(), null));
         properties.add(super.createProperty(PickerControlExtension.getPropertyDescriptor(DISPLAYPATH),
                 this.getDisplayPath(), null));
+        properties.add(super.createProperty(PickerControlExtension.getPropertyDescriptor(AUTOCOMPLETIONFILTER),
+                this.getAutoCompletionFilter(), null));
         properties.add(super.createProperty(PickerControlExtension.getPropertyDescriptor(QUERYPARAMETERMAPPING),
                 this.getQueryParameterMapping(), null));
         return properties;
@@ -162,6 +172,9 @@ public class PickerControlExtension extends EditorControlExtension implements Da
             return true;
         } else if ((property.getName().equals(DISPLAYPATH) && (property.getType() == StringProperty.class))) {
             this.setDisplayPath(((StringProperty) property.getInstance()));
+            return true;
+        } else if ((property.getName().equals(AUTOCOMPLETIONFILTER) && (property.getType() == StringProperty.class))) {
+            this.setAutoCompletionFilter(((StringProperty) property.getInstance()));
             return true;
         } else if ((property.getName().equals(QUERYPARAMETERMAPPING) && (property.getType() == QueryParameterMappingExtension.class))) {
             this.setQueryParameterMapping(((QueryParameterMappingExtension) property.getInstance()));
@@ -205,6 +218,11 @@ public class PickerControlExtension extends EditorControlExtension implements Da
                 return false;
         } else if ((!this.displayPath.equals(other.displayPath)))
             return false;
+        if ((this.autoCompletionFilter == null)) {
+            if ((other.autoCompletionFilter != null))
+                return false;
+        } else if ((!this.autoCompletionFilter.equals(other.autoCompletionFilter)))
+            return false;
         if ((this.queryParameterMapping == null)) {
             if ((other.queryParameterMapping != null))
                 return false;
@@ -221,6 +239,7 @@ public class PickerControlExtension extends EditorControlExtension implements Da
         result = ((PRIME * result) + ((this.pickerDialog == null) ? 0 : this.pickerDialog.hashCode()));
         result = ((PRIME * result) + ((this.multipleSelection == null) ? 0 : this.multipleSelection.hashCode()));
         result = ((PRIME * result) + ((this.displayPath == null) ? 0 : this.displayPath.hashCode()));
+        result = ((PRIME * result) + ((this.autoCompletionFilter == null) ? 0 : this.autoCompletionFilter.hashCode()));
         result = ((PRIME * result) + ((this.queryParameterMapping == null) ? 0 : this.queryParameterMapping.hashCode()));
         return result;
     }
@@ -302,6 +321,24 @@ public class PickerControlExtension extends EditorControlExtension implements Da
      */
     public StringProperty getDisplayPath() {
         return this.displayPath;
+    }
+
+    /**
+     * Auto-Completion filter name.
+     *
+     * @param autoCompletionFilter the StringProperty.
+     */
+    public void setAutoCompletionFilter(StringProperty autoCompletionFilter) {
+        this.autoCompletionFilter = autoCompletionFilter;
+    }
+
+    /**
+     * Auto-Completion filter name.
+     *
+     * @return the StringProperty.
+     */
+    public StringProperty getAutoCompletionFilter() {
+        return this.autoCompletionFilter;
     }
 
     /**

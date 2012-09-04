@@ -18,11 +18,14 @@ package org.nabucco.framework.base.ui.web.component.work.editor.control;
 
 import org.nabucco.framework.base.facade.datatype.NDate;
 import org.nabucco.framework.base.facade.datatype.extension.schema.ui.work.editor.control.DateControlExtension;
-import org.nabucco.framework.base.ui.web.model.control.ControlModel;
-import org.nabucco.framework.base.ui.web.model.control.property.date.DateControlModel;
-import org.nabucco.framework.base.ui.web.model.control.util.formatter.ControlFormatter;
-import org.nabucco.framework.base.ui.web.model.control.util.formatter.DateControlFormatter;
-import org.nabucco.framework.base.ui.web.model.control.util.validator.NabuccoDateValidator;
+import org.nabucco.framework.base.facade.datatype.visitor.VisitorException;
+import org.nabucco.framework.base.ui.web.component.work.visitor.WebElementVisitor;
+import org.nabucco.framework.base.ui.web.component.work.visitor.WebElementVisitorContext;
+import org.nabucco.framework.base.ui.web.model.editor.control.ControlModel;
+import org.nabucco.framework.base.ui.web.model.editor.control.property.date.DateControlModel;
+import org.nabucco.framework.base.ui.web.model.editor.util.formatter.ControlFormatter;
+import org.nabucco.framework.base.ui.web.model.editor.util.formatter.DateControlFormatter;
+import org.nabucco.framework.base.ui.web.model.editor.util.validator.NabuccoDateValidator;
 
 /**
  * DateControl
@@ -48,8 +51,23 @@ public class DateControl extends EditorControl {
         NabuccoDateValidator validator = new NabuccoDateValidator(this);
         ControlFormatter<NDate> formatter = new DateControlFormatter(this);
 
-        return new DateControlModel(id, propertyPath, validator, formatter, super.getDependencySet(),
-                this.getEditable());
+        return new DateControlModel(id, propertyPath, validator, formatter, super.getDependencySet(), this.isEditable());
+    }
+
+    /**
+     * Accepts the web element visitor. Overload this function to let element be visited
+     * 
+     * @param visitor
+     *            visitor to be accepted
+     * @param context
+     *            context of the visitor
+     */
+    @Override
+    public <T extends WebElementVisitorContext> void accept(WebElementVisitor<T> visitor, T context)
+            throws VisitorException {
+        if (visitor != null) {
+            visitor.visit(this, context);
+        }
     }
 
 }

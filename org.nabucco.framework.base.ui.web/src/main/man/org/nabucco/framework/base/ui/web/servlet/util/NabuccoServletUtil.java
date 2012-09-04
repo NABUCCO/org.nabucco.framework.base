@@ -23,7 +23,7 @@ import org.nabucco.framework.base.ui.web.component.browser.Browser;
 import org.nabucco.framework.base.ui.web.component.browser.BrowserArea;
 import org.nabucco.framework.base.ui.web.component.common.controller.DialogController;
 import org.nabucco.framework.base.ui.web.component.common.controller.PickerDialogController;
-import org.nabucco.framework.base.ui.web.component.common.controller.ResourceController;
+import org.nabucco.framework.base.ui.web.component.common.controller.resource.ResourceController;
 import org.nabucco.framework.base.ui.web.component.common.grid.GridWidgetElement;
 import org.nabucco.framework.base.ui.web.component.dialog.Dialog;
 import org.nabucco.framework.base.ui.web.component.error.ErrorLogContainer;

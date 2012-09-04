@@ -24,6 +24,9 @@ import org.nabucco.framework.base.facade.datatype.Enumeration;
 import org.nabucco.framework.base.facade.datatype.NType;
 import org.nabucco.framework.base.facade.datatype.code.Code;
 import org.nabucco.framework.base.facade.datatype.converter.NabuccoConverter;
+import org.nabucco.framework.base.facade.datatype.property.NabuccoProperty;
+import org.nabucco.framework.base.ui.web.model.editor.control.property.dropdown.selection.SelectionItem;
+import org.nabucco.framework.base.ui.web.model.editor.control.property.dropdown.selection.SelectionProviderDelegate;
 
 /**
  * WebRendererSupport
@@ -42,7 +45,7 @@ public abstract class WebRendererSupport {
      * 
      * @return the value of this type
      */
-    protected String getValue(NType type) {
+    protected String getValue(NType type, NabuccoProperty property) {
         if (type instanceof Basetype) {
             Basetype basetype = (Basetype) type;
 
@@ -56,15 +59,18 @@ public abstract class WebRendererSupport {
         }
 
         if (type instanceof Enumeration) {
-            return String.valueOf(type);
+            SelectionProviderDelegate<Enumeration> delegate = new SelectionProviderDelegate<Enumeration>();
+            SelectionItem<Enumeration> selectionValue = delegate.getSelectionValue(property, (Enumeration) type);
+
+            return selectionValue.getI18n();
         }
 
         if (type instanceof Code) {
             Code code = (Code) type;
+            SelectionProviderDelegate<Code> delegate = new SelectionProviderDelegate<Code>();
+            SelectionItem<Code> selectionValue = delegate.getSelectionValue(property, code);
 
-            if (code.getName() != null && code.getName().getValue() != null) {
-                return code.getName().getValue();
-            }
+            return selectionValue.getI18n();
         }
 
         return DEFAULT_VALUE;

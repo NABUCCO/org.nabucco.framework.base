@@ -16,6 +16,7 @@
 */
 package org.nabucco.framework.base.facade.datatype.extension.schema.ui.work.editor;
 
+import org.nabucco.framework.base.facade.datatype.extension.property.ClassProperty;
 import org.nabucco.framework.base.facade.datatype.extension.schema.ui.common.EditorButtonExtension;
 import org.nabucco.framework.base.facade.datatype.extension.schema.ui.work.WorkItemExtension;
 import org.nabucco.framework.base.facade.datatype.extension.schema.ui.work.editor.EditorRelationExtension;
@@ -27,6 +28,9 @@ import org.nabucco.framework.base.facade.datatype.extension.schema.ui.work.edito
 @Company		PRODYNA AG
 @Description	NABUCCO User Interface Editor extension.
 public Datatype EditorExtension extends WorkItemExtension {
+
+	@Description		The Resolver instance to use for editor binding
+	private Datatype ClassProperty[0..1] resolver;
 
 	@Description		The Editor Actions.
 	private Datatype EditorButtonExtension[0..*] buttons;

@@ -17,9 +17,12 @@
 package org.nabucco.framework.base.ui.web.component.work.editor.control;
 
 import org.nabucco.framework.base.facade.datatype.extension.schema.ui.work.editor.control.RadioControlExtension;
-import org.nabucco.framework.base.ui.web.model.control.ControlModel;
-import org.nabucco.framework.base.ui.web.model.control.property.dropdown.RadioButtonControlModel;
-import org.nabucco.framework.base.ui.web.model.control.util.validator.NabuccoEnumerationValidator;
+import org.nabucco.framework.base.facade.datatype.visitor.VisitorException;
+import org.nabucco.framework.base.ui.web.component.work.visitor.WebElementVisitor;
+import org.nabucco.framework.base.ui.web.component.work.visitor.WebElementVisitorContext;
+import org.nabucco.framework.base.ui.web.model.editor.control.ControlModel;
+import org.nabucco.framework.base.ui.web.model.editor.control.property.dropdown.RadioButtonControlModel;
+import org.nabucco.framework.base.ui.web.model.editor.util.validator.NabuccoEnumerationValidator;
 
 /**
  * RadioButtonControl
@@ -44,6 +47,22 @@ public class RadioButtonControl extends EditorControl {
     @SuppressWarnings({ "unchecked", "rawtypes" })
     public ControlModel<?> instantiateModel(String id, String propertyPath) {
         NabuccoEnumerationValidator validator = new NabuccoEnumerationValidator(this);
-        return new RadioButtonControlModel(id, propertyPath, validator, super.getDependencySet(), this.getEditable());
+        return new RadioButtonControlModel(id, propertyPath, validator, super.getDependencySet(), this.isEditable());
+    }
+
+    /**
+     * Accepts the web element visitor. Overload this function to let element be visited
+     * 
+     * @param visitor
+     *            visitor to be accepted
+     * @param context
+     *            context of the visitor
+     */
+    @Override
+    public <T extends WebElementVisitorContext> void accept(WebElementVisitor<T> visitor, T context)
+            throws VisitorException {
+        if (visitor != null) {
+            visitor.visit(this, context);
+        }
     }
 }

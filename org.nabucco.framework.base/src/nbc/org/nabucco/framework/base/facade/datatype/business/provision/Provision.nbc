@@ -16,13 +16,13 @@
  */
 package org.nabucco.framework.base.facade.datatype.business.provision;
 
+import org.nabucco.framework.base.facade.datatype.FunctionalIdentifier;
+import org.nabucco.framework.base.facade.datatype.NabuccoDatatype;
 import org.nabucco.framework.base.facade.datatype.Name;
-import org.nabucco.framework.base.facade.datatype.Description;
 import org.nabucco.framework.base.facade.datatype.Owner;
 import org.nabucco.framework.base.facade.datatype.StatusType;
-import org.nabucco.framework.base.facade.datatype.NabuccoDatatype;
-import org.nabucco.framework.base.facade.datatype.FunctionalIdentifier;
 import org.nabucco.framework.base.facade.datatype.code.Code;
+import org.nabucco.framework.base.facade.datatype.text.LongDescription;
 
 @Author			Dominic Trumpfheller
 @Company		PRODYNA AG
@@ -38,7 +38,7 @@ public Datatype Provision extends NabuccoDatatype {
 	private Basetype Name[1] name;
 	
 	@Description		The description of the Provision.
-	private Basetype Description[0..1] description;
+	private Basetype LongDescription[0..1] description;
 	
 	@TechnicalProperty
 	@Default			ACTIVE

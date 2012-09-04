@@ -16,14 +16,13 @@
  */
 package org.nabucco.framework.base.ui.web.model.table.filter;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.HashMap;
+import java.util.Map;
 
-import org.nabucco.framework.base.facade.datatype.Basetype;
 import org.nabucco.framework.base.facade.datatype.Datatype;
-import org.nabucco.framework.base.facade.datatype.property.BasetypeProperty;
+import org.nabucco.framework.base.facade.datatype.NType;
 import org.nabucco.framework.base.facade.datatype.property.NabuccoProperty;
-import org.nabucco.framework.base.facade.datatype.property.NabuccoPropertyType;
+import org.nabucco.framework.base.facade.datatype.property.NabuccoPropertyResolver;
 
 /**
  * Basic implementation of Table Filtering.
@@ -32,9 +31,7 @@ import org.nabucco.framework.base.facade.datatype.property.NabuccoPropertyType;
  */
 public class TableFilter {
 
-    private String property;
-
-    private List<TableColumnFilter> filterList;
+    private Map<String, TableColumnFilter> filterMap;
 
     /**
      * Creates a new {@link TableFilter} instance.
@@ -42,21 +39,24 @@ public class TableFilter {
      * @param property
      *            the datatype property to filter
      */
-    public TableFilter(String property) {
-        if (property == null) {
-            throw new IllegalArgumentException("Cannot filter property [null].");
-        }
-        this.property = property;
-        this.filterList = new ArrayList<TableColumnFilter>();
+    public TableFilter() {
+        this.filterMap = new HashMap<String, TableColumnFilter>();
     }
 
     /**
      * Add a column filter to the table filter.
      * 
+     * @param propertyPath
+     *            the property path for the filter
      * @param filter
+     *            the filter instance
      */
-    public void add(TableColumnFilter filter) {
-        this.filterList.add(filter);
+    public void add(String propertyPath, TableColumnFilter filter) {
+        if (propertyPath == null) {
+            throw new IllegalArgumentException("Cannot add filter to the propertypath 'null'");
+        }
+
+        this.filterMap.put(propertyPath, filter);
     }
 
     /**
@@ -69,15 +69,16 @@ public class TableFilter {
      */
     public boolean accept(Datatype datatype) {
         boolean accept = true;
+        NabuccoPropertyResolver<Datatype> resolver = new NabuccoPropertyResolver<Datatype>(datatype);
 
-        NabuccoProperty np = datatype.getProperty(this.property);
-        if (np == null || np.getPropertyType() != NabuccoPropertyType.BASETYPE) {
-            return false;
-        }
+        for (String propertyPath : this.filterMap.keySet()) {
+            TableColumnFilter filter = this.filterMap.get(propertyPath);
 
-        Basetype value = ((BasetypeProperty) np).getInstance();
-        for (TableColumnFilter filter : this.filterList) {
-            accept = accept && filter.accept(value);
+            NabuccoProperty property = resolver.resolveProperty(propertyPath);
+            Object value = property.getInstance();
+
+            accept = accept && filter.accept((NType) value);
+
             if (!accept) {
                 break;
             }

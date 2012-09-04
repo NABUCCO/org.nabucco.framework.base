@@ -84,7 +84,7 @@ public class BasetypeValidatorTest {
 
         ValidationResult result = new ValidationResult();
 
-        Email email = new Email("[asf@de.prodyna.com");
+        Email email = new Email("asf@de.prodyna.com");
         email.validate(result, ValidationType.SHALLOW);
 
         System.out.println(result);

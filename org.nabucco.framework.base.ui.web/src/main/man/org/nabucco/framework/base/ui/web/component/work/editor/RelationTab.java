@@ -26,20 +26,27 @@ import org.nabucco.framework.base.facade.datatype.Datatype;
 import org.nabucco.framework.base.facade.datatype.extension.property.PropertyLoader;
 import org.nabucco.framework.base.facade.datatype.extension.schema.ui.common.ColumnExtension;
 import org.nabucco.framework.base.facade.datatype.extension.schema.ui.common.ListButtonExtension;
+import org.nabucco.framework.base.facade.datatype.extension.schema.ui.common.ListButtonGroupExtension;
+import org.nabucco.framework.base.facade.datatype.extension.schema.ui.common.MenuButtonExtension;
 import org.nabucco.framework.base.facade.datatype.extension.schema.ui.work.editor.EditorRelationExtension;
 import org.nabucco.framework.base.facade.datatype.extension.schema.ui.work.editor.dependency.DependencySetExtension;
 import org.nabucco.framework.base.facade.datatype.logger.NabuccoLogger;
 import org.nabucco.framework.base.facade.datatype.logger.NabuccoLoggingFactory;
+import org.nabucco.framework.base.facade.datatype.visitor.VisitorException;
 import org.nabucco.framework.base.ui.web.component.WebComposite;
 import org.nabucco.framework.base.ui.web.component.WebElement;
 import org.nabucco.framework.base.ui.web.component.WebElementType;
 import org.nabucco.framework.base.ui.web.component.common.button.Button;
 import org.nabucco.framework.base.ui.web.component.common.button.ListButton;
+import org.nabucco.framework.base.ui.web.component.common.button.ListButtonGroup;
+import org.nabucco.framework.base.ui.web.component.common.button.MenuButton;
 import org.nabucco.framework.base.ui.web.component.work.list.TableElement;
+import org.nabucco.framework.base.ui.web.component.work.visitor.WebElementVisitor;
+import org.nabucco.framework.base.ui.web.component.work.visitor.WebElementVisitorContext;
 import org.nabucco.framework.base.ui.web.json.JsonElement;
 import org.nabucco.framework.base.ui.web.json.JsonList;
 import org.nabucco.framework.base.ui.web.json.JsonMap;
-import org.nabucco.framework.base.ui.web.model.control.util.dependency.DependencyController;
+import org.nabucco.framework.base.ui.web.model.editor.util.dependency.DependencyController;
 import org.nabucco.framework.base.ui.web.model.relation.RelationTabModel;
 import org.nabucco.framework.base.ui.web.model.table.TableColumn;
 import org.nabucco.framework.base.ui.web.model.table.TableModel;
@@ -59,6 +66,8 @@ public class RelationTab extends WebComposite implements TableElement {
 
     private static final String JSON_DOUBLECLICK_ACTION = "doubleclickAction";
 
+    private static final String JSON_MENU_BUTTONS = "menuButtons";
+
     /** Logger */
     private static NabuccoLogger logger = NabuccoLoggingFactory.getInstance().getLogger(RelationTab.class);
 
@@ -68,6 +77,8 @@ public class RelationTab extends WebComposite implements TableElement {
     private EditorRelationExtension extension;
 
     private DependencyController dependencySet;
+
+    private MenuButton menuButtonContainer;
 
     /**
      * Creates a new {@link Relation} instance.
@@ -89,9 +100,38 @@ public class RelationTab extends WebComposite implements TableElement {
         TableModel<Datatype> tableModel = new TableModel<Datatype>(null, 5);
 
         for (ListButtonExtension actionExtension : this.extension.getButtons()) {
-            ListButton button = new ListButton(actionExtension);
-            this.addElement(button.getId(), button);
-            button.init();
+            if (actionExtension instanceof ListButtonGroupExtension) {
+                ListButtonGroup buttonGroup = new ListButtonGroup((ListButtonGroupExtension) actionExtension);
+                this.addElement(buttonGroup.getId(), buttonGroup);
+                buttonGroup.init();
+            } else {
+                ListButton button = new ListButton(actionExtension);
+                this.addElement(button.getId(), button);
+                button.init();
+            }
+        }
+
+        if (this.extension.getMenuButton() != null) {
+            MenuButtonExtension menuButton = this.extension.getMenuButton();
+            if (menuButton != null) {
+                menuButtonContainer = new MenuButton(menuButton);
+                for (ListButtonExtension buttonExtension : menuButton.getButtons()) {
+                    Button button;
+
+                    if (buttonExtension instanceof ListButtonGroupExtension) {
+                        button = new ListButtonGroup((ListButtonGroupExtension) buttonExtension);
+                    } else if (buttonExtension instanceof ListButtonExtension) {
+                        button = new ListButton(buttonExtension);
+                    } else {
+                        throw new IllegalArgumentException(
+                                "Cannot add a button to the relation tab menu. Not supported extension type");
+                    }
+
+                    button.init();
+                    menuButtonContainer.addButton(button);
+                }
+
+            }
         }
 
         for (ColumnExtension columnExtension : this.extension.getColumns()) {
@@ -114,9 +154,11 @@ public class RelationTab extends WebComposite implements TableElement {
         this.dependencySet = new DependencyController(dependencySetExtension);
         this.dependencySet.init();
 
-        this.model = new RelationTabModel(this.getId(), this.getProperty(),
-                this.getDependencyController(), tableModel);
-        
+        boolean lazy = (this.getLoadAction() != null && (this.getLoadAction().isEmpty() == false));
+
+        this.model = new RelationTabModel(this.getId(), this.getProperty(), this.getDependencyController(), tableModel,
+                lazy);
+
     }
 
     /**
@@ -175,8 +217,6 @@ public class RelationTab extends WebComposite implements TableElement {
     public TableModel<Datatype> getTableModel() {
         return this.model.getTableModel();
     }
-
-
 
     /**
      * Getter for the model.
@@ -237,6 +277,24 @@ public class RelationTab extends WebComposite implements TableElement {
     }
 
     /**
+     * Indicates if the element is technical (not important for print)
+     * 
+     * @return true if technical
+     */
+    public boolean isTechnical() {
+        return PropertyLoader.loadProperty(this.extension.getIsTechnical());
+    }
+
+    /**
+     * Getter for the open action configured to be fires by doubleclick of the item
+     * 
+     * @return the action to be fired to open item
+     */
+    public String getLoadAction() {
+        return PropertyLoader.loadProperty(this.extension.getLoadAction());
+    }
+
+    /**
      * Getter for the open action configured to be fires by doubleclick of the item
      * 
      * @return the action to be fired to open item
@@ -281,7 +339,41 @@ public class RelationTab extends WebComposite implements TableElement {
         return buttonList;
     }
 
+    /**
+     * Getter for all configured editor buttons.
+     * 
+     * @return the list of buttons
+     */
+    public List<ListButton> getMenuButtons() {
+        boolean isEditable = this.model.isEditable();
+        boolean hasSelectedValue = this.model.hasSelectedValue();
 
+        List<ListButton> buttonList = new ArrayList<ListButton>();
+        if (menuButtonContainer == null) {
+            return buttonList;
+        }
+        for (WebElement child : this.menuButtonContainer.getElements()) {
+            if (child.getType() == WebElementType.BUTTON) {
+                ListButton button = (ListButton) child;
+                button.updateStatus(hasSelectedValue, isEditable);
+                buttonList.add(button);
+            }
+        }
+        return buttonList;
+    }
+
+    /**
+     * Accepts the web element visitor. Overload this function to let element be visited
+     * 
+     * @param visitor
+     */
+    @Override
+    public <T extends WebElementVisitorContext> void accept(WebElementVisitor<T> visitor, T context)
+            throws VisitorException {
+        if (visitor != null) {
+            visitor.visit(this, context);
+        }
+    }
 
     @Override
     public JsonElement toJson() {
@@ -292,6 +384,12 @@ public class RelationTab extends WebComposite implements TableElement {
         json.add(JSON_DOUBLECLICK_ACTION, this.getDoubleClickAction());
 
         json.add(JSON_MODEL, this.model.toJson());
+
+        JsonList menuButtonList = new JsonList();
+        for (Button button : this.getMenuButtons()) {
+            menuButtonList.add(button.toJson());
+        }
+        json.add(JSON_MENU_BUTTONS, menuButtonList);
 
         JsonList buttonList = new JsonList();
         for (Button button : this.getAllButtons()) {

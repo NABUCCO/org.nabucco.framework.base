@@ -16,15 +16,17 @@
  */
 package org.nabucco.framework.base.ui.web.action.handler.picker;
 
+import org.nabucco.framework.base.facade.datatype.logger.NabuccoLogger;
+import org.nabucco.framework.base.facade.datatype.logger.NabuccoLoggingFactory;
 import org.nabucco.framework.base.facade.exception.client.ClientException;
-import org.nabucco.framework.base.ui.web.action.WebAction;
-import org.nabucco.framework.base.ui.web.action.WebActionHandler;
-import org.nabucco.framework.base.ui.web.action.WebActionRegistry;
+import org.nabucco.framework.base.ui.web.action.WebActionHandlerSupport;
 import org.nabucco.framework.base.ui.web.action.parameter.WebActionParameter;
 import org.nabucco.framework.base.ui.web.action.result.OpenItem;
 import org.nabucco.framework.base.ui.web.action.result.WebActionResult;
+import org.nabucco.framework.base.ui.web.component.WebElement;
 import org.nabucco.framework.base.ui.web.component.WebElementType;
 import org.nabucco.framework.base.ui.web.component.dialog.PickerDialog;
+import org.nabucco.framework.base.ui.web.component.work.bulkeditor.column.BulkEditorPickerColumn;
 import org.nabucco.framework.base.ui.web.component.work.editor.control.PickerControl;
 import org.nabucco.framework.base.ui.web.servlet.util.path.NabuccoServletPathType;
 
@@ -35,21 +37,19 @@ import org.nabucco.framework.base.ui.web.servlet.util.path.NabuccoServletPathTyp
  * 
  * @author Leonid Agranovskiy, PRODYNA AG
  */
-public class InitializePickerDialogHandler extends WebActionHandler {
+public class InitializePickerDialogHandler extends WebActionHandlerSupport {
+
+    NabuccoLogger logger = NabuccoLoggingFactory.getInstance().getLogger(InitializePickerDialogHandler.class);
 
     @Override
     public WebActionResult execute(WebActionParameter parameter) throws ClientException {
-        if (!PickerControl.class.isAssignableFrom(parameter.getElement().getClass())) {
-            throw new ClientException("element is not a Picker Control");
-        }
+        PickerDialog pickerDialog = this.getPickerDialog(parameter);
 
         String selectedValue = parameter.getJsonRequest().getValue();
 
-        PickerControl element = (PickerControl) parameter.getElement();
-        PickerDialog pickerDialog = element.getDialog();
-        
         if (pickerDialog == null) {
-            throw new IllegalStateException("The pickerDialog is not even initialized. Cannot initilize PickerDialog.");
+            logger.debug("No Picker dialog configured");
+            return new WebActionResult();
         }
 
         pickerDialog.setSelectedValue(selectedValue);
@@ -57,17 +57,32 @@ public class InitializePickerDialogHandler extends WebActionHandler {
 
         // Process filter
         parameter.setParameter(NabuccoServletPathType.PICKER_DIALOG, pickerDialog.getInstanceId());
-        WebAction action = WebActionRegistry.getInstance().newAction(ApplyPickerFilterHandler.ID);
-
-        if (action == null) {
-            throw new ClientException("Cannot instanciate filter action.");
-        }
-        action.execute(parameter);
-
         WebActionResult result = new WebActionResult();
+        WebActionResult applyingResult = super.executeAction(ApplyPickerFilterHandler.ID, parameter);
+        result.addResult(applyingResult);
 
         result.addItem(new OpenItem(WebElementType.PICKERDIALOG, pickerDialog.getInstanceId()));
         return result;
     }
 
+    /**
+     * gets the dialog id to be initialized
+     * 
+     * @param parameter
+     *            parameter
+     * @return dialog instance
+     * @throws ClientException
+     */
+    private PickerDialog getPickerDialog(WebActionParameter parameter) throws ClientException {
+        WebElement element = parameter.getElement();
+        if (element instanceof BulkEditorPickerColumn) {
+            BulkEditorPickerColumn pd = (BulkEditorPickerColumn) element;
+            return pd.getDialog();
+        } else if (element instanceof PickerControl) {
+            PickerControl pd = (PickerControl) element;
+            return pd.getDialog();
+        } else {
+            throw new ClientException("element is not a Picker Control");
+        }
+    }
 }

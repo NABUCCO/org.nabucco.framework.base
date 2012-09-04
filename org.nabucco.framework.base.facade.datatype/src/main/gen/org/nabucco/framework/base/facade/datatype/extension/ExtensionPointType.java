@@ -1,18 +1,16 @@
 /*
  * Copyright 2012 PRODYNA AG
- *
- * Licensed under the Eclipse Public License (EPL), Version 1.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
+ * 
+ * Licensed under the Eclipse Public License (EPL), Version 1.0 (the "License"); you may not use
+ * this file except in compliance with the License. You may obtain a copy of the License at
+ * 
  * http://www.opensource.org/licenses/eclipse-1.0.php or
  * http://www.nabucco.org/License.html
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+ * 
+ * Unless required by applicable law or agreed to in writing, software distributed under the
+ * License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND,
+ * either express or implied. See the License for the specific language governing permissions
+ * and limitations under the License.
  */
 package org.nabucco.framework.base.facade.datatype.extension;
 
@@ -94,6 +92,8 @@ public enum ExtensionPointType implements Enumeration {
     ORG_NABUCCO_FRAMEWORK_SETUP_GEO_CONFIG("org.nabucco.framework.setup.geo.config"),
     /** Extension point for template mapping. */
     ORG_NABUCCO_FRAMEWORK_TEMPLATE_MAPPING("org.nabucco.framework.template.mapping"),
+    /** Extension point for template datastructure */
+    ORG_NABUCCO_FRAMEWORK_TEMPLATE_DATASTRUCTURE("org.nabucco.framework.template.datastructure"),
     /** Extension point for workflow configurations. */
     ORG_NABUCCO_FRAMEWORK_WORKFLOW("org.nabucco.framework.workflow"),
     /** Extension point for bussiness object schema configurations. */
@@ -118,6 +118,8 @@ public enum ExtensionPointType implements Enumeration {
     ORG_NABUCCO_UI_WORKAREA("org.nabucco.ui.workarea"),
     /** Extension point for an editor of the user interface. */
     ORG_NABUCCO_UI_EDITOR("org.nabucco.ui.editor"),
+    /** Extension point for an bulk editor of the user interface. */
+    ORG_NABUCCO_UI_BULK_EDITOR("org.nabucco.ui.bulkeditor"),
     /** Extension point for an dashboard of the user interface. */
     ORG_NABUCCO_UI_DASHBOARD("org.nabucco.ui.dashboard"),
     /** Extension point for a list of the user interface. */
@@ -147,7 +149,9 @@ public enum ExtensionPointType implements Enumeration {
     /** Extension point for ui message pushing */
     ORG_NABUCCO_UI_MESSAGE_QUEUE("org.nabucco.ui.messagequeue"),
     /** Extension point for working item validation error mapping */
-    ORG_NABUCCO_UI_MESSAGE_SET("org.nabucco.ui.messageset"), ;
+    ORG_NABUCCO_UI_MESSAGE_SET("org.nabucco.ui.messageset"),
+    /** Extension point for the shortcuts on the ui */
+    ORG_NABUCCO_UI_SHORTCUTS("org.nabucco.ui.shortcuts"), ;
 
     private String id;
 

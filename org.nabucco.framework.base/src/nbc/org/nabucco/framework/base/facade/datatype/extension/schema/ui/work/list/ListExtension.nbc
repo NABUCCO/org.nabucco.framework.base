@@ -19,6 +19,7 @@ package org.nabucco.framework.base.facade.datatype.extension.schema.ui.work.list
 import org.nabucco.framework.base.facade.datatype.extension.property.StringProperty;
 import org.nabucco.framework.base.facade.datatype.extension.schema.ui.common.ColumnExtension;
 import org.nabucco.framework.base.facade.datatype.extension.schema.ui.common.ListButtonExtension;
+import org.nabucco.framework.base.facade.datatype.extension.schema.ui.common.MenuButtonExtension;
 import org.nabucco.framework.base.facade.datatype.extension.schema.ui.common.filter.FilterReferenceExtension;
 import org.nabucco.framework.base.facade.datatype.extension.schema.ui.work.WorkItemExtension;
 
@@ -31,6 +32,9 @@ public Datatype ListExtension extends WorkItemExtension {
 
 	@Description		The action to be used to open content items
 	private Datatype StringProperty[0..1] doubleclickAction;
+	
+	@Description	 	The Menu actions.
+	private Datatype MenuButtonExtension[0..1] menuButton;
 	
 	@Description		The Editor Actions.
 	private Datatype ListButtonExtension[0..*] buttons;  

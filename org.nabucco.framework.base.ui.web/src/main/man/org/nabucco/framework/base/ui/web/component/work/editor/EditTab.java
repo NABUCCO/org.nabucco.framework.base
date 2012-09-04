@@ -27,13 +27,17 @@ import org.nabucco.framework.base.facade.datatype.extension.schema.ui.work.edito
 import org.nabucco.framework.base.facade.datatype.extension.schema.ui.work.editor.control.DateControlExtension;
 import org.nabucco.framework.base.facade.datatype.extension.schema.ui.work.editor.control.DropDownControlExtension;
 import org.nabucco.framework.base.facade.datatype.extension.schema.ui.work.editor.control.EditorControlExtension;
+import org.nabucco.framework.base.facade.datatype.extension.schema.ui.work.editor.control.FileControlExtension;
 import org.nabucco.framework.base.facade.datatype.extension.schema.ui.work.editor.control.ImageControlExtension;
+import org.nabucco.framework.base.facade.datatype.extension.schema.ui.work.editor.control.LabelControlExtension;
 import org.nabucco.framework.base.facade.datatype.extension.schema.ui.work.editor.control.LinkControlExtension;
 import org.nabucco.framework.base.facade.datatype.extension.schema.ui.work.editor.control.PasswordControlExtension;
 import org.nabucco.framework.base.facade.datatype.extension.schema.ui.work.editor.control.PickerControlExtension;
 import org.nabucco.framework.base.facade.datatype.extension.schema.ui.work.editor.control.RadioControlExtension;
 import org.nabucco.framework.base.facade.datatype.extension.schema.ui.work.editor.control.TextAreaControlExtension;
 import org.nabucco.framework.base.facade.datatype.extension.schema.ui.work.editor.control.TextControlExtension;
+import org.nabucco.framework.base.facade.datatype.visitor.VisitorException;
+import org.nabucco.framework.base.ui.web.component.WebComponent;
 import org.nabucco.framework.base.ui.web.component.WebComposite;
 import org.nabucco.framework.base.ui.web.component.WebElement;
 import org.nabucco.framework.base.ui.web.component.WebElementType;
@@ -42,17 +46,21 @@ import org.nabucco.framework.base.ui.web.component.work.editor.control.CurrencyC
 import org.nabucco.framework.base.ui.web.component.work.editor.control.DateControl;
 import org.nabucco.framework.base.ui.web.component.work.editor.control.DropDownControl;
 import org.nabucco.framework.base.ui.web.component.work.editor.control.EditorControl;
+import org.nabucco.framework.base.ui.web.component.work.editor.control.FileControl;
 import org.nabucco.framework.base.ui.web.component.work.editor.control.ImageControl;
-import org.nabucco.framework.base.ui.web.component.work.editor.control.LinkControl;
 import org.nabucco.framework.base.ui.web.component.work.editor.control.PasswordControl;
 import org.nabucco.framework.base.ui.web.component.work.editor.control.PickerControl;
 import org.nabucco.framework.base.ui.web.component.work.editor.control.RadioButtonControl;
+import org.nabucco.framework.base.ui.web.component.work.editor.control.SimpleLabelControl;
 import org.nabucco.framework.base.ui.web.component.work.editor.control.TextAreaInputControl;
 import org.nabucco.framework.base.ui.web.component.work.editor.control.TextInputControl;
+import org.nabucco.framework.base.ui.web.component.work.editor.gridelement.LinkElement;
+import org.nabucco.framework.base.ui.web.component.work.visitor.WebElementVisitor;
+import org.nabucco.framework.base.ui.web.component.work.visitor.WebElementVisitorContext;
 import org.nabucco.framework.base.ui.web.json.JsonElement;
 import org.nabucco.framework.base.ui.web.json.JsonList;
 import org.nabucco.framework.base.ui.web.json.JsonMap;
-import org.nabucco.framework.base.ui.web.model.control.ControlType;
+import org.nabucco.framework.base.ui.web.model.editor.ControlType;
 
 /**
  * Tab of a single editor.
@@ -95,12 +103,16 @@ public class EditTab extends WebComposite {
 
     @Override
     public void init() throws ExtensionException {
-        for (EditorControlExtension controlExtension : this.extension.getFields()) {
-            EditorControl control;
+        for (EditorControlExtension controlExtension : extension.getFields()) {
+            WebComponent control;
 
             ControlType type = PropertyLoader.loadProperty(ControlType.class, controlExtension.getType());
 
             switch (type) {
+            case LABEL: {
+                control = new SimpleLabelControl((LabelControlExtension) controlExtension);
+                break;
+            }
             case DROPDOWN:
                 control = new DropDownControl((DropDownControlExtension) controlExtension);
                 break;
@@ -126,7 +138,7 @@ public class EditTab extends WebComposite {
                 break;
 
             case LINK:
-                control = new LinkControl((LinkControlExtension) controlExtension);
+                control = new LinkElement((LinkControlExtension) controlExtension);
                 break;
 
             case PICKER:
@@ -145,6 +157,10 @@ public class EditTab extends WebComposite {
                 control = new PasswordControl((PasswordControlExtension) controlExtension);
                 break;
             }
+            case FILE: {
+                control = new FileControl((FileControlExtension) controlExtension);
+                break;
+            }
             default:
                 throw new IllegalArgumentException("Control model type [" + type + "] is not supported.");
             }
@@ -153,7 +169,6 @@ public class EditTab extends WebComposite {
             control.init();
         }
     }
-
 
     /**
      * Indicates if the validation messages need to be sent to UI
@@ -192,11 +207,11 @@ public class EditTab extends WebComposite {
      * @return the editor tab id
      */
     public String getId() {
-        if (this.extension.getIdentifier() == null) {
+        if (extension.getIdentifier() == null) {
             return null;
         }
 
-        return this.extension.getIdentifier().getValue();
+        return extension.getIdentifier().getValue();
     }
 
     /**
@@ -205,7 +220,7 @@ public class EditTab extends WebComposite {
      * @return the editor tab label
      */
     public String getLabel() {
-        return PropertyLoader.loadProperty(this.extension.getLabel());
+        return PropertyLoader.loadProperty(extension.getLabel());
     }
 
     /**
@@ -214,7 +229,16 @@ public class EditTab extends WebComposite {
      * @return the editor tab tooltip
      */
     public String getTooltip() {
-        return PropertyLoader.loadProperty(this.extension.getTooltip());
+        return PropertyLoader.loadProperty(extension.getTooltip());
+    }
+
+    /**
+     * Indicates if the element is technical (not important for print)
+     * 
+     * @return true if technical
+     */
+    public boolean isTechnical() {
+        return PropertyLoader.loadProperty(this.extension.getIsTechnical());
     }
 
     /**
@@ -223,7 +247,7 @@ public class EditTab extends WebComposite {
      * @return the editor tab icon
      */
     public String getIcon() {
-        return PropertyLoader.loadProperty(this.extension.getIcon());
+        return PropertyLoader.loadProperty(extension.getIcon());
     }
 
     /**
@@ -232,18 +256,18 @@ public class EditTab extends WebComposite {
      * @return the editor control start position
      */
     public String getStartPosition() {
-        if (this.gridStart == null) {
-            String position = PropertyLoader.loadProperty(this.extension.getGrid());
+        if (gridStart == null) {
+            String position = PropertyLoader.loadProperty(extension.getGrid());
             String[] positions = position.split("-");
 
             if (positions.length != 2 || positions[0].isEmpty()) {
                 throw new IllegalArgumentException("Cannot resolve grid of tab [" + this.getId() + "].");
             }
 
-            this.gridStart = positions[0];
+            gridStart = positions[0];
         }
 
-        return this.gridStart;
+        return gridStart;
     }
 
     /**
@@ -252,18 +276,18 @@ public class EditTab extends WebComposite {
      * @return the editor control end position
      */
     public String getEndPosition() {
-        if (this.gridEnd == null) {
-            String position = PropertyLoader.loadProperty(this.extension.getGrid());
+        if (gridEnd == null) {
+            String position = PropertyLoader.loadProperty(extension.getGrid());
             String[] positions = position.split("-");
 
             if (positions.length != 2 || positions[1].isEmpty()) {
                 throw new IllegalArgumentException("Cannot resolve grid of tab [" + this.getId() + "].");
             }
 
-            this.gridEnd = positions[1];
+            gridEnd = positions[1];
         }
 
-        return this.gridEnd;
+        return gridEnd;
     }
 
     /**
@@ -315,6 +339,23 @@ public class EditTab extends WebComposite {
     }
 
     /**
+     * Getter for the grid element with given id
+     * 
+     * @param id
+     *            id of the element to search for
+     * @return the element
+     */
+    public EditorGridElement getGridElement(String id) {
+        WebElement element = super.getElement(id);
+
+        if (element instanceof EditorGridElement) {
+            return (EditorGridElement) element;
+        }
+
+        return null;
+    }
+
+    /**
      * Getter for the lsit of editor controls.
      * 
      * @return the list of registered editor controls
@@ -331,13 +372,44 @@ public class EditTab extends WebComposite {
         return controls;
     }
 
+    /**
+     * Getter for the list of grid element controls. This list includes not enly controls listening
+     * by each other over editor model, but also non control elements like links
+     * 
+     * @return list of EditorGridElements
+     */
+    public List<EditorGridElement> getAllGridElements() {
+        List<EditorGridElement> controls = new ArrayList<EditorGridElement>();
+        String[] ids = super.getElementIds();
+        for (String id : ids) {
+            WebElement element = super.getElement(id);
+            if (element instanceof EditorGridElement) {
+                controls.add((EditorGridElement) element);
+            }
+        }
+        return controls;
+    }
+
+    /**
+     * Accepts the web element visitor. Overload this function to let element be visited
+     * 
+     * @param visitor
+     */
+    @Override
+    public <T extends WebElementVisitorContext> void accept(WebElementVisitor<T> visitor, T context)
+            throws VisitorException {
+        if (visitor != null) {
+            visitor.visit(this, context);
+        }
+    }
+
     @Override
     public JsonElement toJson() {
         JsonMap json = new JsonMap();
 
         JsonList controlList = new JsonList();
 
-        for (EditorControl control : this.getAllControls()) {
+        for (EditorGridElement control : this.getAllGridElements()) {
             if (control.isVisible()) {
                 controlList.add(control.toJson());
             }

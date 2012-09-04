@@ -312,9 +312,9 @@ public class PickerDialog extends WebComposite implements TableElement {
                     FilterItem filterItem = null;
 
                     if (filterExtension == null) {
-                        filterItem = new FilterItem(filterExt);
+                        filterItem = new FilterItem(refId, filterExt);
                     } else {
-                        filterItem = new FilterItem(filterExt, filterExtension);
+                        filterItem = new FilterItem(refId, filterExt, filterExtension);
                     }
 
                     this.filterMap.put(filterItem.getRefId(), filterItem);

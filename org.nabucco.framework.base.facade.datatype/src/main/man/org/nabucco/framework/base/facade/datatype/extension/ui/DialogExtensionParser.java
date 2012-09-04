@@ -30,7 +30,10 @@ import org.nabucco.framework.base.facade.datatype.extension.property.StringPrope
 import org.nabucco.framework.base.facade.datatype.extension.schema.ui.common.DialogButtonExtension;
 import org.nabucco.framework.base.facade.datatype.extension.schema.ui.dialog.DialogExtension;
 import org.nabucco.framework.base.facade.datatype.extension.schema.ui.dialog.GridDialogExtension;
+import org.nabucco.framework.base.facade.datatype.extension.schema.ui.dialog.control.DateDialogControlExtension;
 import org.nabucco.framework.base.facade.datatype.extension.schema.ui.dialog.control.DialogControlExtension;
+import org.nabucco.framework.base.facade.datatype.extension.schema.ui.dialog.control.DropDownDialogControlExtension;
+import org.nabucco.framework.base.facade.datatype.extension.schema.ui.dialog.control.DropDownSelectionItemExtension;
 import org.nabucco.framework.base.facade.datatype.extension.schema.ui.dialog.control.FileDialogControlExtension;
 import org.nabucco.framework.base.facade.datatype.extension.schema.ui.dialog.control.LinkDialogControlExtension;
 import org.nabucco.framework.base.facade.datatype.extension.schema.ui.dialog.control.TextDialogControlExtension;
@@ -46,6 +49,14 @@ import org.w3c.dom.Element;
  * @author Leonid Agranovskiy, PRODYNA AG
  */
 public class DialogExtensionParser extends NabuccoExtensionParserSupport implements ExtensionParser {
+
+    private static final String ATTR_NAME = "name";
+
+    private static final String ELEMENT_SELECTION = "selection";
+
+    private static final String CONSTANT_DATE = "DATE";
+
+    private static final String CONSTANT_DROPDOWN = "DROPDOWN";
 
     private static final String ATTR_EXTENSION_FILTER = "extensionFilter";
 
@@ -94,6 +105,10 @@ public class DialogExtensionParser extends NabuccoExtensionParserSupport impleme
     private static final String ATTR_EDITABLE = "editable";
 
     private static final String ELEMENT_DEFAULT_VALUE = "defaultValue";
+
+    private static final String ATTR_DEFAULT_ID = "defaultId";
+
+    private static final String ATTR_LOCALIZATION_PATH = "localizationPath";
 
     private static NabuccoLogger logger = NabuccoLoggingFactory.getInstance().getLogger(DialogExtensionParser.class);
 
@@ -198,6 +213,10 @@ public class DialogExtensionParser extends NabuccoExtensionParserSupport impleme
             LinkDialogControlExtension ext = new LinkDialogControlExtension();
             ext.setUrl(super.getStringProperty(controlElement, ATTR_URL));
             controlExtension = ext;
+        } else if (tagName.equalsIgnoreCase(CONSTANT_DATE)) {
+            controlExtension = this.parseDateExtension(controlElement);
+        } else if (tagName.equalsIgnoreCase(CONSTANT_DROPDOWN)) {
+            controlExtension = this.parseDropDownExtension(controlElement);
         } else {
             throw new ExtensionParserException("The tag name " + tagName + " is not supported yet");
         }
@@ -255,6 +274,62 @@ public class DialogExtensionParser extends NabuccoExtensionParserSupport impleme
             defaultValueStringProperty.setValue(defaultValue);
         }
         controlExtension.setDefaultValue(defaultValueStringProperty);
+        return controlExtension;
+    }
+
+    /**
+     * Parses text specifical parameters in text dialog extension
+     * 
+     * @param controlElement
+     *            control element to be parsed
+     * @return parsed extension
+     * @throws ExtensionParserException
+     *             if cannot parse
+     * @throws ExtensionException
+     */
+    private DateDialogControlExtension parseDateExtension(Element controlElement) throws ExtensionParserException,
+            ExtensionException {
+        DateDialogControlExtension controlExtension = new DateDialogControlExtension();
+
+        controlExtension.setEditable(super.getBooleanProperty(controlElement, ATTR_EDITABLE, true));
+        StringProperty defaultValueStringProperty = new StringProperty();
+        List<Element> childElements = super.getElementsByTagName(controlElement, ELEMENT_DEFAULT_VALUE);
+        if (childElements != null && !childElements.isEmpty()) {
+            Element defaultValueElement = childElements.get(0);
+            String defaultValue = defaultValueElement.getTextContent();
+            defaultValueStringProperty.setValue(defaultValue);
+        }
+        controlExtension.setDefaultValue(defaultValueStringProperty);
+        return controlExtension;
+    }
+
+    /**
+     * Parses text specifical parameters in text dialog extension
+     * 
+     * @param controlElement
+     *            control element to be parsed
+     * @return parsed extension
+     * @throws ExtensionParserException
+     *             if cannot parse
+     * @throws ExtensionException
+     */
+    private DropDownDialogControlExtension parseDropDownExtension(Element controlElement)
+            throws ExtensionParserException, ExtensionException {
+        DropDownDialogControlExtension controlExtension = new DropDownDialogControlExtension();
+
+        controlExtension.setEditable(super.getBooleanProperty(controlElement, ATTR_EDITABLE, true));
+        super.getElementsByTagName(controlElement, ATTR_DEFAULT_ID);
+        controlExtension.setDefaultId(super.getStringProperty(controlElement, ATTR_DEFAULT_ID));
+
+        // parse selections
+        List<Element> selectionElements = super.getElementsByTagName(controlElement, ELEMENT_SELECTION);
+        for (Element selectionElement : selectionElements) {
+            DropDownSelectionItemExtension item = new DropDownSelectionItemExtension();
+            item.setId(super.getStringProperty(selectionElement, ATTR_ID));
+            item.setName(super.getStringProperty(selectionElement, ATTR_NAME));
+            item.setLocalizationPath(super.getStringProperty(selectionElement, ATTR_LOCALIZATION_PATH));
+            controlExtension.getSelectionList().add(item);
+        }
         return controlExtension;
     }
 }

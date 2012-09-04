@@ -24,8 +24,6 @@ import org.nabucco.framework.base.ui.web.json.JsonElement;
 import org.nabucco.framework.base.ui.web.json.JsonMap;
 import org.nabucco.framework.base.ui.web.model.table.TableModel;
 
-
-
 /**
  * TableWidgetModel
  * 
@@ -34,6 +32,7 @@ import org.nabucco.framework.base.ui.web.model.table.TableModel;
 public class TableWidgetModel extends DashboardWidgetModel {
 
     private TableModel<NabuccoDatatype> table;
+
     /**
      * Creates a new {@link TableWidgetModel} instance.
      * 
@@ -45,7 +44,7 @@ public class TableWidgetModel extends DashboardWidgetModel {
     }
 
     @Override
-    public void setContent(List<NabuccoDatatype> values) {
+    public void setContent(String filterId, List<NabuccoDatatype> values, String viewName) {
         this.table.firstPage();
         this.table.setContent(values);
     }

@@ -65,6 +65,7 @@ public class Button extends WebComponent {
      * 
      * @return the button id
      */
+    @Override
     public String getId() {
         if (this.extension.getIdentifier() == null) {
             return null;
@@ -139,6 +140,7 @@ public class Button extends WebComponent {
         json.add(JSON_ACTION, this.getActionId());
         json.add(JSON_PARAMETER, this.getParameter());
         json.add(JSON_DISABLED, this.isDisabled());
+        json.add(JSON_TYPE, WebElementType.BUTTON.getName());
         return json;
     }
 }

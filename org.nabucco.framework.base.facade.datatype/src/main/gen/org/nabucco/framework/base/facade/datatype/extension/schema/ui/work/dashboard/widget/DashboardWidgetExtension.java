@@ -1,18 +1,16 @@
 /*
  * Copyright 2012 PRODYNA AG
- *
- * Licensed under the Eclipse Public License (EPL), Version 1.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
+ * 
+ * Licensed under the Eclipse Public License (EPL), Version 1.0 (the "License"); you may not use
+ * this file except in compliance with the License. You may obtain a copy of the License at
+ * 
  * http://www.opensource.org/licenses/eclipse-1.0.php or
  * http://www.nabucco.org/License.html
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+ * 
+ * Unless required by applicable law or agreed to in writing, software distributed under the
+ * License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND,
+ * either express or implied. See the License for the specific language governing permissions
+ * and limitations under the License.
  */
 package org.nabucco.framework.base.facade.datatype.extension.schema.ui.work.dashboard.widget;
 
@@ -27,7 +25,7 @@ import org.nabucco.framework.base.facade.datatype.collection.NabuccoListImpl;
 import org.nabucco.framework.base.facade.datatype.extension.property.EnumerationProperty;
 import org.nabucco.framework.base.facade.datatype.extension.property.StringProperty;
 import org.nabucco.framework.base.facade.datatype.extension.schema.ui.UiExtension;
-import org.nabucco.framework.base.facade.datatype.extension.schema.ui.common.filter.FilterReferenceExtension;
+import org.nabucco.framework.base.facade.datatype.extension.schema.ui.work.dashboard.widget.DashboardFilterViewExtension;
 import org.nabucco.framework.base.facade.datatype.property.NabuccoProperty;
 import org.nabucco.framework.base.facade.datatype.property.NabuccoPropertyContainer;
 import org.nabucco.framework.base.facade.datatype.property.NabuccoPropertyDescriptor;
@@ -58,7 +56,7 @@ public class DashboardWidgetExtension extends UiExtension implements Datatype {
     public static final String ICON = "icon";
 
     /** References to the configured filters */
-    public NabuccoList<FilterReferenceExtension> filters;
+    private NabuccoList<DashboardFilterViewExtension> filters;
 
     /** The type of the widget (BARGRAPF, PIECHART, TABLE etc) */
     public EnumerationProperty widgetType;
@@ -109,25 +107,25 @@ public class DashboardWidgetExtension extends UiExtension implements Datatype {
     /**
      * Getter for the FiltersJPA.
      *
-     * @return the List<FilterReferenceExtension>.
+     * @return the List<DashboardFilterViewExtension>.
      */
-    List<FilterReferenceExtension> getFiltersJPA() {
+    List<DashboardFilterViewExtension> getFiltersJPA() {
         if ((this.filters == null)) {
-            this.filters = new NabuccoListImpl<FilterReferenceExtension>(NabuccoCollectionState.LAZY);
+            this.filters = new NabuccoListImpl<DashboardFilterViewExtension>(NabuccoCollectionState.LAZY);
         }
-        return ((NabuccoListImpl<FilterReferenceExtension>) this.filters).getDelegate();
+        return ((NabuccoListImpl<DashboardFilterViewExtension>) this.filters).getDelegate();
     }
 
     /**
      * Setter for the FiltersJPA.
      *
-     * @param filters the List<FilterReferenceExtension>.
+     * @param filters the List<DashboardFilterViewExtension>.
      */
-    void setFiltersJPA(List<FilterReferenceExtension> filters) {
+    void setFiltersJPA(List<DashboardFilterViewExtension> filters) {
         if ((this.filters == null)) {
-            this.filters = new NabuccoListImpl<FilterReferenceExtension>(NabuccoCollectionState.LAZY);
+            this.filters = new NabuccoListImpl<DashboardFilterViewExtension>(NabuccoCollectionState.LAZY);
         }
-        ((NabuccoListImpl<FilterReferenceExtension>) this.filters).setDelegate(filters);
+        ((NabuccoListImpl<DashboardFilterViewExtension>) this.filters).setDelegate(filters);
     }
 
     /**
@@ -138,8 +136,9 @@ public class DashboardWidgetExtension extends UiExtension implements Datatype {
     protected static NabuccoPropertyContainer createPropertyContainer() {
         Map<String, NabuccoPropertyDescriptor> propertyMap = new HashMap<String, NabuccoPropertyDescriptor>();
         propertyMap.putAll(PropertyCache.getInstance().retrieve(UiExtension.class).getPropertyMap());
-        propertyMap.put(FILTERS, PropertyDescriptorSupport.createCollection(FILTERS, FilterReferenceExtension.class, 4,
-                PROPERTY_CONSTRAINTS[0], false, PropertyAssociationType.COMPOSITION));
+        propertyMap.put(FILTERS, PropertyDescriptorSupport.createCollection(FILTERS,
+                DashboardFilterViewExtension.class, 4, PROPERTY_CONSTRAINTS[0], false,
+                PropertyAssociationType.COMPOSITION));
         propertyMap.put(WIDGETTYPE, PropertyDescriptorSupport.createDatatype(WIDGETTYPE, EnumerationProperty.class, 5,
                 PROPERTY_CONSTRAINTS[1], false, PropertyAssociationType.COMPOSITION));
         propertyMap.put(LABEL, PropertyDescriptorSupport.createDatatype(LABEL, StringProperty.class, 6,
@@ -178,8 +177,8 @@ public class DashboardWidgetExtension extends UiExtension implements Datatype {
         if (super.setProperty(property)) {
             return true;
         }
-        if ((property.getName().equals(FILTERS) && (property.getType() == FilterReferenceExtension.class))) {
-            this.filters = ((NabuccoList<FilterReferenceExtension>) property.getInstance());
+        if ((property.getName().equals(FILTERS) && (property.getType() == DashboardFilterViewExtension.class))) {
+            this.filters = ((NabuccoList<DashboardFilterViewExtension>) property.getInstance());
             return true;
         } else if ((property.getName().equals(WIDGETTYPE) && (property.getType() == EnumerationProperty.class))) {
             this.setWidgetType(((EnumerationProperty) property.getInstance()));
@@ -256,11 +255,11 @@ public class DashboardWidgetExtension extends UiExtension implements Datatype {
     /**
      * References to the configured filters
      *
-     * @return the NabuccoList<FilterReferenceExtension>.
+     * @return the NabuccoList<DashboardFilterViewExtension>.
      */
-    public NabuccoList<FilterReferenceExtension> getFilters() {
+    public NabuccoList<DashboardFilterViewExtension> getFilters() {
         if ((this.filters == null)) {
-            this.filters = new NabuccoListImpl<FilterReferenceExtension>(NabuccoCollectionState.INITIALIZED);
+            this.filters = new NabuccoListImpl<DashboardFilterViewExtension>(NabuccoCollectionState.INITIALIZED);
         }
         return this.filters;
     }

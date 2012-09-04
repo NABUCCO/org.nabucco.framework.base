@@ -16,6 +16,8 @@
  */
 package org.nabucco.framework.base.facade.datatype.extension.ui;
 
+import java.util.List;
+
 import org.nabucco.common.extension.ExtensionException;
 import org.nabucco.common.extension.parser.ExtensionParser;
 import org.nabucco.common.extension.parser.ExtensionParserException;
@@ -23,6 +25,8 @@ import org.nabucco.framework.base.facade.datatype.extension.ExtensionId;
 import org.nabucco.framework.base.facade.datatype.extension.NabuccoExtensionParserSupport;
 import org.nabucco.framework.base.facade.datatype.extension.NabucoExtensionContainer;
 import org.nabucco.framework.base.facade.datatype.extension.schema.ui.application.ApplicationExtension;
+import org.nabucco.framework.base.facade.datatype.extension.schema.ui.application.LocalizationExtension;
+import org.nabucco.framework.base.facade.datatype.extension.schema.ui.application.LocalizationLanguageExtension;
 import org.nabucco.framework.base.facade.datatype.logger.NabuccoLogger;
 import org.nabucco.framework.base.facade.datatype.logger.NabuccoLoggingFactory;
 import org.w3c.dom.Element;
@@ -34,7 +38,11 @@ import org.w3c.dom.Element;
  */
 public class ApplicationExtensionParser extends NabuccoExtensionParserSupport implements ExtensionParser {
 
+    private static final String ELEMENT_LOCALIZATION_LANGUAGE = "localizationLanguage";
+
     private static final String ELEMENT_APPLICATION = "application";
+
+    private static final String ELEMENT_LOCALIZATION = "localization";
 
     private static final String ATTR_ID = "id";
 
@@ -49,8 +57,16 @@ public class ApplicationExtensionParser extends NabuccoExtensionParserSupport im
     private static final String ATTR_PERSPECTIVEAREA = "perspectivearea";
 
     private static final String ATTR_STATUSBAR = "statusbar";
-    
+
     private static final String ATTR_DEBUGMODE = "debugmode";
+
+    private static final String ATTR_COUNTRY = "country";
+
+    private static final String ATTR_ICON = "icon";
+
+    private static final String ATTR_DEFAULT_LANGUAGEID = "defaultLanguageId";
+
+    private static final String ATTR_LANGUAGE = "language";
 
     private static NabuccoLogger logger = NabuccoLoggingFactory.getInstance().getLogger(
             ApplicationExtensionParser.class);
@@ -74,6 +90,10 @@ public class ApplicationExtensionParser extends NabuccoExtensionParserSupport im
             extension.setStatusBar(super.getStringProperty(applicationElement, ATTR_STATUSBAR));
             extension.setDebugMode(super.getBooleanProperty(applicationElement, ATTR_DEBUGMODE));
 
+            Element localizationElement = super.getElementsByTagName(element, ELEMENT_LOCALIZATION).get(0);
+            LocalizationExtension localizationExtension = this.parseLocalizationExtension(localizationElement);
+            extension.setLocalization(localizationExtension);
+
             NabucoExtensionContainer container = new NabucoExtensionContainer(extension);
             return container;
 
@@ -82,4 +102,37 @@ public class ApplicationExtensionParser extends NabuccoExtensionParserSupport im
         }
     }
 
+    /**
+     * Parses the localization extension of the application
+     * 
+     * @param element
+     *            the element to be parsed
+     * @return parsed extension
+     * @throws ExtensionParserException
+     */
+    private LocalizationExtension parseLocalizationExtension(Element element) throws ExtensionParserException {
+        try {
+            LocalizationExtension localization = new LocalizationExtension();
+
+            String defaultId = super.getAttribute(element, ATTR_DEFAULT_LANGUAGEID);
+            localization.setDefaultLanguageIdentifier(defaultId);
+
+            List<Element> languageList = super.getElementsByTagName(element, ELEMENT_LOCALIZATION_LANGUAGE);
+
+            for (Element languageElement : languageList) {
+                LocalizationLanguageExtension languageExt = new LocalizationLanguageExtension();
+
+                languageExt.setIdentifier(super.getAttribute(languageElement, ATTR_ID));
+                languageExt.setLanguage(super.getStringProperty(languageElement, ATTR_LANGUAGE));
+                languageExt.setCountry(super.getStringProperty(languageElement, ATTR_COUNTRY));
+                languageExt.setIcon(super.getStringProperty(languageElement, ATTR_ICON));
+
+                localization.getLocalizationLanguageList().add(languageExt);
+            }
+
+            return localization;
+        } catch (ExtensionException e) {
+            throw new ExtensionParserException("Cannot parse localization extension", e);
+        }
+    }
 }

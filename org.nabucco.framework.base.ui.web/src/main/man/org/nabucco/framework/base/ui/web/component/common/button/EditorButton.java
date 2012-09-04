@@ -63,8 +63,10 @@ public class EditorButton extends Button {
     public void updateStatus(boolean isModelDirty) {
         boolean retVal = false;
 
-        if (this.isDirtyStateNeeded() && !isModelDirty) {
+        if (this.isDirtyStateNeeded() == true && !isModelDirty) {
             retVal = true;
+        } else if (this.isDirtyStateNeeded() == false) {
+            retVal = false;
         }
 
         this.setDisabled(retVal);

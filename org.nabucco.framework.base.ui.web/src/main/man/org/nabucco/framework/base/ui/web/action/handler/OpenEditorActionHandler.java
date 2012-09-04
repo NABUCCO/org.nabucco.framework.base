@@ -22,7 +22,7 @@ import org.nabucco.framework.base.facade.datatype.logger.NabuccoLogger;
 import org.nabucco.framework.base.facade.datatype.logger.NabuccoLoggingFactory;
 import org.nabucco.framework.base.facade.exception.client.ClientException;
 import org.nabucco.framework.base.facade.exception.client.action.ActionException;
-import org.nabucco.framework.base.ui.web.action.WebActionHandler;
+import org.nabucco.framework.base.ui.web.action.WebActionHandlerSupport;
 import org.nabucco.framework.base.ui.web.action.parameter.WebActionParameter;
 import org.nabucco.framework.base.ui.web.action.result.RefreshItem;
 import org.nabucco.framework.base.ui.web.action.result.WebActionResult;
@@ -37,26 +37,24 @@ import org.nabucco.framework.base.ui.web.servlet.util.path.NabuccoServletPathTyp
  * 
  * @author Nicolas Moser, PRODYNA AG
  */
-public abstract class OpenEditorActionHandler<D extends NabuccoDatatype> extends WebActionHandler {
+public abstract class OpenEditorActionHandler<D extends NabuccoDatatype> extends WebActionHandlerSupport {
 
     private static NabuccoLogger logger = NabuccoLoggingFactory.getInstance().getLogger(OpenEditorActionHandler.class);
 
     @Override
     public final WebActionResult execute(WebActionParameter parameter) throws ClientException {
 
-        String itemId = this.getEditorId(parameter);
-
         WebActionResult result = new WebActionResult();
-
-        if (itemId == null || itemId.isEmpty()) {
-            logger.warning("Cannot open Editor with id '" + itemId + "'.");
-            return result;
-        }
-
 
         D datatype = this.resolve(parameter);
 
         if (datatype == null) {
+            return result;
+        }
+
+        String itemId = this.getEditorId(parameter, datatype);
+        if (itemId == null || itemId.isEmpty()) {
+            logger.warning("Cannot open Editor with id '" + itemId + "'.");
             return result;
         }
 
@@ -75,7 +73,8 @@ public abstract class OpenEditorActionHandler<D extends NabuccoDatatype> extends
                 editor = workArea.newEditor(itemId, String.valueOf(datatype.getId()));
             }
 
-            this.addSource(parameter, editor);
+            // Add sources to the new editor
+            this.addSourceItem(parameter, editor);
 
             editor.getModel().setDatatype(datatype);
 
@@ -97,11 +96,28 @@ public abstract class OpenEditorActionHandler<D extends NabuccoDatatype> extends
      * @param target
      *            the target item
      */
-    private void addSource(WebActionParameter parameter, EditorItem target) {
+    private void addSourceItem(WebActionParameter parameter, EditorItem target) {
         String editorId = parameter.get(NabuccoServletPathType.EDITOR);
         EditorItem source = NabuccoServletUtil.getEditor(editorId);
 
-        target.setSource(source);
+        if (target.getSource() == null) {
+            target.setSource(source);
+            target.setSourceWebElement(parameter.getElement());
+        }
+    }
+
+    /**
+     * Returns the source editor or null if not fount
+     * 
+     * @param parameter
+     *            parameter
+     * @return editor or null
+     */
+    protected EditorItem getSourceEditor(WebActionParameter parameter) {
+        String editorId = parameter.get(NabuccoServletPathType.EDITOR);
+        EditorItem source = NabuccoServletUtil.getEditor(editorId);
+
+        return source;
     }
 
     /**
@@ -168,13 +184,15 @@ public abstract class OpenEditorActionHandler<D extends NabuccoDatatype> extends
      * 
      * @param parameter
      *            the web action parameter
+     * @param datatype
+     *            the datatype which will be bound to the editor
      * 
      * @return the editor id to open
      * 
      * @throws ClientException
      *             when the editor id cannot be resolved
      */
-    protected abstract String getEditorId(WebActionParameter parameter) throws ClientException;
+    protected abstract String getEditorId(WebActionParameter parameter, D datatype) throws ClientException;
 
     /**
      * Resolve the given datatype from the database.

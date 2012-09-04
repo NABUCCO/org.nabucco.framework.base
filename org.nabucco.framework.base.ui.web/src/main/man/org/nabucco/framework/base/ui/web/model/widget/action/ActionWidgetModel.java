@@ -29,23 +29,40 @@ public class ActionWidgetModel extends WidgetModel {
 
     private static final String JSON_TEXT = "text";
 
+    private static final String JSON_ICON = "icon";
+
     private String action;
 
     private String text;
 
+    private String tooltip;
+
+    private String icon;
+
     /**
+     * 
      * Creates a new {@link ActionWidgetModel} instance.
      * 
+     * @param action
+     *            action to call
      * @param text
-     *            text to show
-     * @param link
-     *            link for the text
+     *            the text to be shown
+     * @param tooltip
+     *            the tooltip to show
+     * @param icon
+     *            the icon (if any)
      */
-    public ActionWidgetModel(String action, String text) {
+    public ActionWidgetModel(String action, String text, String tooltip, String icon) {
         super(WidgetType.ACTION);
+
+        if (text == null) {
+            throw new IllegalArgumentException("Cannot create a Action Widget without text ('null')");
+        }
 
         this.setAction(action);
         this.setText(text);
+        this.setTooltip(tooltip);
+        this.setIcon(icon);
     }
 
     /**
@@ -54,7 +71,7 @@ public class ActionWidgetModel extends WidgetModel {
      * @param action
      *            The action to set.
      */
-    public void setAction(String action) {
+    private void setAction(String action) {
         this.action = action;
     }
 
@@ -73,7 +90,7 @@ public class ActionWidgetModel extends WidgetModel {
      * @param text
      *            The text to set.
      */
-    public void setText(String text) {
+    private void setText(String text) {
         this.text = text;
     }
 
@@ -86,11 +103,53 @@ public class ActionWidgetModel extends WidgetModel {
         return this.text;
     }
 
+    /**
+     * Setter for the tooltip.
+     * 
+     * @param tooltip
+     *            The tooltip to set.
+     */
+    private void setTooltip(String tooltip) {
+        this.tooltip = tooltip;
+    }
+
+    /**
+     * Getter for the tooltip.
+     * 
+     * @return Returns the tooltip.
+     */
+    public String getTooltip() {
+        return tooltip;
+    }
+
+    /**
+     * Setter for the icon.
+     * 
+     * @param icon
+     *            The icon to set.
+     */
+    private void setIcon(String icon) {
+        this.icon = icon;
+    }
+
+    /**
+     * Getter for the icon.
+     * 
+     * @return Returns the icon.
+     */
+    public String getIcon() {
+        return icon;
+    }
+
     @Override
     public JsonMap toJson() {
         JsonMap retVal = super.toJson();
         retVal.add(JSON_ACTION, this.getAction());
         retVal.add(JSON_TEXT, this.getText());
+        retVal.add(JSON_ICON, this.getIcon());
+        retVal.add(JSON_TOOLTIP, this.getTooltip());
+
         return retVal;
     }
+
 }

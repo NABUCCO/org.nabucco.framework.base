@@ -27,7 +27,7 @@ import org.nabucco.framework.base.facade.datatype.extension.NabuccoExtensionPars
 import org.nabucco.framework.base.facade.datatype.extension.NabucoExtensionContainer;
 import org.nabucco.framework.base.facade.datatype.extension.property.EnumerationProperty;
 import org.nabucco.framework.base.facade.datatype.extension.schema.ui.common.ColumnExtension;
-import org.nabucco.framework.base.facade.datatype.extension.schema.ui.common.filter.FilterReferenceExtension;
+import org.nabucco.framework.base.facade.datatype.extension.schema.ui.work.dashboard.widget.DashboardFilterViewExtension;
 import org.nabucco.framework.base.facade.datatype.extension.schema.ui.work.dashboard.widget.DashboardWidgetExtension;
 import org.nabucco.framework.base.facade.datatype.extension.schema.ui.work.dashboard.widget.DashboardWidgetSkaleItemExtension;
 import org.nabucco.framework.base.facade.datatype.extension.schema.ui.work.dashboard.widget.GraphDashboardWidgetExtension;
@@ -44,6 +44,8 @@ import org.w3c.dom.Element;
  * @author Leonid Agranovskiy, PRODYNA AG
  */
 public class DashboardWidgetExtensionParser extends NabuccoExtensionParserSupport implements ExtensionParser {
+
+    private static final String ATTR_VIEW_NAME = "viewName";
 
     private static final String ELEMENT_SKALE_ITEM = "skaleItem";
 
@@ -138,15 +140,15 @@ public class DashboardWidgetExtensionParser extends NabuccoExtensionParserSuppor
                 // Parse skale
                 Element skaleElement = super.getElementsByTagName(shemeElement, ELEMENT_SKALE).get(0);
                 List<Element> skaleItems = super.getElementsByTagName(skaleElement, ELEMENT_SKALE_ITEM);
-                for(Element skaleItem : skaleItems){
+                for (Element skaleItem : skaleItems) {
                     DashboardWidgetSkaleItemExtension skaleItemExt = new DashboardWidgetSkaleItemExtension();
-                    
+
                     skaleItemExt.setLabel(super.getStringProperty(skaleItem, ATTR_LABEL));
                     skaleItemExt.setValue(super.getStringProperty(skaleItem, ATTR_VALUE));
 
                     ext.getSkaleItems().add(skaleItemExt);
                 }
-                
+
                 extension = ext;
 
             } else {
@@ -162,7 +164,7 @@ public class DashboardWidgetExtensionParser extends NabuccoExtensionParserSuppor
 
             List<Element> filterElements = super.getElementsByTagName(shemeElement, ELEMENT_FILTER);
             for (Element filterElement : filterElements) {
-                FilterReferenceExtension filterExtension = this.parseFilterReferenceExtension(filterElement);
+                DashboardFilterViewExtension filterExtension = this.parseFilterReferenceExtension(filterElement);
                 extension.getFilters().add(filterExtension);
             }
 
@@ -173,7 +175,6 @@ public class DashboardWidgetExtensionParser extends NabuccoExtensionParserSuppor
         }
     }
 
-
     /**
      * Parse the list of referenced filters
      * 
@@ -181,11 +182,13 @@ public class DashboardWidgetExtensionParser extends NabuccoExtensionParserSuppor
      *            the group of filters to be parsed
      * @return QueryFilterReferenceExtension instance
      */
-    private FilterReferenceExtension parseFilterReferenceExtension(Element filterElement)
+    private DashboardFilterViewExtension parseFilterReferenceExtension(Element filterElement)
             throws ExtensionParserException, ExtensionException {
 
-        FilterReferenceExtension retVal = new FilterReferenceExtension();
+        DashboardFilterViewExtension retVal = new DashboardFilterViewExtension();
 
+        retVal.setId(super.getStringProperty(filterElement, ATTR_ID));
+        retVal.setViewName(super.getStringProperty(filterElement, ATTR_VIEW_NAME));
         retVal.setRefId(super.getStringProperty(filterElement, ATTR_REFID));
         retVal.setTooltip(super.getStringProperty(filterElement, ATTR_TOOLTIP));
         retVal.setLabel(super.getStringProperty(filterElement, ATTR_LABEL));

@@ -16,8 +16,8 @@
  */
 package org.nabucco.framework.base.ui.web.model.table.filter;
 
-import org.nabucco.framework.base.facade.datatype.Basetype;
 import org.nabucco.framework.base.facade.datatype.NString;
+import org.nabucco.framework.base.facade.datatype.NType;
 
 /**
  * Default filter for NABUCCO String Basetypes.
@@ -29,18 +29,28 @@ public class NStringFilter implements TableColumnFilter {
     /** The regular expression of the string filter. */
     private String regex;
 
+    /** Case of the text is ignored */
+    private boolean caseIgnore;
+
     /**
      * Creates a new {@link NStringFilter} instance.
      * 
      * @param regex
      *            the string regex to match against
+     * @param caseIgnore
+     *            ignoring of case of text is active or not
      */
-    public NStringFilter(String regex) {
+    public NStringFilter(String regex, boolean caseIgnore) {
         this.regex = regex;
+        this.caseIgnore = caseIgnore;
+
+        if (caseIgnore) {
+            this.regex = regex.toLowerCase();
+        }
     }
 
     @Override
-    public boolean accept(Basetype basetype) {
+    public boolean accept(NType basetype) {
         if (!(basetype instanceof NString)) {
             return false;
         }
@@ -55,7 +65,12 @@ public class NStringFilter implements TableColumnFilter {
             return true;
         }
 
-        return value.matches(this.regex);
+        if (caseIgnore) {
+            value = value.toLowerCase();
+        }
+
+        boolean matches = value.matches(this.regex);
+        return matches;
     }
 
 }

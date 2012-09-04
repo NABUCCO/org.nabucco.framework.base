@@ -72,7 +72,7 @@ public class ProceedPickerDialogSelection extends WebActionHandlerSupport {
         WorkItem selectedWorkItem = NabuccoServletUtil.getSelectedWorkItem();
         if (selectedWorkItem.getType() == WebElementType.EDITOR) {
             selectedWorkItem.getModel().refresh();
-            
+
             parameter.setParameter(NabuccoServletPathType.EDITOR, selectedWorkItem.getInstanceId());
             WebActionResult refreshItems = super.executeAction(RefreshEditorDependenciesHandler.ID, parameter);
             result.addResult(refreshItems);
@@ -111,7 +111,7 @@ public class ProceedPickerDialogSelection extends WebActionHandlerSupport {
 
         case PICKER: {
             PickerControl control = (PickerControl) sourceElement;
-            this.addToPicker(value, pickerDialog, control, result);
+            this.addToPicker(value, control, result);
             break;
         }
 
@@ -143,7 +143,7 @@ public class ProceedPickerDialogSelection extends WebActionHandlerSupport {
      * @param result
      *            the web action result
      */
-    protected void addToPicker(String value, PickerDialog pickerDialog, PickerControl source, WebActionResult result) {
+    protected void addToPicker(String value, PickerControl source, WebActionResult result) {
         source.getModel().setValue(value);
         result.addItem(new RefreshItem(WebElementType.CONTROL, source.getId()));
     }
@@ -179,7 +179,7 @@ public class ProceedPickerDialogSelection extends WebActionHandlerSupport {
         super.addProperty(newElement, sourceDatatype, propertyName);
 
         result.addItem(new RefreshItem(WebElementType.EDITOR_RELATION_AREA, selectedWorkItem.getInstanceId()));
-//        result.addItem(new RefreshItem(WebElementType.WORK_AREA));
+        // result.addItem(new RefreshItem(WebElementType.WORK_AREA));
     }
 
 }

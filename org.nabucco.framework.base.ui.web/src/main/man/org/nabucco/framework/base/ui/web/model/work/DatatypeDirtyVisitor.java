@@ -17,7 +17,7 @@
 package org.nabucco.framework.base.ui.web.model.work;
 
 import org.nabucco.framework.base.facade.datatype.Datatype;
-import org.nabucco.framework.base.facade.datatype.visitor.DatatypeVisitor;
+import org.nabucco.framework.base.facade.datatype.visitor.ExtendedDatatypeVisitor;
 import org.nabucco.framework.base.facade.datatype.visitor.VisitorException;
 
 /**
@@ -25,7 +25,7 @@ import org.nabucco.framework.base.facade.datatype.visitor.VisitorException;
  * 
  * @author Leonid Agranovskiy, PRODYNA AG
  */
-class DatatypeDirtyVisitor extends DatatypeVisitor {
+public class DatatypeDirtyVisitor extends ExtendedDatatypeVisitor {
 
     private boolean dirty = false;
 

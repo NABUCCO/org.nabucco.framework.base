@@ -22,32 +22,25 @@ import org.nabucco.framework.base.facade.datatype.extension.schema.ui.work.edito
 import org.nabucco.framework.base.facade.datatype.extension.schema.ui.work.editor.dependency.DependencySetExtension;
 import org.nabucco.framework.base.facade.datatype.logger.NabuccoLogger;
 import org.nabucco.framework.base.facade.datatype.logger.NabuccoLoggingFactory;
-import org.nabucco.framework.base.ui.web.component.WebComponent;
+import org.nabucco.framework.base.facade.datatype.visitor.VisitorException;
 import org.nabucco.framework.base.ui.web.component.WebElementType;
-import org.nabucco.framework.base.ui.web.json.JsonElement;
+import org.nabucco.framework.base.ui.web.component.work.editor.EditorGridElement;
+import org.nabucco.framework.base.ui.web.component.work.visitor.WebElementVisitor;
+import org.nabucco.framework.base.ui.web.component.work.visitor.WebElementVisitorContext;
 import org.nabucco.framework.base.ui.web.json.JsonMap;
-import org.nabucco.framework.base.ui.web.model.control.ControlModel;
-import org.nabucco.framework.base.ui.web.model.control.util.dependency.DependencyController;
+import org.nabucco.framework.base.ui.web.model.editor.EditorGridElementModel;
+import org.nabucco.framework.base.ui.web.model.editor.control.ControlModel;
+import org.nabucco.framework.base.ui.web.model.editor.util.dependency.DependencyController;
 
 /**
  * EditorField
  * 
  * @author Nicolas Moser, PRODYNA AG
  */
-public abstract class EditorControl extends WebComponent {
+public abstract class EditorControl extends EditorGridElement {
 
     /** The default serial version UID */
     private static final long serialVersionUID = 1L;
-
-    private static final String JSON_COLUMN = "col";
-
-    private static final String JSON_ROW = "row";
-
-    private static final String JSON_HEIGHT = "height";
-
-    private static final String JSON_WIDTH = "width";
-
-    private static final String JSON_HINT = "hint";
 
     /** Logger */
     protected static NabuccoLogger logger = NabuccoLoggingFactory.getInstance().getLogger(EditorControl.class);
@@ -55,17 +48,11 @@ public abstract class EditorControl extends WebComponent {
     /** The Editor Field Extension */
     private EditorControlExtension extension;
 
-    /** The Control start position */
-    private String startPosition;
-
-    /** The Control end position */
-    private String endPosition;
-
     /** The Control Model */
-    private ControlModel<?> model;
+    protected ControlModel<?> model;
 
     /** The control dependency Set */
-    private DependencyController dependencySet;
+    protected DependencyController dependencySet;
 
     /**
      * Creates a new {@link EditorControl} instance.
@@ -113,11 +100,11 @@ public abstract class EditorControl extends WebComponent {
             throw new IllegalArgumentException("Cannot add Control for property [null] to the model.");
         }
 
-        DependencySetExtension dependencySetExtension = this.extension.getDependencySet();
-        this.dependencySet = new DependencyController(dependencySetExtension);
-        this.dependencySet.init();
-        this.model = this.instantiateModel(id, propertyPath);
-        this.model.init();
+        DependencySetExtension dependencySetExtension = extension.getDependencySet();
+        dependencySet = new DependencyController(dependencySetExtension);
+        dependencySet.init();
+        model = this.instantiateModel(id, propertyPath);
+        model.init();
     }
 
     /**
@@ -137,7 +124,12 @@ public abstract class EditorControl extends WebComponent {
      * @return Returns the model.
      */
     public ControlModel<?> getModel() {
-        return this.model;
+        return model;
+    }
+
+    @Override
+    public EditorGridElementModel getGridElementModel() {
+        return model;
     }
 
     /**
@@ -145,8 +137,9 @@ public abstract class EditorControl extends WebComponent {
      * 
      * @return true if visible
      */
-    public boolean isVisible(){
-        return this.model.isVisible();
+    @Override
+    public boolean isVisible() {
+        return model.isVisible();
     }
 
     /**
@@ -155,7 +148,7 @@ public abstract class EditorControl extends WebComponent {
      * @return dependency set
      */
     protected DependencyController getDependencySet() {
-        return this.dependencySet;
+        return dependencySet;
     }
 
     /**
@@ -163,12 +156,13 @@ public abstract class EditorControl extends WebComponent {
      * 
      * @return the editor control id or null if no setted
      */
+    @Override
     public String getId() {
-        if (this.extension.getIdentifier() == null) {
+        if (extension.getIdentifier() == null) {
             return null;
         }
 
-        return this.extension.getIdentifier().getValue();
+        return extension.getIdentifier().getValue();
     }
 
     /**
@@ -176,8 +170,8 @@ public abstract class EditorControl extends WebComponent {
      * 
      * @return the editor control property
      */
-    private String getProperty() {
-        return PropertyLoader.loadProperty(this.extension.getProperty());
+    public String getProperty() {
+        return PropertyLoader.loadProperty(extension.getProperty());
     }
 
     /**
@@ -185,8 +179,8 @@ public abstract class EditorControl extends WebComponent {
      * 
      * @return the editor control label
      */
-    private String getLabel() {
-        return PropertyLoader.loadProperty(this.extension.getLabel());
+    public String getLabel() {
+        return PropertyLoader.loadProperty(extension.getLabel());
     }
 
     /**
@@ -194,121 +188,17 @@ public abstract class EditorControl extends WebComponent {
      * 
      * @return the editor control tooltip
      */
-    private String getTooltip() {
-        return PropertyLoader.loadProperty(this.extension.getTooltip());
+    public String getTooltip() {
+        return PropertyLoader.loadProperty(extension.getTooltip());
     }
-
 
     /**
      * Return if the Control Editable Flag.
      * 
      * @return <b>true</b> if the control is editable, <b>false</b> if not
      */
-    protected boolean getEditable() {
-        return PropertyLoader.loadProperty(this.extension.getEditable());
-    }
-
-    /**
-     * Getter for the editor control start position.
-     * 
-     * @return the editor control start position
-     */
-    private String getStartPosition() {
-        if (this.startPosition == null) {
-            String position = PropertyLoader.loadProperty(this.extension.getPosition());
-            String[] positions = position.split("-");
-
-            if (positions.length != 2 || positions[0].isEmpty()) {
-                throw new IllegalArgumentException("Cannot resolve position of control [" + this.getId() + "].");
-            }
-
-            this.startPosition = positions[0];
-        }
-
-        return this.startPosition;
-    }
-
-    /**
-     * Getter for the editor control end position.
-     * 
-     * @return the editor control end position
-     */
-    private String getEndPosition() {
-        if (this.endPosition == null) {
-            String position = PropertyLoader.loadProperty(this.extension.getPosition());
-            String[] positions = position.split("-");
-
-            if (positions.length != 2 || positions[1].isEmpty()) {
-                throw new IllegalArgumentException("Cannot resolve position of control [" + this.getId() + "].");
-            }
-
-            this.endPosition = positions[1];
-        }
-
-        return this.endPosition;
-    }
-
-    /**
-     * Getter for the starting row.
-     * 
-     * @return the start row
-     */
-    private Integer getStartRow() {
-        String start = this.getStartPosition();
-        int startHeight = Integer.parseInt(start.substring(1));
-
-        return startHeight;
-    }
-
-    /**
-     * Getter for the starting row.
-     * 
-     * @return the start row
-     */
-    private Integer getStartColumn() {
-        String start = this.getStartPosition();
-        Character startCharacter = start.charAt(0);
-
-        return Character.getNumericValue(startCharacter) - 10;
-    }
-
-    /**
-     * Getter for the control height.
-     * 
-     * @return the height of the control
-     */
-    private Integer getHeight() {
-        String start = this.getStartPosition();
-        String end = this.getEndPosition();
-
-        int startHeight = Integer.parseInt(start.substring(1));
-        int endHeight = Integer.parseInt(end.substring(1));
-
-        return endHeight - startHeight + 1;
-    }
-
-    /**
-     * Getter for the control width.
-     * 
-     * @return the width of the control
-     */
-    private Integer getWidth() {
-        String start = this.getStartPosition();
-        String end = this.getEndPosition();
-
-        Character startCharacter = start.charAt(0);
-        Character endCharacter = end.charAt(0);
-
-        return endCharacter.compareTo(startCharacter) + 1;
-    }
-
-    /**
-     * Getter for the editor control position hint.
-     * 
-     * @return the editor control position hint
-     */
-    private String getHint() {
-        return PropertyLoader.loadProperty(this.extension.getHint());
+    public boolean isEditable() {
+        return PropertyLoader.loadProperty(extension.getEditable());
     }
 
     /**
@@ -317,28 +207,37 @@ public abstract class EditorControl extends WebComponent {
      * @return Returns the extension.
      */
     protected EditorControlExtension getExtension() {
-        return this.extension;
+        return extension;
     }
 
+    /**
+     * Accepts the web element visitor. Overload this function to let element be visited
+     * 
+     * @param visitor
+     *            visitor to be accepted
+     * @param context
+     *            context of the visitor
+     */
+    @Override
+    public <T extends WebElementVisitorContext> void accept(WebElementVisitor<T> visitor, T context)
+            throws VisitorException {
+        if (visitor != null) {
+            visitor.visit(this, context);
+        }
+    }
 
     @Override
-    public JsonElement toJson() {
-        JsonMap json = new JsonMap();
-        json.add(JSON_ID, this.getId());
+    public JsonMap toJson() {
+        JsonMap json = super.toJson();
+
         json.add(JSON_LABEL, this.getLabel());
         json.add(JSON_TOOLTIP, this.getTooltip());
-        json.add(JSON_ROW, this.getStartRow());
-        json.add(JSON_COLUMN, this.getStartColumn());
-        json.add(JSON_HEIGHT, this.getHeight());
-        json.add(JSON_WIDTH, this.getWidth());
-        json.add(JSON_HINT, this.getHint());
 
-        if (this.model != null) {
-            json.add(JSON_MODEL, this.model.toJson());
+        if (model != null) {
+            json.add(JSON_MODEL, model.toJson());
         }
 
         return json;
     }
-
 
 }

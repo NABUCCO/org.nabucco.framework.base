@@ -26,8 +26,7 @@ import org.nabucco.framework.base.impl.service.aspect.Aspect;
  *      href="http://www.nabuccosource.org/confluence/display/NBCF/Service+Aspects+Concept">Service
  *      Aspects Concept</a>
  * 
- * @author Frank Ratschinski, PRODYNA AG
- * @author Nicolas Moser, PRODYNA AG
+ * @author Leonid Agranovskiy, PRODYNA AG
  */
 public interface ConstrainingAspect extends Aspect {
 

@@ -115,9 +115,8 @@ public final class MessageResolver {
             }
 
         } catch (Exception e) {
-            logger.error(e, "Cannot configure MessageResolver with extensions");
+            logger.error(e, "Error configuring Exception MessageResolver.");
         }
-
     }
 
     /**

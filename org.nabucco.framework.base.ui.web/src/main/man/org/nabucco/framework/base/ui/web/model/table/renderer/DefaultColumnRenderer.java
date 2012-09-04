@@ -20,6 +20,7 @@ import java.math.BigDecimal;
 import java.text.DecimalFormat;
 
 import org.nabucco.framework.base.facade.datatype.NType;
+import org.nabucco.framework.base.facade.datatype.property.NabuccoProperty;
 
 /**
  * DefaultColumnRenderer
@@ -39,9 +40,9 @@ public class DefaultColumnRenderer extends ColumnRenderer {
     }
 
     @Override
-    public String render(NType type) {
+    public String render(NType type, NabuccoProperty property) {
 
-        String value = super.getValue(type);
+        String value = super.getValue(type, property);
         ColumnLayoutType layout = super.getLayout();
 
         switch (layout) {
@@ -63,4 +64,10 @@ public class DefaultColumnRenderer extends ColumnRenderer {
 
         throw new IllegalStateException("Cannot render layout '" + layout + "'.");
     }
+
+    @Override
+    public String render(NType value) {
+        return this.render(value, null);
+    }
+
 }

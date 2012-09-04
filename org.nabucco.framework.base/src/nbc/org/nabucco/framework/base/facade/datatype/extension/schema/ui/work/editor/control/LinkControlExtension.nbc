@@ -16,6 +16,7 @@
 */
 package org.nabucco.framework.base.facade.datatype.extension.schema.ui.work.editor.control;
 
+import org.nabucco.framework.base.facade.datatype.extension.property.EnumerationProperty;
 import org.nabucco.framework.base.facade.datatype.extension.property.StringProperty;
 import org.nabucco.framework.base.facade.datatype.extension.schema.ui.work.editor.control.EditorControlExtension;
 
@@ -27,6 +28,15 @@ import org.nabucco.framework.base.facade.datatype.extension.schema.ui.work.edito
 public Datatype LinkControlExtension extends EditorControlExtension {
 
 	@Description		The Action Reference ID.
-	private Datatype StringProperty[1] action;
+	private Datatype StringProperty[0..1] action;
+	
+	@Description		The Referenced Url.
+	private Datatype StringProperty[0..1] url;
+
+	@Description		The type of the link (internal or external)
+	private Datatype EnumerationProperty[1] linkType;
+
+	@Description		The icon to show
+	private Datatype StringProperty[1] icon;
 
 }

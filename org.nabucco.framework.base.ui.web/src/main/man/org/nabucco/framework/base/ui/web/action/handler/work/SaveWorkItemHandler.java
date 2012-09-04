@@ -21,6 +21,8 @@ import org.nabucco.framework.base.ui.web.action.WebActionHandlerSupport;
 import org.nabucco.framework.base.ui.web.action.parameter.WebActionParameter;
 import org.nabucco.framework.base.ui.web.action.result.RefreshItem;
 import org.nabucco.framework.base.ui.web.action.result.WebActionResult;
+import org.nabucco.framework.base.ui.web.action.result.WebActionResultItem;
+import org.nabucco.framework.base.ui.web.action.result.WebActionResultItemType;
 import org.nabucco.framework.base.ui.web.component.WebElementType;
 import org.nabucco.framework.base.ui.web.component.work.WorkArea;
 import org.nabucco.framework.base.ui.web.component.work.WorkItem;
@@ -64,6 +66,15 @@ public class SaveWorkItemHandler extends WebActionHandlerSupport {
                 // parameter.setParameter(NabuccoServletPathType.WORK_AREA, workItemId);
                 subResult = super.executeAction(CloseWorkItemHandler.ID, parameter);
                 result.addResult(subResult);
+
+                // Workaround to prevent refreshing of closed editor
+                for (WebActionResultItem resultItem : result.getItemList()) {
+                    if (resultItem.getType().equals(WebActionResultItemType.REFRESH)
+                            && resultItem.getElementType().equals(WebElementType.EDITOR)) {
+                        result.removeItemFromResult(resultItem);
+                        break;
+                    }
+                }
 
             } else {
                 result.addItem(new RefreshItem(WebElementType.EDITOR, item.getInstanceId()));

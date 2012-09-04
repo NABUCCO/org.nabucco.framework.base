@@ -30,6 +30,7 @@ public Datatype TextControlExtension extends EditorControlExtension {
 		@Description		regex to validate the text input
 	private Datatype StringProperty[1]	regex;
 	
+	@Description		The format of the text that will be represented (percent etc...)
 	private Datatype EnumerationProperty[0..1] formatType; 
 
 }

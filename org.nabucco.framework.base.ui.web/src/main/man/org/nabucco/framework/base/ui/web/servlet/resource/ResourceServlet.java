@@ -19,9 +19,11 @@ package org.nabucco.framework.base.ui.web.servlet.resource;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 
+import org.nabucco.framework.base.facade.datatype.NabuccoSystem;
+import org.nabucco.framework.base.facade.datatype.content.ContentEntry;
 import org.nabucco.framework.base.facade.datatype.content.ContentEntryType;
 import org.nabucco.framework.base.facade.exception.client.ClientException;
-import org.nabucco.framework.base.ui.web.component.common.controller.ResourceControllerEntry;
+import org.nabucco.framework.base.ui.web.component.common.controller.resource.ResourceControllerEntry;
 import org.nabucco.framework.base.ui.web.json.JsonValue;
 import org.nabucco.framework.base.ui.web.servlet.NabuccoServlet;
 import org.nabucco.framework.base.ui.web.servlet.NabuccoServletRequest;
@@ -38,13 +40,17 @@ import org.nabucco.framework.base.ui.web.session.NabuccoWebSession;
  */
 public abstract class ResourceServlet extends NabuccoServlet {
 
+    private static final String DIGIT_REGEX_PATTERN = "\\d*";
+
     private static final String PATH_SEPARATOR = "/";
+
+    private static final String TEMP_FOLDER = "temp";
 
     private static final String ID_PREFIX = "id";
 
     private static final long serialVersionUID = 1L;
 
-    private static final int MAX_SIZE = 512000; // 500KB
+    private static final int MAX_SIZE = 6000000;
 
     @Override
     protected final void restGet(NabuccoServletRequest request, NabuccoServletResponse response) throws ClientException {
@@ -58,8 +64,13 @@ public abstract class ResourceServlet extends NabuccoServlet {
             if (uri.startsWith(ID_PREFIX)) {
                 // Search via Resource controller
                 String key = this.resolveKeyFromUri(uri);
-                ResourceControllerEntry resolveResource = NabuccoServletUtil.getResourceController().resolveResource(
-                        key);
+
+                if (key == null) {
+                    return;
+                }
+
+                ResourceControllerEntry resolveResource = NabuccoServletUtil.getResourceController()
+                        .resolveDownloadReference(key);
                 Long resourceId = resolveResource.getId();
 
                 ContentEntryType resourceType = resolveResource.getType();
@@ -70,10 +81,11 @@ public abstract class ResourceServlet extends NabuccoServlet {
                 data = this.loadDataFromUrl(uri, session);
             }
 
-            ByteArrayInputStream in = new ByteArrayInputStream(data);
+            if (data != null) {
+                ByteArrayInputStream in = new ByteArrayInputStream(data);
 
-            response.sendData(in);
-
+                response.sendData(in);
+            }
         } catch (ClientException ce) {
             // TODO: Error page!
             response.sendRedirect("/login");
@@ -96,7 +108,19 @@ public abstract class ResourceServlet extends NabuccoServlet {
         String fileName = this.resolveFilename(request);
         String instanceid = this.resolveInstanceId(request);
 
-        String tempUri = this.writeData(fileName, instanceid, data, request.getSession());
+        if (instanceid == null || instanceid.isEmpty()) {
+            instanceid = NabuccoSystem.createUUID();
+        }
+
+        ContentEntry tempEntry = this.writeData(fileName, instanceid, data, request.getSession());
+
+        if (tempEntry == null) {
+            throw new ClientException("Cannot maintain entry. Maintained entry is 'null'.");
+        }
+
+        NabuccoServletUtil.getResourceController().addUploadedResource(instanceid, tempEntry);
+
+        String tempUri = TEMP_FOLDER + PATH_SEPARATOR + instanceid + PATH_SEPARATOR + fileName;
         response.sendResponseParameter(new JsonValue(tempUri));
     }
 
@@ -122,6 +146,9 @@ public abstract class ResourceServlet extends NabuccoServlet {
      */
     private String resolveInstanceId(NabuccoServletRequest request) {
         NabuccoServletPathEntry requestParameter = request.getServletPath().getEntry(NabuccoServletPathType.INSTANCE);
+        if (requestParameter == null) {
+            return null;
+        }
         String instance = requestParameter.getNext().getValue();
         return instance;
     }
@@ -151,12 +178,15 @@ public abstract class ResourceServlet extends NabuccoServlet {
      * @return resolved uri string or null
      */
     private String resolveKeyFromUri(String url) {
-        String retVal = null;
-        if (url.contains(PATH_SEPARATOR)) {
-            retVal = url.substring(url.lastIndexOf(PATH_SEPARATOR) + 1, url.length());
+        String[] split = url.split(PATH_SEPARATOR);
+
+        for (String key : split) {
+            if (key.matches(DIGIT_REGEX_PATTERN)) {
+                return key;
+            }
         }
 
-        return retVal;
+        return null;
     }
 
     /**
@@ -198,10 +228,10 @@ public abstract class ResourceServlet extends NabuccoServlet {
      * @param data
      *            the serialized data to write
      * @param session
-     * @return The Path string
+     * @return the maintained content entry
      * @throws ClientException
      */
-    protected abstract String writeData(String filename, String instanceId, byte[] data, NabuccoWebSession session)
+    protected abstract ContentEntry writeData(String filename, String instanceId, byte[] data, NabuccoWebSession session)
             throws ClientException;
 
 }

@@ -17,6 +17,7 @@
 package org.nabucco.framework.base.ui.web.model.common.renderer;
 
 import org.nabucco.framework.base.facade.datatype.NType;
+import org.nabucco.framework.base.facade.datatype.property.NabuccoProperty;
 
 /**
  * Default implementation of a {@link WebRenderer}.
@@ -26,8 +27,13 @@ import org.nabucco.framework.base.facade.datatype.NType;
 public class DefaultWebRenderer extends WebRendererSupport implements WebRenderer {
 
     @Override
+    public String render(NType type, NabuccoProperty property) {
+        return super.getValue(type, property);
+    }
+
+    @Override
     public String render(NType type) {
-        return super.getValue(type);
+        return super.getValue(type, null);
     }
 
 }

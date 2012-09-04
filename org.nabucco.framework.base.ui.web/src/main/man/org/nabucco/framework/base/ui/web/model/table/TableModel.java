@@ -52,37 +52,37 @@ public class TableModel<T extends Datatype> extends WebModel {
     public static final String CONTENT_PROPERTY = "content";
 
     /** Label for counter seperation */
-    private static final String LABEL_COUNTER_SEPERATOR = "von";
+    protected static final String LABEL_COUNTER_SEPERATOR = "von";
 
-    private static final String JSON_HEAD = "head";
+    protected static final String JSON_HEAD = "head";
 
-    private static final String JSON_SIZE = "size";
+    protected static final String JSON_SIZE = "size";
 
-    private static final String JSON_MENU = "menu";
+    protected static final String JSON_MENU = "menu";
 
-    private static final String JSON_PREVIOUS = "previous";
+    protected static final String JSON_PREVIOUS = "previous";
 
-    private static final String JSON_NEXT = "next";
+    protected static final String JSON_NEXT = "next";
 
-    private static final String JSON_HEAD_COLUMNS = "headColumns";
+    protected static final String JSON_HEAD_COLUMNS = "headColumns";
 
-    private static final String JSON_ROWS = "rows";
+    protected static final String JSON_ROWS = "rows";
 
-    private static final String JSON_COLUMNS = "cols";
+    protected static final String JSON_COLUMNS = "cols";
 
-    private static final String JSON_OBJECT_ID = "objectId";
+    protected static final String JSON_OBJECT_ID = "objectId";
 
-    private static final String JSON_ROW_ID = "rowId";
+    protected static final String JSON_ROW_ID = "rowId";
 
-    private static final String JSON_COUNTER = "counter";
+    protected static final String JSON_COUNTER = "counter";
 
-    private static final String JSON_SORT = "sort";
+    protected static final String JSON_SORT = "sort";
 
-    private static final String JSON_ORDER = "order";
+    protected static final String JSON_ORDER = "order";
 
-    private static final String ORDER_ASCENDING = "ASC";
+    protected static final String ORDER_ASCENDING = "ASC";
 
-    private static final String ORDER_DESCENDING = "DSC";
+    protected static final String ORDER_DESCENDING = "DSC";
 
     /** The Logger */
     private static NabuccoLogger logger = NabuccoLoggingFactory.getInstance().getLogger(TableModel.class);
@@ -222,6 +222,7 @@ public class TableModel<T extends Datatype> extends WebModel {
         }
 
         this.originalList = contentList;
+        this.filter = null;
 
         this.refresh();
     }
@@ -312,7 +313,7 @@ public class TableModel<T extends Datatype> extends WebModel {
      * 
      * @return the amount of currently displayed entries.
      */
-    private int getAmount() {
+    protected int getAmount() {
         if (this.index + this.pageSize >= this.tableSize) {
             return this.tableSize - this.index;
         }
@@ -389,6 +390,17 @@ public class TableModel<T extends Datatype> extends WebModel {
     }
 
     /**
+     * Getter for the page size.
+     * 
+     * @return Returns the page size.
+     */
+    public void setPageSize(int size) {
+        this.pageSize = size;
+
+        this.init();
+    }
+
+    /**
      * Getter for the whole table size.
      * 
      * @return Returns the table size.
@@ -404,6 +416,32 @@ public class TableModel<T extends Datatype> extends WebModel {
      */
     public List<T> getCurrentList() {
         return Collections.unmodifiableList(this.sortedList);
+    }
+
+    /**
+     * Returns the list that represent the current shown page
+     * 
+     * @return the current page
+     */
+    public List<T> getCurrentPage() {
+
+        int amount = this.getAmount();
+
+        int startIndex = this.index;
+        int endIndex = this.index + amount;
+
+        List<T> retVal = sortedList.subList(startIndex, endIndex);
+
+        return retVal;
+    }
+
+    /**
+     * Returns the unmodifieble list with table columns
+     * 
+     * @return unmodifieble list with table columns
+     */
+    public List<TableColumn> getColumnList() {
+        return Collections.unmodifiableList(columnList);
     }
 
     /**
@@ -475,7 +513,7 @@ public class TableModel<T extends Datatype> extends WebModel {
         for (TableColumn column : this.columnList) {
 
             if (column.getId().equals(columnId)) {
-                TableComparator comparator = new TableComparator(column.getProperty());
+                TableComparator comparator = new TableComparator(column.getPropertyPath());
 
                 if (comparator.equals(this.getComparator())) {
                     this.getComparator().reverse();
@@ -507,7 +545,6 @@ public class TableModel<T extends Datatype> extends WebModel {
                 }
             }
         }
-
         this.sort();
     }
 
@@ -627,7 +664,7 @@ public class TableModel<T extends Datatype> extends WebModel {
      * @param json
      *            the JSON map to append the table body
      */
-    private void appendJsonTableBody(JsonMap json) {
+    protected void appendJsonTableBody(JsonMap json) {
 
         JsonList jsonRowList = new JsonList();
 
@@ -638,36 +675,37 @@ public class TableModel<T extends Datatype> extends WebModel {
 
         for (int rowId = startIndex; rowId < endIndex; rowId++) {
 
-            JsonMap jsonRow = new JsonMap();
+            if (rowId < sortedList.size()) {
+                T datatype = this.sortedList.get(rowId);
 
-            T datatype = this.sortedList.get(rowId);
-            WebLabelProvider<T> labelProvider = this.labelProviderFactory.createLabelProvider(datatype);
+                JsonMap jsonRow = new JsonMap();
 
-            JsonList jsonColumnList = new JsonList();
-            for (TableColumn column : this.columnList) {
-                String label = labelProvider.getLabel(column.getProperty(), column.getRenderer());
-                jsonColumnList.add(label);
-            }
+                WebLabelProvider<T> labelProvider = this.labelProviderFactory.createLabelProvider(datatype);
 
-            jsonRow.add(JSON_COLUMNS, jsonColumnList);
-
-            if (datatype instanceof ComponentRelation<?>) {
-                ComponentRelation<?> relation = (ComponentRelation<?>) datatype;
-                if (relation.getTarget() != null) {
-                    jsonRow.add(JSON_OBJECT_ID, relation.getTarget().getId());
+                JsonList jsonColumnList = new JsonList();
+                for (TableColumn column : this.columnList) {
+                    String label = labelProvider.getLabel(column.getPropertyPath(), column.getRenderer());
+                    jsonColumnList.add(label);
                 }
-            } else if (datatype instanceof NabuccoDatatype) {
-                jsonRow.add(JSON_OBJECT_ID, ((NabuccoDatatype) datatype).getId());
+
+                jsonRow.add(JSON_COLUMNS, jsonColumnList);
+
+                if (datatype instanceof ComponentRelation<?>) {
+                    ComponentRelation<?> relation = (ComponentRelation<?>) datatype;
+                    if (relation.getTarget() != null) {
+                        jsonRow.add(JSON_OBJECT_ID, relation.getTarget().getId());
+                    }
+                } else if (datatype instanceof NabuccoDatatype) {
+                    jsonRow.add(JSON_OBJECT_ID, ((NabuccoDatatype) datatype).getId());
+                }
+
+                jsonRow.add(JSON_ROW_ID, rowId);
+
+                jsonRowList.add(jsonRow);
             }
-
-            jsonRow.add(JSON_ROW_ID, rowId);
-
-            jsonRowList.add(jsonRow);
         }
 
         json.add(JSON_ROWS, jsonRowList);
-
-
 
         TableComparator comparator = this.getComparator();
         if (comparator != null) {
@@ -690,11 +728,14 @@ public class TableModel<T extends Datatype> extends WebModel {
      */
     private String createCounter() {
         StringBuilder counter = new StringBuilder();
-        counter.append(this.getTableSize() == 0 ? 0 : this.index + 1);
+
+        tableSize = this.sortedList.size();
+
+        counter.append(tableSize == 0 || this.getPageSize() == 0 ? 0 : this.index + 1);
         counter.append(" - ");
         counter.append(this.index + this.getAmount());
         counter.append(" ").append(LABEL_COUNTER_SEPERATOR).append(" ");
-        counter.append(this.getTableSize());
+        counter.append(tableSize);
         return counter.toString();
     }
 
@@ -706,9 +747,9 @@ public class TableModel<T extends Datatype> extends WebModel {
      * 
      * @return the table column
      */
-    private TableColumn getColumnByProperty(String propertyName) {
+    protected TableColumn getColumnByProperty(String propertyName) {
         for (TableColumn column : this.columnList) {
-            if (column.getProperty().equals(propertyName)) {
+            if (column.getPropertyPath().equals(propertyName)) {
                 return column;
             }
         }

@@ -49,8 +49,12 @@ public class BrowserArea extends WebComposite {
 
     private static final String JSON_BROWSERS = "browsers";
 
+    private static final String JSON_SYNC = "sync";
+
     /** ID of the currenlty focused browser */
     private String selectedBrowserId;
+
+    private boolean synchronize = false;
 
     /** The BrowserArea Extension. */
     private BrowserAreaExtension extension;
@@ -193,6 +197,25 @@ public class BrowserArea extends WebComposite {
         return PropertyLoader.loadProperty(this.extension.getLayout());
     }
 
+    /**
+     * Indicates if the browser area is synchronized to the working area
+     * 
+     * @return true if synchronized
+     */
+    public boolean isSynchronized() {
+        return synchronize;
+    }
+
+    /**
+     * Sets the synchronized value of the browser area
+     * 
+     * @param value
+     *            value to be set
+     */
+    public void setSynchronized(boolean value) {
+        synchronize = value;
+    }
+
     @Override
     public JsonElement toJson() {
 
@@ -211,6 +234,7 @@ public class BrowserArea extends WebComposite {
 
         json.add(JSON_LAYOUT, this.getLayout());
         json.add(JSON_BROWSERS, jsonList);
+        json.add(JSON_SYNC, synchronize);
 
         Browser selected = this.getSelectedBrowser();
         if (selected != null) {

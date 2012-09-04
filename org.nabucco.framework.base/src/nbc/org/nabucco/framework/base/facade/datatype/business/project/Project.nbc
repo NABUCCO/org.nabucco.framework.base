@@ -16,7 +16,6 @@
  */
 package org.nabucco.framework.base.facade.datatype.business.project;
 
-import org.nabucco.framework.base.facade.datatype.Description;
 import org.nabucco.framework.base.facade.datatype.FunctionalIdentifier;
 import org.nabucco.framework.base.facade.datatype.NabuccoDatatype;
 import org.nabucco.framework.base.facade.datatype.Name;
@@ -25,6 +24,7 @@ import org.nabucco.framework.base.facade.datatype.StatusType;
 import org.nabucco.framework.base.facade.datatype.business.ErpId;
 import org.nabucco.framework.base.facade.datatype.code.Code;
 import org.nabucco.framework.base.facade.datatype.date.Date;
+import org.nabucco.framework.base.facade.datatype.text.LongDescription;
 
 @Author			Nicolas Moser
 @Company		PRODYNA AG
@@ -40,7 +40,7 @@ public Datatype Project extends NabuccoDatatype {
 	private Basetype Name[1] name;
 
 	@Description		The description of the project.
-	private Basetype Description[0..1] description;
+	private Basetype LongDescription[0..1] description;
 	
 	@Description		The start date of the project.
 	private Basetype Date[1] startDate;

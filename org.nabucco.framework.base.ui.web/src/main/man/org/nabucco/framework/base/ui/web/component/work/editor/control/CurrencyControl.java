@@ -18,9 +18,12 @@ package org.nabucco.framework.base.ui.web.component.work.editor.control;
 
 import org.nabucco.framework.base.facade.datatype.extension.property.PropertyLoader;
 import org.nabucco.framework.base.facade.datatype.extension.schema.ui.work.editor.control.CurrencyControlExtension;
-import org.nabucco.framework.base.ui.web.model.control.property.input.CurrencyControlModel;
-import org.nabucco.framework.base.ui.web.model.control.util.formatter.CurrencyControlFormatter;
-import org.nabucco.framework.base.ui.web.model.control.util.validator.NabuccoCurrencyValidator;
+import org.nabucco.framework.base.facade.datatype.visitor.VisitorException;
+import org.nabucco.framework.base.ui.web.component.work.visitor.WebElementVisitor;
+import org.nabucco.framework.base.ui.web.component.work.visitor.WebElementVisitorContext;
+import org.nabucco.framework.base.ui.web.model.editor.control.property.input.CurrencyControlModel;
+import org.nabucco.framework.base.ui.web.model.editor.util.formatter.CurrencyControlFormatter;
+import org.nabucco.framework.base.ui.web.model.editor.util.validator.NabuccoCurrencyValidator;
 
 /**
  * CurrencyControl
@@ -47,7 +50,7 @@ public class CurrencyControl extends EditorControl {
         CurrencyControlFormatter formatter = new CurrencyControlFormatter(this);
         NabuccoCurrencyValidator validator = new NabuccoCurrencyValidator(this);
         CurrencyControlModel model = new CurrencyControlModel(id, propertyPath, formatter, validator,
-                super.getDependencySet(), this.getEditable());
+                super.getDependencySet(), this.isEditable());
 
         return model;
     }
@@ -115,4 +118,21 @@ public class CurrencyControl extends EditorControl {
     public CurrencyControlModel getModel() {
         return (CurrencyControlModel) super.getModel();
     }
+
+    /**
+     * Accepts the web element visitor. Overload this function to let element be visited
+     * 
+     * @param visitor
+     *            visitor to be accepted
+     * @param context
+     *            context of the visitor
+     */
+    @Override
+    public <T extends WebElementVisitorContext> void accept(WebElementVisitor<T> visitor, T context)
+            throws VisitorException {
+        if (visitor != null) {
+            visitor.visit(this, context);
+        }
+    }
+
 }

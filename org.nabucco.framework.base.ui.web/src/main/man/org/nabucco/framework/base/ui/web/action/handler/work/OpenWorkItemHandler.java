@@ -22,6 +22,7 @@ import org.nabucco.framework.base.ui.web.action.parameter.WebActionParameter;
 import org.nabucco.framework.base.ui.web.action.result.RefreshItem;
 import org.nabucco.framework.base.ui.web.action.result.WebActionResult;
 import org.nabucco.framework.base.ui.web.component.WebElementType;
+import org.nabucco.framework.base.ui.web.component.browser.Browser;
 import org.nabucco.framework.base.ui.web.component.work.WorkArea;
 import org.nabucco.framework.base.ui.web.servlet.util.NabuccoServletUtil;
 import org.nabucco.framework.base.ui.web.servlet.util.path.NabuccoServletPathType;
@@ -44,6 +45,12 @@ public class OpenWorkItemHandler extends WebActionHandler {
         }
 
         workArea.selectItem(workItemId);
+
+        if (NabuccoServletUtil.getBrowserArea().isSynchronized()) {
+            Browser selectedBrowser = NabuccoServletUtil.getBrowserArea().getSelectedBrowser();
+            selectedBrowser.getModel();
+            // TODO: Select item
+        }
 
         WebActionResult result = new WebActionResult();
         result.addItem(new RefreshItem(WebElementType.WORK_AREA));

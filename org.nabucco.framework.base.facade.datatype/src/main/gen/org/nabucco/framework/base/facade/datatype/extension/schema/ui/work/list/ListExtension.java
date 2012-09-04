@@ -1,18 +1,16 @@
 /*
  * Copyright 2012 PRODYNA AG
- *
- * Licensed under the Eclipse Public License (EPL), Version 1.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
+ * 
+ * Licensed under the Eclipse Public License (EPL), Version 1.0 (the "License"); you may not use
+ * this file except in compliance with the License. You may obtain a copy of the License at
+ * 
  * http://www.opensource.org/licenses/eclipse-1.0.php or
  * http://www.nabucco.org/License.html
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+ * 
+ * Unless required by applicable law or agreed to in writing, software distributed under the
+ * License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND,
+ * either express or implied. See the License for the specific language governing permissions
+ * and limitations under the License.
  */
 package org.nabucco.framework.base.facade.datatype.extension.schema.ui.work.list;
 
@@ -27,6 +25,7 @@ import org.nabucco.framework.base.facade.datatype.collection.NabuccoListImpl;
 import org.nabucco.framework.base.facade.datatype.extension.property.StringProperty;
 import org.nabucco.framework.base.facade.datatype.extension.schema.ui.common.ColumnExtension;
 import org.nabucco.framework.base.facade.datatype.extension.schema.ui.common.ListButtonExtension;
+import org.nabucco.framework.base.facade.datatype.extension.schema.ui.common.MenuButtonExtension;
 import org.nabucco.framework.base.facade.datatype.extension.schema.ui.common.filter.FilterReferenceExtension;
 import org.nabucco.framework.base.facade.datatype.extension.schema.ui.work.WorkItemExtension;
 import org.nabucco.framework.base.facade.datatype.property.NabuccoProperty;
@@ -46,9 +45,11 @@ public class ListExtension extends WorkItemExtension implements Datatype {
 
     private static final long serialVersionUID = 1L;
 
-    private static final String[] PROPERTY_CONSTRAINTS = { "m0,1;", "m0,n;", "m0,n;", "m0,n;" };
+    private static final String[] PROPERTY_CONSTRAINTS = { "m0,1;", "m0,1;", "m0,n;", "m0,n;", "m0,n;" };
 
     public static final String DOUBLECLICKACTION = "doubleclickAction";
+
+    public static final String MENUBUTTON = "menuButton";
 
     public static final String BUTTONS = "buttons";
 
@@ -58,6 +59,9 @@ public class ListExtension extends WorkItemExtension implements Datatype {
 
     /** The action to be used to open content items */
     private StringProperty doubleclickAction;
+
+    /** The Menu actions. */
+    private MenuButtonExtension menuButton;
 
     /** The Editor Actions. */
     private NabuccoList<ListButtonExtension> buttons;
@@ -87,6 +91,9 @@ public class ListExtension extends WorkItemExtension implements Datatype {
         super.cloneObject(clone);
         if ((this.getDoubleclickAction() != null)) {
             clone.setDoubleclickAction(this.getDoubleclickAction().cloneObject());
+        }
+        if ((this.getMenuButton() != null)) {
+            clone.setMenuButton(this.getMenuButton().cloneObject());
         }
         if ((this.buttons != null)) {
             clone.buttons = this.buttons.cloneCollection();
@@ -181,12 +188,14 @@ public class ListExtension extends WorkItemExtension implements Datatype {
         propertyMap.putAll(PropertyCache.getInstance().retrieve(WorkItemExtension.class).getPropertyMap());
         propertyMap.put(DOUBLECLICKACTION, PropertyDescriptorSupport.createDatatype(DOUBLECLICKACTION,
                 StringProperty.class, 11, PROPERTY_CONSTRAINTS[0], false, PropertyAssociationType.COMPOSITION));
-        propertyMap.put(BUTTONS, PropertyDescriptorSupport.createCollection(BUTTONS, ListButtonExtension.class, 12,
+        propertyMap.put(MENUBUTTON, PropertyDescriptorSupport.createDatatype(MENUBUTTON, MenuButtonExtension.class, 12,
                 PROPERTY_CONSTRAINTS[1], false, PropertyAssociationType.COMPOSITION));
-        propertyMap.put(COLUMNS, PropertyDescriptorSupport.createCollection(COLUMNS, ColumnExtension.class, 13,
+        propertyMap.put(BUTTONS, PropertyDescriptorSupport.createCollection(BUTTONS, ListButtonExtension.class, 13,
                 PROPERTY_CONSTRAINTS[2], false, PropertyAssociationType.COMPOSITION));
+        propertyMap.put(COLUMNS, PropertyDescriptorSupport.createCollection(COLUMNS, ColumnExtension.class, 14,
+                PROPERTY_CONSTRAINTS[3], false, PropertyAssociationType.COMPOSITION));
         propertyMap.put(FILTERS, PropertyDescriptorSupport.createCollection(FILTERS, FilterReferenceExtension.class,
-                14, PROPERTY_CONSTRAINTS[3], false, PropertyAssociationType.COMPOSITION));
+                15, PROPERTY_CONSTRAINTS[4], false, PropertyAssociationType.COMPOSITION));
         return new NabuccoPropertyContainer(propertyMap);
     }
 
@@ -200,6 +209,8 @@ public class ListExtension extends WorkItemExtension implements Datatype {
         Set<NabuccoProperty> properties = super.getProperties();
         properties.add(super.createProperty(ListExtension.getPropertyDescriptor(DOUBLECLICKACTION),
                 this.getDoubleclickAction(), null));
+        properties
+                .add(super.createProperty(ListExtension.getPropertyDescriptor(MENUBUTTON), this.getMenuButton(), null));
         properties.add(super.createProperty(ListExtension.getPropertyDescriptor(BUTTONS), this.buttons, null));
         properties.add(super.createProperty(ListExtension.getPropertyDescriptor(COLUMNS), this.columns, null));
         properties.add(super.createProperty(ListExtension.getPropertyDescriptor(FILTERS), this.filters, null));
@@ -214,6 +225,9 @@ public class ListExtension extends WorkItemExtension implements Datatype {
         }
         if ((property.getName().equals(DOUBLECLICKACTION) && (property.getType() == StringProperty.class))) {
             this.setDoubleclickAction(((StringProperty) property.getInstance()));
+            return true;
+        } else if ((property.getName().equals(MENUBUTTON) && (property.getType() == MenuButtonExtension.class))) {
+            this.setMenuButton(((MenuButtonExtension) property.getInstance()));
             return true;
         } else if ((property.getName().equals(BUTTONS) && (property.getType() == ListButtonExtension.class))) {
             this.buttons = ((NabuccoList<ListButtonExtension>) property.getInstance());
@@ -248,6 +262,11 @@ public class ListExtension extends WorkItemExtension implements Datatype {
                 return false;
         } else if ((!this.doubleclickAction.equals(other.doubleclickAction)))
             return false;
+        if ((this.menuButton == null)) {
+            if ((other.menuButton != null))
+                return false;
+        } else if ((!this.menuButton.equals(other.menuButton)))
+            return false;
         return true;
     }
 
@@ -256,6 +275,7 @@ public class ListExtension extends WorkItemExtension implements Datatype {
         final int PRIME = 31;
         int result = super.hashCode();
         result = ((PRIME * result) + ((this.doubleclickAction == null) ? 0 : this.doubleclickAction.hashCode()));
+        result = ((PRIME * result) + ((this.menuButton == null) ? 0 : this.menuButton.hashCode()));
         return result;
     }
 
@@ -282,6 +302,24 @@ public class ListExtension extends WorkItemExtension implements Datatype {
      */
     public StringProperty getDoubleclickAction() {
         return this.doubleclickAction;
+    }
+
+    /**
+     * The Menu actions.
+     *
+     * @param menuButton the MenuButtonExtension.
+     */
+    public void setMenuButton(MenuButtonExtension menuButton) {
+        this.menuButton = menuButton;
+    }
+
+    /**
+     * The Menu actions.
+     *
+     * @return the MenuButtonExtension.
+     */
+    public MenuButtonExtension getMenuButton() {
+        return this.menuButton;
     }
 
     /**

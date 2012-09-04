@@ -23,6 +23,7 @@ import org.nabucco.framework.base.ui.web.action.result.RefreshItem;
 import org.nabucco.framework.base.ui.web.action.result.WebActionResult;
 import org.nabucco.framework.base.ui.web.component.WebElement;
 import org.nabucco.framework.base.ui.web.component.WebElementType;
+import org.nabucco.framework.base.ui.web.component.work.bulkeditor.BulkEditorItem;
 import org.nabucco.framework.base.ui.web.component.work.list.ListItem;
 import org.nabucco.framework.base.ui.web.servlet.util.path.NabuccoServletPathType;
 
@@ -49,6 +50,25 @@ public class SynchronizeListSelectionHandler extends WebActionHandler {
             // Process dependencies check
             if (listItem.getListModel().isRefreshNeeded()) {
                 result.addItem(new RefreshItem(WebElementType.LIST, listItem.getInstanceId()));
+            }
+        } else if (element.getType() == WebElementType.BULKEDITOR) {
+            String value = parameter.get(NabuccoServletPathType.INSTANCE);
+            String selected = parameter.get(NabuccoServletPathType.VALUE);
+            if (selected == null || selected.isEmpty()) {
+                return result;
+            }
+            boolean wasSelected = Boolean.parseBoolean(selected);
+
+            BulkEditorItem bulkItem = (BulkEditorItem) element;
+            if (wasSelected) {
+                bulkItem.getModel().selectRow(value);
+            } else {
+                bulkItem.getModel().deselectRow(value);
+            }
+
+            // Process dependencies check
+            if (bulkItem.getModel().isRefreshNeeded()) {
+                result.addItem(new RefreshItem(WebElementType.BULKEDITOR, bulkItem.getInstanceId()));
             }
         }
 

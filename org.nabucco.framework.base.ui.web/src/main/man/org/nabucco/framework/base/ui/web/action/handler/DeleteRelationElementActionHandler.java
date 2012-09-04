@@ -85,12 +85,44 @@ public class DeleteRelationElementActionHandler extends WebActionHandler {
 
         NabuccoProperty property = sourceDatatype.getProperty(propertyPath);
 
-        this.removeElement(removeElement, property);
+        if (!this.checkRemovingAllowed(removeElement, parameter)) {
+            return result;
+        }
 
+        this.removeElement(removeElement, property);
         selectedWorkItem.getModel().refresh();
+
+        this.physicalRemoveElement(removeElement, parameter);
+
         result.addItem(new RefreshItem(WebElementType.EDITOR_RELATION_AREA, selectedWorkItem.getInstanceId()));
+
         result.addItem(new RefreshItem(WebElementType.WORK_AREA));
         return result;
+    }
+
+    /**
+     * Optional check if removing is allowed
+     * 
+     * @param removeElement
+     *            element to be checked
+     * @param parameter
+     *            parameter
+     * @return true is allowed or false if not
+     */
+    protected boolean checkRemovingAllowed(Datatype removeElement, WebActionParameter parameter) {
+        return true;
+    }
+
+    /**
+     * Remove element physically if needed
+     * 
+     * @param removeElement
+     *            element to be removed
+     * @param parameter
+     *            parameter
+     */
+    protected void physicalRemoveElement(Datatype removeElement, WebActionParameter parameter) {
+
     }
 
     /**

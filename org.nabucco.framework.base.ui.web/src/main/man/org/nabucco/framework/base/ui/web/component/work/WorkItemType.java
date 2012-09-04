@@ -38,5 +38,10 @@ public enum WorkItemType {
     /**
      * The work item is a dashboard.
      */
-    DASHBOARD
+    DASHBOARD,
+
+    /**
+     * The editor for modifiying of n datatypes
+     */
+    BULKEDITOR
 }

@@ -47,8 +47,10 @@ public class ActionWidget extends WidgetElement {
 
         String action = PropertyLoader.loadProperty(this.getWidgetExtension().getAction());
         String text = PropertyLoader.loadProperty(this.getWidgetExtension().getText());
+        String icon = PropertyLoader.loadProperty(this.getWidgetExtension().getIcon());
+        String tooltip = PropertyLoader.loadProperty(this.getWidgetExtension().getTooltip());
 
-        ActionWidgetModel model = new ActionWidgetModel(action, text);
+        ActionWidgetModel model = new ActionWidgetModel(action, text, tooltip, icon);
         super.setModel(model);
     }
 

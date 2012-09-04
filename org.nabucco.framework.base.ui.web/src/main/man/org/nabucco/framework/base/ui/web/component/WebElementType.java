@@ -57,6 +57,12 @@ public enum WebElementType {
 
     EDITOR("editor"),
 
+    BULKEDITOR("bulkeditor"),
+
+    BULKEDITOR_CONTROL("bulkeditorcontrol"),
+
+    BULKEDITOR_COLUMN("bulkeditorcolumn"),
+
     EDITOR_EDIT_AREA("edit"),
 
     EDITOR_EDIT_TAB("tab"),
@@ -71,14 +77,20 @@ public enum WebElementType {
 
     LINK("link"),
 
+    LABEL("label"),
+
     DASHBOARD("dashboard"),
 
+    MENUBUTTON("menubutton"),
+
     BUTTON("button"),
+
+    BUTTONGROUP("buttongroup"),
 
     WIDGET("widget"),
 
     GRID("grid"),
-    
+
     DIRTYFLAG("dirtyflag"),
 
     MESSAGEQUEUE("messagequeue"),

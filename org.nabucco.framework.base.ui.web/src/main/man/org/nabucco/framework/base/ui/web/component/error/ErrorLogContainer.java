@@ -57,14 +57,24 @@ public class ErrorLogContainer extends WebComponent {
      * 
      * @return the title
      */
-    public String getTitle(){
+    public String getTitle() {
         return PropertyLoader.loadProperty(this.extension.getTitle());
     }
 
+    /**
+     * Indicates if the user may clear the error list
+     * 
+     * @return true if may
+     */
     public boolean isClearAllowed() {
         return PropertyLoader.loadProperty(this.extension.getAllowClear());
     }
 
+    /**
+     * Returns the layout type of the error dialog
+     * 
+     * @return the type of dialog
+     */
     public ErrorLogLayout getLayout() {
         return PropertyLoader.loadProperty(ErrorLogLayout.class, this.extension.getLayout());
     }

@@ -33,7 +33,7 @@ public class NabuccoSession {
 
     private ServiceContext serviceContext;
 
-    private Locale locale = Locale.getDefault();
+    private Locale locale;
 
     /**
      * Getter for the securityContext.
@@ -41,10 +41,10 @@ public class NabuccoSession {
      * @return Returns the securityContext.
      */
     public SecurityContext getSecurityContext() {
-        if (this.securityContext == null) {
-            this.securityContext = new SecurityContext();
+        if (securityContext == null) {
+            securityContext = new SecurityContext();
         }
-        return this.securityContext;
+        return securityContext;
     }
 
     /**
@@ -53,10 +53,10 @@ public class NabuccoSession {
      * @return Returns the serviceContext.
      */
     public ServiceContext getServiceContext() {
-        if (this.serviceContext == null) {
-            this.serviceContext = new ServiceContext();
+        if (serviceContext == null) {
+            serviceContext = new ServiceContext();
         }
-        return this.serviceContext;
+        return serviceContext;
     }
 
     /**
@@ -77,6 +77,9 @@ public class NabuccoSession {
      * @return Returns the locale.
      */
     public Locale getLocale() {
+        if (this.locale == null) {
+            this.locale = Locale.getDefault();
+        }
         return this.locale;
     }
 
@@ -87,9 +90,6 @@ public class NabuccoSession {
      *            The locale to set.
      */
     public void setLocale(Locale locale) {
-        if (locale == null) {
-            locale = Locale.getDefault();
-        }
         this.locale = locale;
     }
 

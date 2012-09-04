@@ -1,18 +1,16 @@
 /*
  * Copyright 2012 PRODYNA AG
- *
- * Licensed under the Eclipse Public License (EPL), Version 1.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
+ * 
+ * Licensed under the Eclipse Public License (EPL), Version 1.0 (the "License"); you may not use
+ * this file except in compliance with the License. You may obtain a copy of the License at
+ * 
  * http://www.opensource.org/licenses/eclipse-1.0.php or
  * http://www.nabucco.org/License.html
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+ * 
+ * Unless required by applicable law or agreed to in writing, software distributed under the
+ * License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND,
+ * either express or implied. See the License for the specific language governing permissions
+ * and limitations under the License.
  */
 package org.nabucco.framework.base.facade.datatype.business.address;
 
@@ -21,7 +19,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import org.nabucco.framework.base.facade.datatype.Datatype;
-import org.nabucco.framework.base.facade.datatype.Description;
 import org.nabucco.framework.base.facade.datatype.FunctionalIdentifier;
 import org.nabucco.framework.base.facade.datatype.MultiTenantDatatype;
 import org.nabucco.framework.base.facade.datatype.Owner;
@@ -35,6 +32,7 @@ import org.nabucco.framework.base.facade.datatype.property.NabuccoPropertyDescri
 import org.nabucco.framework.base.facade.datatype.property.PropertyAssociationType;
 import org.nabucco.framework.base.facade.datatype.property.PropertyCache;
 import org.nabucco.framework.base.facade.datatype.property.PropertyDescriptorSupport;
+import org.nabucco.framework.base.facade.datatype.text.LongDescription;
 
 /**
  * Address<p/>An address in the Address Component.<p/>
@@ -48,7 +46,7 @@ public class Address extends MultiTenantDatatype implements Datatype {
 
     private static final StatusType STATUSTYPE_DEFAULT = StatusType.ACTIVE;
 
-    private static final String[] PROPERTY_CONSTRAINTS = { "l3,12;u0,n;m1,1;", "l0,255;u0,n;m0,1;", "m1,1;", "m1,1;",
+    private static final String[] PROPERTY_CONSTRAINTS = { "l3,12;u0,n;m1,1;", "l0,4000;u0,n;m0,1;", "m1,1;", "m1,1;",
             "l0,n;u0,n;m0,1;", "m0,1;" };
 
     public static final String OWNER = "owner";
@@ -67,7 +65,7 @@ public class Address extends MultiTenantDatatype implements Datatype {
     private Owner owner;
 
     /** The Address description. */
-    private Description description;
+    private LongDescription description;
 
     /** Type of the address. */
     protected AddressType type;
@@ -127,7 +125,7 @@ public class Address extends MultiTenantDatatype implements Datatype {
         propertyMap.putAll(PropertyCache.getInstance().retrieve(MultiTenantDatatype.class).getPropertyMap());
         propertyMap.put(OWNER,
                 PropertyDescriptorSupport.createBasetype(OWNER, Owner.class, 4, PROPERTY_CONSTRAINTS[0], false));
-        propertyMap.put(DESCRIPTION, PropertyDescriptorSupport.createBasetype(DESCRIPTION, Description.class, 5,
+        propertyMap.put(DESCRIPTION, PropertyDescriptorSupport.createBasetype(DESCRIPTION, LongDescription.class, 5,
                 PROPERTY_CONSTRAINTS[1], false));
         propertyMap
                 .put(TYPE, PropertyDescriptorSupport.createEnumeration(TYPE, AddressType.class, 6,
@@ -167,8 +165,8 @@ public class Address extends MultiTenantDatatype implements Datatype {
         if ((property.getName().equals(OWNER) && (property.getType() == Owner.class))) {
             this.setOwner(((Owner) property.getInstance()));
             return true;
-        } else if ((property.getName().equals(DESCRIPTION) && (property.getType() == Description.class))) {
-            this.setDescription(((Description) property.getInstance()));
+        } else if ((property.getName().equals(DESCRIPTION) && (property.getType() == LongDescription.class))) {
+            this.setDescription(((LongDescription) property.getInstance()));
             return true;
         } else if ((property.getName().equals(TYPE) && (property.getType() == AddressType.class))) {
             this.setType(((AddressType) property.getInstance()));
@@ -290,18 +288,18 @@ public class Address extends MultiTenantDatatype implements Datatype {
     /**
      * The Address description.
      *
-     * @return the Description.
+     * @return the LongDescription.
      */
-    public Description getDescription() {
+    public LongDescription getDescription() {
         return this.description;
     }
 
     /**
      * The Address description.
      *
-     * @param description the Description.
+     * @param description the LongDescription.
      */
-    public void setDescription(Description description) {
+    public void setDescription(LongDescription description) {
         this.description = description;
     }
 
@@ -315,7 +313,7 @@ public class Address extends MultiTenantDatatype implements Datatype {
             if ((description == null)) {
                 return;
             }
-            this.description = new Description();
+            this.description = new LongDescription();
         }
         this.description.setValue(description);
     }

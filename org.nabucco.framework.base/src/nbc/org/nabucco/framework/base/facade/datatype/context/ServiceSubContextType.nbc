@@ -34,4 +34,8 @@ public Enumeration ServiceSubContextType {
 	@Description	Identifies a Workflow Transition
 	@LiteralId		W
 	WORKFLOW_TRANSITION
+	
+	@Description	Identifies the Initialization detail context
+	@LiteralId		I
+	INITIALIZATION_DETAIL
 }

@@ -34,6 +34,8 @@ import org.nabucco.framework.base.ui.web.servlet.util.path.NabuccoServletPathTyp
  */
 public class SelectPickerFilter extends WebActionHandlerSupport {
 
+    private final static String DEFAULT_APPLY_FILTER_ACTION = ApplyPickerFilterHandler.ID;
+
     @Override
     public WebActionResult execute(WebActionParameter parameter) throws ClientException {
         String pickerDialogInstanceId = parameter.get(NabuccoServletPathType.PICKER_DIALOG);
@@ -51,7 +53,11 @@ public class SelectPickerFilter extends WebActionHandlerSupport {
         if (filterItem == null) {
             throw new ClientException("Cannot load values of the selected filter item. Filter item is not found.");
         }
-        String filterLoadAction = filterItem.getLoadAction();
+        String filterLoadAction = filterItem.getCustomLoadAction();
+
+        if (filterLoadAction == null || filterLoadAction.isEmpty()) {
+            filterLoadAction = DEFAULT_APPLY_FILTER_ACTION;
+        }
 
         // Process filter
         WebActionResult result = new WebActionResult();

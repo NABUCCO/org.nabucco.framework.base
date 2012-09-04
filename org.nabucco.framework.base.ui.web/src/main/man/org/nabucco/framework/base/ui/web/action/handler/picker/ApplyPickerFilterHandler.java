@@ -29,7 +29,7 @@ import org.nabucco.framework.base.ui.web.component.WebElement;
 import org.nabucco.framework.base.ui.web.component.dialog.PickerDialog;
 import org.nabucco.framework.base.ui.web.component.work.editor.RelationTab;
 import org.nabucco.framework.base.ui.web.component.work.editor.control.PickerControl;
-import org.nabucco.framework.base.ui.web.model.control.relation.picker.PickerControlModel;
+import org.nabucco.framework.base.ui.web.model.editor.control.relation.picker.PickerControlModel;
 import org.nabucco.framework.base.ui.web.servlet.util.NabuccoServletUtil;
 import org.nabucco.framework.base.ui.web.servlet.util.path.NabuccoServletPathType;
 

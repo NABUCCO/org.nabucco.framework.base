@@ -39,6 +39,10 @@ public class CloseWorkItemHandler extends WebActionHandler {
     public WebActionResult execute(WebActionParameter parameter) throws ActionException {
 
         String workItemId = parameter.get(NabuccoServletPathType.WORK_AREA);
+
+        if (workItemId == null) {
+            workItemId = parameter.get(NabuccoServletPathType.EDITOR);
+        }
         WorkArea workArea = NabuccoServletUtil.getWorkArea();
 
         if (workArea == null) {

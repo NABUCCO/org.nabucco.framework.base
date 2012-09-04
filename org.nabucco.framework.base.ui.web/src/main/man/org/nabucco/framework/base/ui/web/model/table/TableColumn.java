@@ -92,7 +92,7 @@ public class TableColumn implements Jsonable {
      * 
      * @return Returns the property.
      */
-    public String getProperty() {
+    public String getPropertyPath() {
         return this.property;
     }
 
@@ -180,6 +180,16 @@ public class TableColumn implements Jsonable {
      */
     public void setWidth(String width) {
         this.width = width;
+    }
+
+    /**
+     * Setter for the width.
+     * 
+     * @param width
+     *            The width to set.
+     */
+    public void setWidth(int width) {
+        this.width = String.valueOf(width);
     }
 
     /**

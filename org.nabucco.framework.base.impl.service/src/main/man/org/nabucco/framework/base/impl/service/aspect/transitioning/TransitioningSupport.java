@@ -143,7 +143,7 @@ public abstract class TransitioningSupport extends AspectSupport {
      *            the name of the workflow to start
      * @param type
      *            type of the workflow (must be a valid dynamic code of
-     *            <code>nabucco.framework.workflow.functionaltype</code>)
+     *            <code>nabucco.workflow.functionaltype</code>)
      * @param summary
      *            a summary of the new instance
      * @param context

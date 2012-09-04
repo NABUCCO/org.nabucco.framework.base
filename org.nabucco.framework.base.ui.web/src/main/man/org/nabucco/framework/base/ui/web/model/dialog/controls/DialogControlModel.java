@@ -57,11 +57,13 @@ public abstract class DialogControlModel extends DialogGridModelElement {
      *            is the field mandatory
      */
     public DialogControlModel(String id, String label, String tooltip, DialogControlType type, String position,
-            boolean mandatory) {
+            boolean mandatory, boolean editable) {
         super(id, label, tooltip, type, position);
-        this.mandatory = mandatory;
 
-        this.initialized = false;
+        this.mandatory = mandatory;
+        this.editable = editable;
+
+        initialized = false;
     }
 
     @Override
@@ -76,7 +78,7 @@ public abstract class DialogControlModel extends DialogGridModelElement {
      */
     @Override
     public boolean isInitialized() {
-        return this.initialized;
+        return initialized;
     }
 
     /**
@@ -90,14 +92,14 @@ public abstract class DialogControlModel extends DialogGridModelElement {
             return true;
         }
 
-        if (this.mandatory) {
-            if (this.value != null && this.value.length() > 0) {
+        if (mandatory) {
+            if (value != null && value.length() > 0) {
                 return true;
             }
             return false;
         }
 
-        if (this.value != null) {
+        if (value != null) {
             return true;
         }
 
@@ -119,18 +121,28 @@ public abstract class DialogControlModel extends DialogGridModelElement {
      * @return returns the value of the dialog control
      */
     public String getValue() {
-        return this.value;
+        return value;
+    }
+
+    /**
+     * Getter for the editable.
+     * 
+     * @return Returns the editable.
+     */
+    public boolean isEditable() {
+        return editable;
     }
 
     @Override
     public JsonMap toJson() {
         JsonMap retVal = super.toJson();
-        retVal.add(JSON_MANDATORY, this.mandatory);
-        retVal.add(JSON_VALUE, this.value);
+        retVal.add(JSON_MANDATORY, mandatory);
+        retVal.add(JSON_VALUE, value);
         retVal.add(JSON_VALID, this.isValid());
-        retVal.add(JSON_EDITABLE, this.editable);
+        retVal.add(JSON_EDITABLE, this.isEditable());
 
-        this.initialized = true;
+        initialized = true;
         return retVal;
     }
+
 }

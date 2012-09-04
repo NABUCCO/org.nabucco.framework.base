@@ -428,7 +428,7 @@ final class XmlDeserializationParser {
      *             when the text cannot be deserialized
      */
     private String parseValue(Element element) throws SerializationException {
-        if (element.hasChildNodes()) {
+        if (element != null && element.hasChildNodes()) {
             return element.getTextContent();
         }
         return null;
@@ -478,9 +478,10 @@ final class XmlDeserializationParser {
         NodeList children = parent.getElementsByTagName(name);
 
         if (children.getLength() < 1) {
-            throw new SerializationException("Cannot deserialize property ["
-                    + name + "]. Property not found in " + parent.getNodeName() + " with id "
-                    + parent.getAttribute(SerializationConstants.ATTRIBUTE_ID) + ".");
+            return null;
+            // throw new SerializationException("Cannot deserialize property ["
+            // + name + "]. Property not found in " + parent.getNodeName() + " with id "
+            // + parent.getAttribute(SerializationConstants.ATTRIBUTE_ID) + ".");
         }
         if (children.getLength() > 1) {
             throw new SerializationException("Cannot deserialize property ["

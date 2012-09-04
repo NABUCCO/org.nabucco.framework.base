@@ -37,6 +37,8 @@ public abstract class WebComponent extends WebElement {
 
     private static final String[] EMPTY_IDS = new String[0];
 
+    UiExtension extension;
+
     /**
      * Creates a new {@link WebComponent} instance.
      * 
@@ -47,6 +49,21 @@ public abstract class WebComponent extends WebElement {
      */
     public WebComponent(WebElementType type, UiExtension extension) {
         super(type, extension);
+
+        this.extension = extension;
+    }
+
+    /**
+     * Getter for the editor control id.
+     * 
+     * @return the editor control id or null if no setted
+     */
+    public String getId() {
+        if (extension.getIdentifier() == null) {
+            return null;
+        }
+
+        return extension.getIdentifier().getValue();
     }
 
     @Override

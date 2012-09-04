@@ -30,22 +30,28 @@ import org.nabucco.framework.base.ui.web.json.Jsonable;
  */
 public class FilterItem implements Jsonable {
 
-    FilterReferenceExtension extension;
+    private static final String JSON_REF_ID = "refId";
 
-    private final static String DEFAULT_APPLY_FILTER_ACTION = "System.ApplyPickerFilter";
+    private FilterReferenceExtension extension;
 
-    QueryFilterExtension filter;
+    private QueryFilterExtension filter;
+
+    private String id;
+
+    private String viewName;
 
     /**
      * 
      * Creates a new {@link FilterItem} instance.
      * 
+     * @param id
+     *            the id
      * @param extension
      *            the filter reference extension
      * @param refFilterExt
      *            the referenced filter extension
      */
-    public FilterItem(FilterReferenceExtension extension, QueryFilterExtension refFilterExt) {
+    public FilterItem(String id, FilterReferenceExtension extension, QueryFilterExtension refFilterExt) {
         if (extension == null) {
             throw new IllegalArgumentException("Cannot create filter item. extension is 'null'");
         }
@@ -53,7 +59,7 @@ public class FilterItem implements Jsonable {
         if (refFilterExt == null) {
             throw new IllegalArgumentException("Cannot create filter item. Filter extension is 'null'");
         }
-
+        this.id = id;
         this.extension = extension;
         this.filter = refFilterExt;
     }
@@ -65,11 +71,11 @@ public class FilterItem implements Jsonable {
      * @param extension
      *            the filter reference extension
      */
-    public FilterItem(FilterReferenceExtension extension) {
+    public FilterItem(String id, FilterReferenceExtension extension) {
         if (extension == null) {
             throw new IllegalArgumentException("Cannot create filter item. extension is 'null'");
         }
-
+        this.id = id;
         this.extension = extension;
     }
 
@@ -122,26 +128,52 @@ public class FilterItem implements Jsonable {
     /**
      * Returns the action to use for loading of filter values
      * 
-     * @return filter id
+     * @return the custom action or null
      */
-    public String getLoadAction() {
+    public String getCustomLoadAction() {
         String retVal = PropertyLoader.loadProperty(this.extension.getLoadAction());
 
-        if (retVal == null || retVal.isEmpty()) {
-            return DEFAULT_APPLY_FILTER_ACTION;
-        }
-
         return retVal;
+    }
+
+    /**
+     * Setter for the viewName.
+     * 
+     * @param viewName
+     *            The viewName to set.
+     */
+    public void setViewName(String viewName) {
+        this.viewName = viewName;
+    }
+
+    /**
+     * Getter for the viewName.
+     * 
+     * @return Returns the viewName.
+     */
+    public String getViewName() {
+        return viewName;
+    }
+
+    /**
+     * Getter for the id.
+     * 
+     * @return Returns the id.
+     */
+    public String getId() {
+        return id;
     }
 
     @Override
     public JsonElement toJson() {
         JsonMap json = new JsonMap();
 
-        json.add(JSON_ID, this.getRefId());
+        json.add(JSON_ID, this.getId());
+        json.add(JSON_REF_ID, this.getRefId());
         json.add(JSON_LABEL, this.getLabel());
         json.add(JSON_TOOLTIP, this.getTooltip());
 
         return json;
     }
+
 }

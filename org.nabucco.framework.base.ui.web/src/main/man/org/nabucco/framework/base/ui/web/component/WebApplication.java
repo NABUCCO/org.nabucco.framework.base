@@ -16,20 +16,29 @@
  */
 package org.nabucco.framework.base.ui.web.component;
 
+import java.util.Locale;
+
 import org.nabucco.common.extension.ExtensionException;
 import org.nabucco.framework.base.facade.datatype.NabuccoSystem;
+import org.nabucco.framework.base.facade.datatype.collection.NabuccoList;
+import org.nabucco.framework.base.facade.datatype.extension.ExtensionId;
 import org.nabucco.framework.base.facade.datatype.extension.ExtensionPointType;
 import org.nabucco.framework.base.facade.datatype.extension.ExtensionResolver;
 import org.nabucco.framework.base.facade.datatype.extension.property.PropertyLoader;
 import org.nabucco.framework.base.facade.datatype.extension.schema.ui.application.ApplicationExtension;
+import org.nabucco.framework.base.facade.datatype.extension.schema.ui.application.LocalizationExtension;
+import org.nabucco.framework.base.facade.datatype.extension.schema.ui.application.LocalizationLanguageExtension;
 import org.nabucco.framework.base.facade.datatype.extension.schema.ui.error.ErrorLogExtension;
 import org.nabucco.framework.base.facade.datatype.extension.schema.ui.messagequeue.MessageQueueExtension;
 import org.nabucco.framework.base.facade.datatype.extension.schema.ui.perspective.PerspectiveAreaExtension;
 import org.nabucco.framework.base.facade.datatype.extension.schema.ui.statusbar.StatusBarExtension;
 import org.nabucco.framework.base.facade.datatype.extension.schema.ui.titlebar.TitleBarExtension;
+import org.nabucco.framework.base.facade.datatype.logger.NabuccoLogger;
+import org.nabucco.framework.base.facade.datatype.logger.NabuccoLoggingFactory;
+import org.nabucco.framework.base.facade.datatype.utils.I18N;
 import org.nabucco.framework.base.ui.web.component.common.controller.DialogController;
 import org.nabucco.framework.base.ui.web.component.common.controller.PickerDialogController;
-import org.nabucco.framework.base.ui.web.component.common.controller.ResourceController;
+import org.nabucco.framework.base.ui.web.component.common.controller.resource.ResourceController;
 import org.nabucco.framework.base.ui.web.component.error.ErrorLogContainer;
 import org.nabucco.framework.base.ui.web.component.messagequeue.MessageQueue;
 import org.nabucco.framework.base.ui.web.component.perspective.PerspectiveArea;
@@ -37,6 +46,8 @@ import org.nabucco.framework.base.ui.web.component.statusbar.StatusBar;
 import org.nabucco.framework.base.ui.web.component.titlebar.TitleBar;
 import org.nabucco.framework.base.ui.web.json.JsonElement;
 import org.nabucco.framework.base.ui.web.json.JsonMap;
+import org.nabucco.framework.base.ui.web.session.NabuccoWebSession;
+import org.nabucco.framework.base.ui.web.session.NabuccoWebSessionFactory;
 
 /**
  * A web application is the root {@link WebComposite} that contains the main application elements
@@ -68,6 +79,8 @@ public class WebApplication extends WebComposite {
     /** The configured web application extension. */
     private ApplicationExtension extension = null;
 
+    NabuccoLogger logger = NabuccoLoggingFactory.getInstance().getLogger(WebApplication.class);
+
     /**
      * Creates a new {@link WebApplication} instance.
      * 
@@ -81,11 +94,46 @@ public class WebApplication extends WebComposite {
 
     @Override
     public void init() throws ExtensionException {
+        this.loadLocalization();
         this.loadTitleBar();
         this.loadPerspectiveArea();
         this.loadStatusBar();
         this.loadErrorLog();
         this.loadMessageQueue();
+    }
+
+    /**
+     * Loads localization configuration and sets the language to default configured
+     */
+    private void loadLocalization() throws ExtensionException {
+        LocalizationExtension localizationExtension = this.extension.getLocalization();
+        ExtensionId defaultLanguageIdentifier = localizationExtension.getDefaultLanguageIdentifier();
+        if (defaultLanguageIdentifier == null || defaultLanguageIdentifier.getValue().isEmpty()) {
+            logger.debug("No default language is defined. Using system default");
+            return;
+        }
+
+        NabuccoList<LocalizationLanguageExtension> languageList = localizationExtension.getLocalizationLanguageList();
+        if (languageList.isEmpty()) {
+            logger.debug("There are no languages defined. Using system default.");
+            return;
+        }
+
+        for (LocalizationLanguageExtension langExt : languageList) {
+            if (langExt.getIdentifier() != null && langExt.getIdentifier().equals(defaultLanguageIdentifier)) {
+                String country = PropertyLoader.loadProperty(langExt.getCountry());
+                String language = PropertyLoader.loadProperty(langExt.getLanguage());
+
+                Locale defaultLanguage = new Locale(language, country);
+
+                NabuccoWebSession session = NabuccoWebSessionFactory.getCurrentSession();
+                session.setLocale(defaultLanguage);
+
+                I18N.setLocale(defaultLanguage);
+                break;
+            }
+        }
+
     }
 
     /**

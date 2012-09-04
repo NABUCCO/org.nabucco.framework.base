@@ -16,13 +16,17 @@
  */
 package org.nabucco.framework.base.ui.web.action.handler.work.editor;
 
+import org.nabucco.framework.base.facade.datatype.logger.NabuccoLogger;
+import org.nabucco.framework.base.facade.datatype.logger.NabuccoLoggingFactory;
+import org.nabucco.framework.base.facade.exception.client.ClientException;
 import org.nabucco.framework.base.facade.exception.client.action.ActionException;
-import org.nabucco.framework.base.ui.web.action.WebActionHandler;
+import org.nabucco.framework.base.ui.web.action.WebActionHandlerSupport;
 import org.nabucco.framework.base.ui.web.action.parameter.WebActionParameter;
 import org.nabucco.framework.base.ui.web.action.result.RefreshItem;
 import org.nabucco.framework.base.ui.web.action.result.WebActionResult;
 import org.nabucco.framework.base.ui.web.component.WebElementType;
 import org.nabucco.framework.base.ui.web.component.work.editor.RelationArea;
+import org.nabucco.framework.base.ui.web.component.work.editor.RelationTab;
 import org.nabucco.framework.base.ui.web.servlet.util.NabuccoServletUtil;
 import org.nabucco.framework.base.ui.web.servlet.util.path.NabuccoServletPathType;
 
@@ -31,7 +35,9 @@ import org.nabucco.framework.base.ui.web.servlet.util.path.NabuccoServletPathTyp
  * 
  * @author Nicolas Moser, PRODYNA AG
  */
-public class OpenEditorRelationHandler extends WebActionHandler {
+public class OpenEditorRelationHandler extends WebActionHandlerSupport {
+
+    NabuccoLogger logger = NabuccoLoggingFactory.getInstance().getLogger(OpenEditorRelationHandler.class);
 
     @Override
     public WebActionResult execute(WebActionParameter parameter) throws ActionException {
@@ -42,9 +48,18 @@ public class OpenEditorRelationHandler extends WebActionHandler {
         if (relationArea != null) {
 
             String tabId = parameter.get(NabuccoServletPathType.TAB);
+            RelationTab tab = relationArea.getTab(tabId);
 
-            if (tabId != null) {
+            if (tab != null) {
                 relationArea.focusTab(tabId);
+
+                if (tab.getModel().isLazy()) {
+                    try {
+                        super.executeAction(tab.getLoadAction(), parameter);
+                    } catch (ClientException e) {
+                        logger.error("Cannot execute load action of the lazy loaded relation tab", e);
+                    }
+                }
             }
         }
 

@@ -26,6 +26,10 @@ import org.nabucco.framework.base.facade.datatype.extension.schema.ui.UiExtensio
 import org.nabucco.framework.base.facade.datatype.extension.schema.ui.common.PermissionExtension;
 import org.nabucco.framework.base.facade.datatype.security.Permission;
 import org.nabucco.framework.base.facade.datatype.ui.permission.UiAccessType;
+import org.nabucco.framework.base.facade.datatype.visitor.VisitorException;
+import org.nabucco.framework.base.ui.web.component.work.visitor.VisitableWebElement;
+import org.nabucco.framework.base.ui.web.component.work.visitor.WebElementVisitor;
+import org.nabucco.framework.base.ui.web.component.work.visitor.WebElementVisitorContext;
 import org.nabucco.framework.base.ui.web.json.Jsonable;
 import org.nabucco.framework.base.ui.web.session.NabuccoWebSessionFactory;
 
@@ -36,7 +40,7 @@ import org.nabucco.framework.base.ui.web.session.NabuccoWebSessionFactory;
  * @author Frank Ratschinski, PRODYNA AG
  * @author Nicolas Moser, PRODYNA AG
  */
-public abstract class WebElement implements Serializable, Jsonable {
+public abstract class WebElement implements Serializable, Jsonable, VisitableWebElement {
 
     /** The default serial version UID */
     private static final long serialVersionUID = 1L;
@@ -170,5 +174,18 @@ public abstract class WebElement implements Serializable, Jsonable {
      *         not exist in this element
      */
     public abstract WebElement getElement(String id);
+
+    /**
+     * Accepts the web element visitor. Overload this function to let element be visited
+     * 
+     * @param visitor
+     */
+    @Override
+    public <T extends WebElementVisitorContext> void accept(WebElementVisitor<T> visitor, T context)
+            throws VisitorException {
+        if (visitor != null) {
+            visitor.visit(this, context);
+        }
+    }
 
 }

@@ -16,10 +16,12 @@
 */
 package org.nabucco.framework.base.facade.datatype.extension.schema.ui.work.editor;
 
+import org.nabucco.framework.base.facade.datatype.extension.property.BooleanProperty;
 import org.nabucco.framework.base.facade.datatype.extension.property.StringProperty;
 import org.nabucco.framework.base.facade.datatype.extension.schema.ui.UiExtension;
 import org.nabucco.framework.base.facade.datatype.extension.schema.ui.common.ColumnExtension;
 import org.nabucco.framework.base.facade.datatype.extension.schema.ui.common.ListButtonExtension;
+import org.nabucco.framework.base.facade.datatype.extension.schema.ui.common.MenuButtonExtension;
 import org.nabucco.framework.base.facade.datatype.extension.schema.ui.work.editor.dependency.DependencySetExtension;
 
 @Author			Nicolas Moser
@@ -36,11 +38,17 @@ public Datatype EditorRelationExtension extends UiExtension {
 	private Datatype StringProperty[1] tooltip;
 	
 	@Description		The path to the binded property.
-	private Datatype StringProperty[1] property;
+	private Datatype StringProperty[0..1] property;
+	
+	@Description		The action to be used for loading of datatypes.
+	private Datatype StringProperty[0..1] loadAction;
 	
 	@Description		The action to be used to open content items
 	private Datatype StringProperty[0..1] doubleclickAction;
 	
+	@Description	 	The Menu actions.
+	private Datatype MenuButtonExtension[0..1] menuButton;
+
 	@Description	 	The Relation actions.
 	private Datatype ListButtonExtension[0..*] buttons;
 
@@ -49,5 +57,8 @@ public Datatype EditorRelationExtension extends UiExtension {
 	
 	@Description		The set of the dependencies of the control
 	private Datatype DependencySetExtension[0..1] dependencySet;
+	
+	@Description		Describes if the tab should be printed
+	private Datatype BooleanProperty[0..1] isTechnical; 
 	
 }

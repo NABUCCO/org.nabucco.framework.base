@@ -59,8 +59,8 @@ public class ListButton extends Button {
     /**
      * Returns the modification type of the button
      */
-    public RelationButtonModificationType getMoificationType() {
-        return PropertyLoader.loadProperty(RelationButtonModificationType.class, this.extension.getModification());
+    public ButtonModificationType getModificationType() {
+        return PropertyLoader.loadProperty(ButtonModificationType.class, this.extension.getModification());
     }
 
     /**
@@ -74,7 +74,7 @@ public class ListButton extends Button {
     public void updateStatus(boolean valueSelected, boolean isEditable) {
         boolean retVal = false;
 
-        RelationButtonModificationType moificationType = this.getMoificationType();
+        ButtonModificationType moificationType = this.getModificationType();
 
         if (moificationType == null) {
             return;
@@ -82,7 +82,7 @@ public class ListButton extends Button {
 
         if (this.getSelectionNeeded() && (valueSelected == false)) {
             retVal = true;
-        } else if (!moificationType.equals(RelationButtonModificationType.NONE) && (isEditable == false)) {
+        } else if (!moificationType.equals(ButtonModificationType.NONE) && (isEditable == false)) {
             retVal = true;
         }
 

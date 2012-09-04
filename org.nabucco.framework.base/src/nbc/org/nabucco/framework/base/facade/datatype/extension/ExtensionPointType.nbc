@@ -151,6 +151,10 @@ public Enumeration ExtensionPointType {
 	@LiteralId		org.nabucco.framework.template.mapping
 	ORG_NABUCCO_FRAMEWORK_TEMPLATE_MAPPING
 	
+	@Description	Extension point for template datastructure
+	@LiteralId		org.nabucco.framework.template.datastructure
+	ORG_NABUCCO_FRAMEWORK_TEMPLATE_DATASTRUCTURE
+	
 	@Description 	Extension point for workflow configurations.
 	@LiteralId 		org.nabucco.framework.workflow
 	ORG_NABUCCO_FRAMEWORK_WORKFLOW
@@ -198,6 +202,10 @@ public Enumeration ExtensionPointType {
 	@Description	Extension point for an editor of the user interface.
 	@LiteralId		org.nabucco.ui.editor
 	ORG_NABUCCO_UI_EDITOR
+
+	@Description	Extension point for an bulk editor of the user interface.
+	@LiteralId		org.nabucco.ui.bulkeditor
+	ORG_NABUCCO_UI_BULK_EDITOR
 	
 	@Description	Extension point for an dashboard of the user interface.
 	@LiteralId		org.nabucco.ui.dashboard
@@ -258,6 +266,10 @@ public Enumeration ExtensionPointType {
 	@Description	Extension point for working item validation error mapping
 	@LiteralId		org.nabucco.ui.messageset
 	ORG_NABUCCO_UI_MESSAGE_SET
+	
+	@Description 	Extension point for the shortcuts on the ui
+	@LiteralId	org.nabucco.ui.shortcuts
+	ORG_NABUCCO_UI_SHORTCUTS
 
 }
 

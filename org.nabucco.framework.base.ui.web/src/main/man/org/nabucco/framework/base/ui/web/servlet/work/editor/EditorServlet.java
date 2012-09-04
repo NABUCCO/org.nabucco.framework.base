@@ -26,10 +26,10 @@ import org.nabucco.framework.base.ui.web.servlet.util.handler.ActionHandler;
 import org.nabucco.framework.base.ui.web.servlet.util.handler.RefreshHandler;
 
 /**
- * Servlet for handling the initialization, data population and action execution of Editor intances.
+ * Servlet for handling the initialization, data population and action execution of Bulk Editor
+ * intances.
  * 
- * @author Frank Ratschinski, PRODYNA AG
- * @author Nicolas Moser, PRODYNA AG
+ * @author Leonid Agranovskiy, PRODYNA AG
  */
 public class EditorServlet extends NabuccoServlet {
 
@@ -37,7 +37,6 @@ public class EditorServlet extends NabuccoServlet {
 
     @Override
     protected void restGet(NabuccoServletRequest request, NabuccoServletResponse response) throws ClientException {
-
         WorkArea workArea = NabuccoServletUtil.getWorkArea();
         RefreshHandler handler = new RefreshHandler(request, response);
         handler.execute(workArea);
@@ -52,6 +51,5 @@ public class EditorServlet extends NabuccoServlet {
         actionHandler.execute(workArea);
 
     }
-
 
 }

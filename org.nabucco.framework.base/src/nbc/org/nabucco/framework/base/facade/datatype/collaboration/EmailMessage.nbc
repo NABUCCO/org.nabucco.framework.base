@@ -1,0 +1,54 @@
+/*
+ * Copyright 2011 PRODYNA AG
+ *
+ * Licensed under the Eclipse Public License (EPL), Version 1.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.opensource.org/licenses/eclipse-1.0.php or
+ * http://www.nabucco-source.org/nabucco-license.html
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+package org.nabucco.framework.base.facade.datatype.collaboration; 
+
+import org.nabucco.framework.base.facade.datatype.Flag;
+import org.nabucco.framework.base.facade.datatype.Key;
+import org.nabucco.framework.base.facade.datatype.NabuccoDatatype;
+import org.nabucco.framework.base.facade.datatype.collaboration.Attachment;
+import org.nabucco.framework.base.facade.datatype.collaboration.Attendee;
+import org.nabucco.framework.base.facade.datatype.mail.Body;
+import org.nabucco.framework.base.facade.datatype.mail.Subject;
+
+@Author         Leonid Agranovskiy
+@Company        PRODYNA AG
+@Date           2012-06-18
+@Version        1.0
+@Description    Email message
+public Datatype EmailMessage extends NabuccoDatatype {
+	
+	@Description		The unique id of the email
+	private Basetype Key[0..1] uniqueId;
+	
+	@Description		The list of the email recipients
+	private Datatype  Attendee[0..*] recipientList; 
+	
+	@Description		The list of the email recipients
+	private Datatype  Attendee[0..*] copyRecipientList; 
+	
+	@Description		The email is new
+	private Basetype  Flag[1] newEmail; 
+	
+	@Description		The subject of the email
+	private Basetype Subject[1] subject;
+	
+	@Description		The message body
+	private Basetype Body[1] messageBody; 
+	
+	@Description		The attachment list
+	private Datatype Attachment[0..*] attachmentList; 
+}

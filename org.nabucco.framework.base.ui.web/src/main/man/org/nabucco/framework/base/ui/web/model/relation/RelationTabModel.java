@@ -33,8 +33,8 @@ import org.nabucco.framework.base.ui.web.json.JsonElement;
 import org.nabucco.framework.base.ui.web.json.JsonList;
 import org.nabucco.framework.base.ui.web.json.JsonMap;
 import org.nabucco.framework.base.ui.web.model.WebModel;
-import org.nabucco.framework.base.ui.web.model.control.ControlConstraintController;
-import org.nabucco.framework.base.ui.web.model.control.util.dependency.DependencyController;
+import org.nabucco.framework.base.ui.web.model.editor.ConstraintController;
+import org.nabucco.framework.base.ui.web.model.editor.util.dependency.DependencyController;
 import org.nabucco.framework.base.ui.web.model.table.TableModel;
 
 /**
@@ -50,6 +50,7 @@ public class RelationTabModel extends WebModel {
 
     private static final String JSON_TABLE = "table";
 
+    private static final String JSON_IS_LAZY = "isLazy";
 
     private boolean isValid;
 
@@ -58,20 +59,23 @@ public class RelationTabModel extends WebModel {
     /** Indicates that the constraints have been changed according to dependencies */
     private boolean refreshNeeded = false;
 
-    private String propertyPath;
-
     private NabuccoProperty property;
 
     private TableModel<Datatype> tableModel;
 
     private DependencyController dependencyController;
 
-    private ControlConstraintController constraintController;
+    private ConstraintController constraintController;
 
     private String selectedValue = null;
 
+    private String propertyPath;
+
     /** Defines if the validation messages should be sent to the UI */
     private boolean validating = false;
+
+    /** Defines that the table model is lazy loaded and refreshes itself only by clicking on it */
+    private boolean lazy;
 
     /**
      * Creates a new {@link RelationTabModel} instance.
@@ -79,31 +83,33 @@ public class RelationTabModel extends WebModel {
      * @param id
      *            the relation tab id
      * @param propertyPath
-     *            path pointing to the property of the relation tab
+     *            the property path
      * @param dependencyController
      *            the relation tab dependency controller
      * @param tableModel
      *            the table model of the relation tab
+     * @param lazy
+     *            relation tab is lazy loaded
      */
     public RelationTabModel(String id, String propertyPath, DependencyController dependencyController,
-            TableModel<Datatype> tableModel) {
+            TableModel<Datatype> tableModel, boolean lazy) {
         if (id == null) {
             throw new IllegalArgumentException("Cannot create relation tab model for id 'null'.");
         }
-        if (propertyPath == null) {
-            throw new IllegalArgumentException("Cannot create relation tab model for propertyPath 'null'.");
-        }
+
         if (tableModel == null) {
             throw new IllegalArgumentException("Cannot create relation tab model for tableModel 'null'.");
         }
 
         this.id = id;
-        this.propertyPath = propertyPath;
         this.tableModel = tableModel;
 
         this.dependencyController = dependencyController;
 
-        this.constraintController = new ControlConstraintController(dependencyController);
+        this.constraintController = new ConstraintController(dependencyController);
+
+        this.propertyPath = propertyPath;
+        this.lazy = lazy;
     }
 
     @Override
@@ -115,6 +121,16 @@ public class RelationTabModel extends WebModel {
     @Override
     public void propertyChange(PropertyChangeEvent event) {
         this.refreshNeeded = true;
+    }
+
+    /**
+     * Returns true if the model is lazy loaded and the binding is made <b> manually </b>. If lazy,
+     * the model will be not filled and updated by the standard binding mechanism.
+     * 
+     * @return
+     */
+    public boolean isLazy() {
+        return lazy;
     }
 
     /**
@@ -173,6 +189,15 @@ public class RelationTabModel extends WebModel {
      */
     public NabuccoProperty getProperty() {
         return this.property;
+    }
+
+    /**
+     * Getter for the property path.
+     * 
+     * @return Returns the property path.
+     */
+    public String getPropertyPath() {
+        return this.propertyPath;
     }
 
     /**
@@ -241,15 +266,6 @@ public class RelationTabModel extends WebModel {
      */
     public String getId() {
         return this.id;
-    }
-
-    /**
-     * Getter for the propertyPath.
-     * 
-     * @return Returns the propertyPath.
-     */
-    public String getPropertyPath() {
-        return this.propertyPath;
     }
 
     /**
@@ -337,6 +353,7 @@ public class RelationTabModel extends WebModel {
 
         /** Selected value (index?) */
         retVal.add(JSON_VALUE, this.getValue());
+        retVal.add(JSON_IS_LAZY, this.isLazy());
 
         if (this.isValidating()) {
             Set<String> validationErrors = this.validate();

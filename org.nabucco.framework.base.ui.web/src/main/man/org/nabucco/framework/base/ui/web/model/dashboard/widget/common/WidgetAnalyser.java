@@ -21,7 +21,6 @@ import java.util.List;
 import org.nabucco.framework.base.facade.datatype.NabuccoDatatype;
 import org.nabucco.framework.base.facade.exception.client.ClientException;
 
-
 /**
  * WidgetAnalyser
  * 
@@ -34,9 +33,12 @@ public interface WidgetAnalyser {
      * 
      * @param values
      *            list of elements
+     * @param viewName
+     *            the name of the view to use (custom field that allow to show different graphs
+     *            according to the same data without configuring of a new widget)
      * @return result of analyse
      */
-    WidgetAnalyserResult evaluate(List<NabuccoDatatype> values) throws ClientException;
+    WidgetAnalyserResult evaluate(List<NabuccoDatatype> values, String viewName) throws ClientException;
 
     /**
      * Normalise result. akkumulate small values, round percents etc

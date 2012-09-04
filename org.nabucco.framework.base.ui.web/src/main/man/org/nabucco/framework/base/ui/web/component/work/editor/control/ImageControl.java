@@ -18,9 +18,12 @@ package org.nabucco.framework.base.ui.web.component.work.editor.control;
 
 import org.nabucco.framework.base.facade.datatype.extension.property.PropertyLoader;
 import org.nabucco.framework.base.facade.datatype.extension.schema.ui.work.editor.control.ImageControlExtension;
-import org.nabucco.framework.base.ui.web.model.control.ControlModel;
-import org.nabucco.framework.base.ui.web.model.control.property.image.SingleImageControlModel;
-import org.nabucco.framework.base.ui.web.model.control.util.validator.NabuccoImageFileValidator;
+import org.nabucco.framework.base.facade.datatype.visitor.VisitorException;
+import org.nabucco.framework.base.ui.web.component.work.visitor.WebElementVisitor;
+import org.nabucco.framework.base.ui.web.component.work.visitor.WebElementVisitorContext;
+import org.nabucco.framework.base.ui.web.model.editor.control.ControlModel;
+import org.nabucco.framework.base.ui.web.model.editor.control.property.image.SingleImageControlModel;
+import org.nabucco.framework.base.ui.web.model.editor.util.validator.NabuccoImageFileValidator;
 
 /**
  * Image Control
@@ -64,7 +67,24 @@ public class ImageControl extends EditorControl {
     @Override
     public ControlModel<?> instantiateModel(String id, String propertyPath) {
         NabuccoImageFileValidator validator = new NabuccoImageFileValidator(this);
-        return new SingleImageControlModel(id, propertyPath, validator, super.getDependencySet(), this.getEditable(),
+        return new SingleImageControlModel(id, propertyPath, validator, super.getDependencySet(), this.isEditable(),
                 this.getUploaderDialogId(), this.getUploadPath());
     }
+
+    /**
+     * Accepts the web element visitor. Overload this function to let element be visited
+     * 
+     * @param visitor
+     *            visitor to be accepted
+     * @param context
+     *            context of the visitor
+     */
+    @Override
+    public <T extends WebElementVisitorContext> void accept(WebElementVisitor<T> visitor, T context)
+            throws VisitorException {
+        if (visitor != null) {
+            visitor.visit(this, context);
+        }
+    }
+
 }

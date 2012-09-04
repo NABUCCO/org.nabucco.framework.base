@@ -19,9 +19,8 @@ package org.nabucco.framework.base.ui.web.action.handler;
 import org.nabucco.common.extension.ExtensionException;
 import org.nabucco.framework.base.facade.datatype.Datatype;
 import org.nabucco.framework.base.facade.exception.client.ClientException;
-import org.nabucco.framework.base.ui.web.action.WebAction;
-import org.nabucco.framework.base.ui.web.action.WebActionHandler;
-import org.nabucco.framework.base.ui.web.action.WebActionRegistry;
+import org.nabucco.framework.base.facade.exception.client.action.ActionException;
+import org.nabucco.framework.base.ui.web.action.WebActionHandlerSupport;
 import org.nabucco.framework.base.ui.web.action.handler.table.ApplyTableFilterHandler;
 import org.nabucco.framework.base.ui.web.action.parameter.WebActionParameter;
 import org.nabucco.framework.base.ui.web.action.result.OpenItem;
@@ -37,7 +36,7 @@ import org.nabucco.framework.base.ui.web.servlet.util.NabuccoServletUtil;
  * 
  * @author Nicolas Moser, PRODYNA AG
  */
-public abstract class OpenListActionHandler<D extends Datatype> extends WebActionHandler {
+public abstract class OpenListActionHandler<D extends Datatype> extends WebActionHandlerSupport {
 
     @Override
     public final WebActionResult execute(WebActionParameter parameter) throws ClientException {
@@ -62,23 +61,43 @@ public abstract class OpenListActionHandler<D extends Datatype> extends WebActio
         }
 
         // Process filter
-        WebAction action = WebActionRegistry.getInstance().newAction(ApplyTableFilterHandler.ID);
+        WebActionResult retVal = new WebActionResult();
 
-        if (action == null) {
-            throw new ClientException("Cannot instanciate filter action.");
-        }
-        action.execute(parameter);
-
-        WebActionResult result = this.postOpen(parameter, list);
-        if (result == null) {
-            result = new WebActionResult();
+        WebActionResult fillListData = this.fillListData(parameter, list);
+        if (fillListData != null) {
+            retVal.addResult(fillListData);
         }
 
-        result.addItem(new OpenItem(WebElementType.LIST, list.getInstanceId()));
-        result.addItem(new RefreshItem(WebElementType.WORK_AREA));
-        result.addItem(new RefreshItem(WebElementType.BROWSER_AREA));
+        WebActionResult postOpenResult = this.postOpen(parameter, list);
+        if (postOpenResult != null) {
+            retVal.addResult(postOpenResult);
+        }
 
-        return result;
+        retVal.addItem(new OpenItem(WebElementType.LIST, list.getInstanceId()));
+        retVal.addItem(new RefreshItem(WebElementType.WORK_AREA));
+        retVal.addItem(new RefreshItem(WebElementType.BROWSER_AREA));
+
+        return retVal;
+    }
+
+    /**
+     * Fills the list with values. Per default use the filter. This hook can be overloaded to get
+     * special data (not a standard way) in the table
+     * 
+     * @param parameter
+     *            web parameter element
+     * @param listItem
+     *            the list item to be filled
+     * @return result will be appended to the agrregated summ result
+     * @throws ClientException
+     *             if problems by filling
+     * @throws ActionException
+     *             if action not found
+     */
+    protected WebActionResult fillListData(WebActionParameter parameter, ListItem listItem) throws ClientException,
+            ActionException {
+
+        return super.executeAction(ApplyTableFilterHandler.ID, parameter);
     }
 
     /**

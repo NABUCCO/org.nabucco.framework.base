@@ -17,6 +17,7 @@
 package org.nabucco.framework.base.ui.web.model.common.renderer;
 
 import org.nabucco.framework.base.facade.datatype.NType;
+import org.nabucco.framework.base.facade.datatype.property.NabuccoProperty;
 
 /**
  * Renderer for Web Labels.
@@ -24,6 +25,18 @@ import org.nabucco.framework.base.facade.datatype.NType;
  * @author Leonid Agranovskiy, PRODYNA AG
  */
 public interface WebRenderer {
+
+    /**
+     * Renders given string to a appropriate display format.
+     * 
+     * @param value
+     *            the value to render
+     * @param the
+     *            property to the value
+     * 
+     * @return the rendered value
+     */
+    String render(NType value, NabuccoProperty property);
 
     /**
      * Renders given string to a appropriate display format.

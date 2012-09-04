@@ -86,7 +86,21 @@ public class NabuccoServletResponse {
         String jsonText = (data == null) ? "" : data.print();
 
         try {
+
+            // Set to expire far in the past.
+            this.httpResponse.setDateHeader("Expires", -1);
+
+            // Set standard HTTP/1.1 no-cache headers.
+            this.httpResponse.setHeader("Cache-Control", "no-store, no-cache, must-revalidate");
+
+            // Set IE extended HTTP/1.1 no-cache headers (use addHeader).
+            this.httpResponse.addHeader("Cache-Control", "post-check=0, pre-check=0");
+
+            // Set standard HTTP/1.0 no-cache header.
+            this.httpResponse.setHeader("Pragma", "no-cache");
+
             this.httpResponse.setHeader("Access-Control-Allow-Origin", "*");
+
             this.httpResponse.setCharacterEncoding("UTF-8");
             this.httpResponse.setContentType("text/json");
             this.httpResponse.getWriter().print(jsonText);
@@ -156,6 +170,25 @@ public class NabuccoServletResponse {
     }
 
     /**
+     * Send the given output stream to the HTTP Servlet stream. At the end of the operation both
+     * streams are closed.
+     * 
+     * @param in
+     *            the input stream to send
+     * 
+     * @throws ClientException
+     *             when the input stream cannot be send to the servlet
+     */
+    public void sendData(InputStream in, String contentType) throws ClientException {
+        if (contentType == null) {
+            throw new ClientException("Cannot send data with content type 'null'");
+        }
+
+        // this.httpResponse.setContentType(contentType);
+        this.sendData(in);
+    }
+
+    /**
      * Close the servlet response.
      * 
      * @throws ClientException
@@ -164,6 +197,7 @@ public class NabuccoServletResponse {
     public synchronized void close() throws ClientException {
         try {
             this.httpResponse.getWriter().close();
+            this.httpResponse.setCharacterEncoding("UTF-8");
         } catch (Exception e) {
             logger.error(e, "Error closing servlet request.");
             throw new ClientException("Error closing servlet request.", e);

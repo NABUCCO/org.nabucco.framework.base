@@ -26,7 +26,7 @@ import org.nabucco.framework.base.facade.datatype.utils.MessageFormatter;
 import org.nabucco.framework.base.ui.web.json.JsonElement;
 import org.nabucco.framework.base.ui.web.json.JsonMap;
 import org.nabucco.framework.base.ui.web.model.WebModel;
-import org.nabucco.framework.base.ui.web.model.control.util.PropertyStringParser;
+import org.nabucco.framework.base.ui.web.model.editor.util.PropertyStringParser;
 
 /**
  * WorkItemModel
@@ -76,7 +76,7 @@ public class WorkItemModel extends WebModel {
      * @return Returns the label.
      */
     public String getLabel() {
-        return this.label;
+        return MessageFormatter.format(this.label, this.propertyMap);
     }
 
     /**
@@ -95,7 +95,7 @@ public class WorkItemModel extends WebModel {
      * @return Returns the tooltip.
      */
     public String getTooltip() {
-        return this.tooltip;
+        return MessageFormatter.format(this.tooltip, this.propertyMap);
     }
 
     /**
@@ -147,16 +147,6 @@ public class WorkItemModel extends WebModel {
         }
     }
 
-    @Override
-    public JsonElement toJson() {
-        JsonMap json = new JsonMap();
-        json.add(JSON_LABEL, MessageFormatter.format(this.label, this.propertyMap));
-        json.add(JSON_TOOLTIP, MessageFormatter.format(this.tooltip, this.propertyMap));
-        json.add(JSON_IMAGE, this.image);
-        json.add(JSON_DIRTY, this.isDirty());
-        return json;
-    }
-
     /**
      * Checks whether the work item model is dirty or not.
      * 
@@ -164,6 +154,16 @@ public class WorkItemModel extends WebModel {
      */
     public boolean isDirty() {
         return false;
+    }
+
+    @Override
+    public JsonElement toJson() {
+        JsonMap json = new JsonMap();
+        json.add(JSON_LABEL, this.getLabel());
+        json.add(JSON_TOOLTIP, this.getTooltip());
+        json.add(JSON_IMAGE, this.image);
+        json.add(JSON_DIRTY, this.isDirty());
+        return json;
     }
 
 }

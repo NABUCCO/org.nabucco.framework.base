@@ -16,6 +16,7 @@
  */
 package org.nabucco.framework.base.facade.datatype.extension.schema.ui.work.editor.control; 
 
+import org.nabucco.framework.base.facade.datatype.extension.property.StringProperty;
 import org.nabucco.framework.base.facade.datatype.extension.schema.ui.work.editor.control.TextControlExtension;
 
 @Author         Leonid Agranovskiy
@@ -25,4 +26,7 @@ import org.nabucco.framework.base.facade.datatype.extension.schema.ui.work.edito
 @Description    Text area control field
 public Datatype TextAreaControlExtension extends TextControlExtension {
 
+	@Description		The path where text have to be stored on the server
+	private Datatype StringProperty[0..1]  uploadPath;
+	
 }

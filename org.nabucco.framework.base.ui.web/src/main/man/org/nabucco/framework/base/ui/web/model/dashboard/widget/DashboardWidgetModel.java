@@ -48,8 +48,20 @@ public abstract class DashboardWidgetModel extends WebModel {
 
         this.type = type;
     }
-    
-    public abstract void setContent(List<NabuccoDatatype> values) throws ClientException;
+
+    /**
+     * Sets the content of the widget model. Triggers the analysation
+     * 
+     * @param filterId
+     *            the id of the filter
+     * @param values
+     *            value to be set
+     * @param viewName
+     *            the name of the view if any
+     * @throws ClientException
+     */
+    public abstract void setContent(String filterId, List<NabuccoDatatype> values, String viewName)
+            throws ClientException;
 
     /**
      * Getter for the type of the widget model

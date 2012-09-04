@@ -19,8 +19,11 @@ package org.nabucco.framework.base.ui.web.component.work;
 import org.nabucco.common.extension.ExtensionException;
 import org.nabucco.framework.base.facade.datatype.extension.property.PropertyLoader;
 import org.nabucco.framework.base.facade.datatype.extension.schema.ui.work.WorkItemWorkflowExtension;
+import org.nabucco.framework.base.facade.datatype.visitor.VisitorException;
 import org.nabucco.framework.base.ui.web.component.WebComponent;
 import org.nabucco.framework.base.ui.web.component.WebElementType;
+import org.nabucco.framework.base.ui.web.component.work.visitor.WebElementVisitor;
+import org.nabucco.framework.base.ui.web.component.work.visitor.WebElementVisitorContext;
 import org.nabucco.framework.base.ui.web.json.JsonElement;
 import org.nabucco.framework.base.ui.web.json.JsonMap;
 import org.nabucco.framework.base.ui.web.model.work.workflow.WorkflowModel;
@@ -130,6 +133,19 @@ public class WorkItemWorkflow extends WebComponent {
      */
     public WorkflowModel getModel() {
         return this.workflowModel;
+    }
+
+    /**
+     * Accepts the web element visitor. Overload this function to let element be visited
+     * 
+     * @param visitor
+     */
+    @Override
+    public <T extends WebElementVisitorContext> void accept(WebElementVisitor<T> visitor, T context)
+            throws VisitorException {
+        if (visitor != null) {
+            visitor.visit(this, context);
+        }
     }
 
     @Override

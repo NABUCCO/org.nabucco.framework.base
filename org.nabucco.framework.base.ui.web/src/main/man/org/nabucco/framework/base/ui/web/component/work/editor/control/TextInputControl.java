@@ -18,10 +18,13 @@ package org.nabucco.framework.base.ui.web.component.work.editor.control;
 
 import org.nabucco.framework.base.facade.datatype.extension.property.PropertyLoader;
 import org.nabucco.framework.base.facade.datatype.extension.schema.ui.work.editor.control.TextControlExtension;
-import org.nabucco.framework.base.ui.web.model.control.ControlModel;
-import org.nabucco.framework.base.ui.web.model.control.property.input.TextInputControlModel;
-import org.nabucco.framework.base.ui.web.model.control.util.formatter.TextControlFormatter;
-import org.nabucco.framework.base.ui.web.model.control.util.validator.NabuccoTextValidator;
+import org.nabucco.framework.base.facade.datatype.visitor.VisitorException;
+import org.nabucco.framework.base.ui.web.component.work.visitor.WebElementVisitor;
+import org.nabucco.framework.base.ui.web.component.work.visitor.WebElementVisitorContext;
+import org.nabucco.framework.base.ui.web.model.editor.control.ControlModel;
+import org.nabucco.framework.base.ui.web.model.editor.control.property.input.TextInputControlModel;
+import org.nabucco.framework.base.ui.web.model.editor.util.formatter.TextControlFormatter;
+import org.nabucco.framework.base.ui.web.model.editor.util.validator.NabuccoTextValidator;
 
 /**
  * TextControl
@@ -57,7 +60,23 @@ public class TextInputControl extends EditorControl {
         NabuccoTextValidator validator = new NabuccoTextValidator(this);
         TextControlFormatter formatter = new TextControlFormatter((TextControlExtension) super.getExtension());
         return new TextInputControlModel(id, propertyPath, validator, formatter, super.getDependencySet(),
-                this.getEditable());
+                this.isEditable());
+    }
+
+    /**
+     * Accepts the web element visitor. Overload this function to let element be visited
+     * 
+     * @param visitor
+     *            visitor to be accepted
+     * @param context
+     *            context of the visitor
+     */
+    @Override
+    public <T extends WebElementVisitorContext> void accept(WebElementVisitor<T> visitor, T context)
+            throws VisitorException {
+        if (visitor != null) {
+            visitor.visit(this, context);
+        }
     }
 
 }

@@ -19,9 +19,7 @@ package org.nabucco.framework.base.ui.web.action.handler;
 import org.nabucco.framework.base.facade.datatype.NabuccoDatatype;
 import org.nabucco.framework.base.facade.exception.client.ClientException;
 import org.nabucco.framework.base.facade.exception.client.action.ActionException;
-import org.nabucco.framework.base.ui.web.action.WebAction;
 import org.nabucco.framework.base.ui.web.action.WebActionHandlerSupport;
-import org.nabucco.framework.base.ui.web.action.WebActionRegistry;
 import org.nabucco.framework.base.ui.web.action.handler.picker.ApplyPickerFilterHandler;
 import org.nabucco.framework.base.ui.web.action.parameter.WebActionParameter;
 import org.nabucco.framework.base.ui.web.action.result.OpenItem;
@@ -77,16 +75,8 @@ public abstract class OpenPickerActionHandler<D extends NabuccoDatatype> extends
             ActionException {
         parameter.setParameter(NabuccoServletPathType.PICKER_DIALOG, pickerDialog.getInstanceId());
 
-        String dataFillAction = ApplyPickerFilterHandler.ID;
-        WebAction action = WebActionRegistry.getInstance().newAction(dataFillAction);
-
-        if (action == null) {
-            throw new ClientException("Cannot instanciate filter action.");
-        }
-        action.execute(parameter);
+        super.executeAction(ApplyPickerFilterHandler.ID, parameter);
     }
-
-
 
     /**
      * Return the id of the picker to be opened

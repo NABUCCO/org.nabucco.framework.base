@@ -20,6 +20,7 @@ package org.nabucco.framework.base.facade.datatype.extension.schema.ui.applicati
 import org.nabucco.framework.base.facade.datatype.extension.property.BooleanProperty;
 import org.nabucco.framework.base.facade.datatype.extension.property.StringProperty;
 import org.nabucco.framework.base.facade.datatype.extension.schema.ui.UiExtension;
+import org.nabucco.framework.base.facade.datatype.extension.schema.ui.application.LocalizationExtension;
 
 
 @Author			Frank Ratschinski
@@ -49,5 +50,8 @@ public Datatype ApplicationExtension extends UiExtension {
 	
 	@Description	Whether the application runs in debug mode or not.
 	private Datatype BooleanProperty[1] debugMode; 
+	
+	@Description	The localization settings of the application
+	private Datatype LocalizationExtension[1] localization;
 	
 }

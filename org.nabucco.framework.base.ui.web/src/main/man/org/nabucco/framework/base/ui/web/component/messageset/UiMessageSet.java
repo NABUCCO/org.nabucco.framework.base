@@ -29,7 +29,7 @@ import org.nabucco.framework.base.facade.datatype.logger.NabuccoLogger;
 import org.nabucco.framework.base.facade.datatype.logger.NabuccoLoggingFactory;
 import org.nabucco.framework.base.facade.datatype.validation.constraint.element.ConstraintType;
 import org.nabucco.framework.base.ui.web.component.work.WorkItem;
-import org.nabucco.framework.base.ui.web.model.control.ControlType;
+import org.nabucco.framework.base.ui.web.model.editor.ControlType;
 import org.nabucco.framework.base.ui.web.servlet.util.NabuccoServletUtil;
 import org.nabucco.framework.base.ui.web.session.NabuccoWebSession;
 import org.nabucco.framework.base.ui.web.session.NabuccoWebSessionFactory;

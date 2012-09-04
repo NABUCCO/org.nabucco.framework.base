@@ -30,6 +30,8 @@ import org.nabucco.framework.base.facade.datatype.extension.property.Enumeration
 import org.nabucco.framework.base.facade.datatype.extension.schema.ui.common.ColumnExtension;
 import org.nabucco.framework.base.facade.datatype.extension.schema.ui.common.EditorButtonExtension;
 import org.nabucco.framework.base.facade.datatype.extension.schema.ui.common.ListButtonExtension;
+import org.nabucco.framework.base.facade.datatype.extension.schema.ui.common.ListButtonGroupExtension;
+import org.nabucco.framework.base.facade.datatype.extension.schema.ui.common.MenuButtonExtension;
 import org.nabucco.framework.base.facade.datatype.extension.schema.ui.work.WorkItemActionExtension;
 import org.nabucco.framework.base.facade.datatype.extension.schema.ui.work.WorkItemActionsExtension;
 import org.nabucco.framework.base.facade.datatype.extension.schema.ui.work.WorkItemBrowserEntryExtension;
@@ -43,7 +45,9 @@ import org.nabucco.framework.base.facade.datatype.extension.schema.ui.work.edito
 import org.nabucco.framework.base.facade.datatype.extension.schema.ui.work.editor.control.DateControlExtension;
 import org.nabucco.framework.base.facade.datatype.extension.schema.ui.work.editor.control.DropDownControlExtension;
 import org.nabucco.framework.base.facade.datatype.extension.schema.ui.work.editor.control.EditorControlExtension;
+import org.nabucco.framework.base.facade.datatype.extension.schema.ui.work.editor.control.FileControlExtension;
 import org.nabucco.framework.base.facade.datatype.extension.schema.ui.work.editor.control.ImageControlExtension;
+import org.nabucco.framework.base.facade.datatype.extension.schema.ui.work.editor.control.LabelControlExtension;
 import org.nabucco.framework.base.facade.datatype.extension.schema.ui.work.editor.control.LinkControlExtension;
 import org.nabucco.framework.base.facade.datatype.extension.schema.ui.work.editor.control.PasswordControlExtension;
 import org.nabucco.framework.base.facade.datatype.extension.schema.ui.work.editor.control.PickerControlExtension;
@@ -66,6 +70,8 @@ import org.w3c.dom.Element;
  */
 public class EditorExtensionParser extends NabuccoExtensionParserSupport implements ExtensionParser {
 
+    private static final String MODIFICATION_DEFAULT = "NONE";
+
     private static final String ELEMENT_PARAMETER = "parameter";
 
     private static final String ELEMENT_QUERY_PARAMETER_MAPPING = "queryParameterMapping";
@@ -80,6 +86,8 @@ public class EditorExtensionParser extends NabuccoExtensionParserSupport impleme
 
     private static final String ELEMENT_BUTTON = "button";
 
+    private static final String ELEMENT_BUTTON_GROUP = "buttonGroup";
+
     private static final String ELEMENT_TAB = "tab";
 
     private static final String ELEMENT_RELATION = "relation";
@@ -88,6 +96,8 @@ public class EditorExtensionParser extends NabuccoExtensionParserSupport impleme
 
     private static final String ELEMENT_DEPENDENCY_SET = "dependencySet";
 
+    private static final Object ELEMENT_MENU = "menu";
+
     private static final String ELEMENT_DEPENDENCY = "dependency";
 
     private static final String ATTR_ID = "id";
@@ -95,6 +105,8 @@ public class EditorExtensionParser extends NabuccoExtensionParserSupport impleme
     private static final String ATTR_NAME = "name";
 
     private static final String ATTR_REFID = "refId";
+
+    private static final String ATTR_RESOLVER = "resolver";
 
     private static final String ATTR_LABEL = "label";
 
@@ -109,6 +121,8 @@ public class EditorExtensionParser extends NabuccoExtensionParserSupport impleme
     private static final String ATTR_UPLOAD_DIALOG_ID = "uploadDialogId";
 
     private static final String ATTR_DOUBLECLICK_ACTION = "doubleclickAction";
+
+    private static final String ATTR_LOAD_ACTION = "loadAction";
 
     private static final String ATTR_OPEN_ACTION = "openAction";
 
@@ -182,6 +196,18 @@ public class EditorExtensionParser extends NabuccoExtensionParserSupport impleme
 
     private static final String ATTR_PARAMETER = "parameter";
 
+    private static final String ATTR_AUTO_COMPLETION = "autoCompletionFilter";
+
+    private static final String ATTR_DIRTY_STATE_NEEDED = "dirtyStateNeeded";
+
+    private static final String ATTR_EXTENSION_FILTER = "extensionFilter";
+
+    private static final String ATTR_IS_TECHNICAL = "isTechnical";
+
+    private static final String ATTR_URL = "url";
+
+    private static final String ATTR_LINK_TYPE = "linkType";
+
     private static final String CONTROL_TYPE_PICKER = "PICKER";
 
     private static final String CONTROL_TYPE_LINK = "LINK";
@@ -198,13 +224,15 @@ public class EditorExtensionParser extends NabuccoExtensionParserSupport impleme
 
     private static final String CONTROL_TYPE_RADIO = "RADIO";
 
+    private static final String CONTROL_LABEL = "LABEL";
+
     private static final String CONTROL_TYPE_IMAGE = "IMAGE";
 
     private static final String CONTROL_PASSWORD = "PASSWORD";
 
     private static final String CONTROL_TYPE_TEXTAREA = "TEXTAREA";
 
-    private static final String ATTR_DIRTY_STATE_NEEDED = "dirtyStateNeeded";
+    private static final String CONTROL_TYPE_FILE = "FILE";
 
     private static NabuccoLogger logger = NabuccoLoggingFactory.getInstance().getLogger(EditorExtensionParser.class);
 
@@ -220,6 +248,7 @@ public class EditorExtensionParser extends NabuccoExtensionParserSupport impleme
 
             Element editorElement = super.getElementsByTagName(element, ELEMENT_EDITOR).get(0);
 
+            extension.setResolver(super.getClassProperty(editorElement, ATTR_RESOLVER));
             extension.setLabel(super.getStringProperty(editorElement, ATTR_LABEL));
             extension.setTooltip(super.getStringProperty(editorElement, ATTR_TOOLTIP));
             extension.setIcon(super.getStringProperty(editorElement, ATTR_ICON));
@@ -389,6 +418,41 @@ public class EditorExtensionParser extends NabuccoExtensionParserSupport impleme
      * @throws ExtensionException
      *             when the tab fields cannot be parsed
      */
+    private ListButtonGroupExtension parseListButtonGroupExtension(Element actionElement)
+            throws ExtensionParserException, ExtensionException {
+
+        ListButtonGroupExtension buttonGroupExtension = new ListButtonGroupExtension();
+
+        String buttonId = actionElement.getAttribute(ATTR_ID);
+        buttonGroupExtension.setIdentifier(buttonId);
+        buttonGroupExtension.setLabel(super.getStringProperty(actionElement, ATTR_LABEL));
+        buttonGroupExtension.setTooltip(super.getStringProperty(actionElement, ATTR_TOOLTIP));
+        buttonGroupExtension.setIcon(super.getStringProperty(actionElement, ATTR_ICON));
+        buttonGroupExtension.setSelection(super.getBooleanProperty(actionElement, ATTR_SELECTION, false));
+        buttonGroupExtension.setModification(super.getEnumerationProperty(actionElement, ATTR_MODIFICATION,
+                MODIFICATION_DEFAULT));
+
+        List<Element> buttons = super.getChildren(actionElement, ELEMENT_BUTTON);
+        for (Element button : buttons) {
+            ListButtonExtension buttonExt = this.parseListButtonExtension(button);
+            buttonGroupExtension.getButtonList().add(buttonExt);
+        }
+
+        return buttonGroupExtension;
+    }
+
+    /**
+     * Parse the action reference element.
+     * 
+     * @param actionElement
+     *            the action element to parse
+     * @return the parsed action extension
+     * 
+     * @throws ExtensionParserException
+     *             when the xml attributes cannot be parsed
+     * @throws ExtensionException
+     *             when the tab fields cannot be parsed
+     */
     private EditorButtonExtension parseButtonExtension(Element actionElement) throws ExtensionParserException,
             ExtensionException {
 
@@ -432,7 +496,8 @@ public class EditorExtensionParser extends NabuccoExtensionParserSupport impleme
         buttonExtension.setParameter(super.getStringProperty(actionElement, ATTR_PARAMETER));
 
         buttonExtension.setSelection(super.getBooleanProperty(actionElement, ATTR_SELECTION, false));
-        buttonExtension.setModification(super.getEnumerationProperty(actionElement, ATTR_MODIFICATION));
+        buttonExtension.setModification(super.getEnumerationProperty(actionElement, ATTR_MODIFICATION,
+                MODIFICATION_DEFAULT));
 
         return buttonExtension;
     }
@@ -459,6 +524,7 @@ public class EditorExtensionParser extends NabuccoExtensionParserSupport impleme
         tabExtension.setTooltip(super.getStringProperty(tabElement, ATTR_TOOLTIP));
         tabExtension.setIcon(super.getStringProperty(tabElement, ATTR_ICON));
         tabExtension.setGrid(super.getStringProperty(tabElement, ATTR_GRID));
+        tabExtension.setIsTechnical(super.getBooleanProperty(tabElement, ATTR_IS_TECHNICAL));
 
         for (Element controlElement : super.getChildren(tabElement)) {
             String tagName = controlElement.getTagName();
@@ -509,8 +575,12 @@ public class EditorExtensionParser extends NabuccoExtensionParserSupport impleme
             controlExtension = new DropDownControlExtension();
         } else if (tagName.equalsIgnoreCase(CONTROL_TYPE_IMAGE)) {
             controlExtension = this.parseImageControlExtension(controlElement);
+        } else if (tagName.equalsIgnoreCase(CONTROL_TYPE_FILE)) {
+            controlExtension = this.parseFileControlExtension(controlElement);
         } else if (tagName.equalsIgnoreCase(CONTROL_PASSWORD)) {
             controlExtension = new PasswordControlExtension();
+        } else if (tagName.equalsIgnoreCase(CONTROL_LABEL)) {
+            controlExtension = new LabelControlExtension();
         } else {
             throw new ExtensionParserException("The tag name " + tagName + " is not supported yet");
         }
@@ -524,6 +594,24 @@ public class EditorExtensionParser extends NabuccoExtensionParserSupport impleme
         controlExtension.setType(controlType);
 
         return controlExtension;
+    }
+
+    /**
+     * parses a new file control extension
+     * 
+     * @param controlElement
+     *            element to parse
+     * @return parsed extension
+     * @throws ExtensionParserException
+     *             by errors in parsing
+     */
+    private EditorControlExtension parseFileControlExtension(Element controlElement) throws ExtensionParserException {
+
+        FileControlExtension fileExtension = new FileControlExtension();
+        fileExtension.setUploadPath(super.getStringProperty(controlElement, ATTR_UPLOAD_PATH));
+        fileExtension.setExtensionFilter(super.getStringProperty(controlElement, ATTR_EXTENSION_FILTER));
+
+        return fileExtension;
     }
 
     /**
@@ -575,6 +663,8 @@ public class EditorExtensionParser extends NabuccoExtensionParserSupport impleme
         TextAreaControlExtension textControlExtension = new TextAreaControlExtension();
         textControlExtension.setRegex(super.getStringProperty(controlElement, ATTR_REGEX));
         textControlExtension.setFormatType(super.getEnumerationProperty(controlElement, ATTR_FORMAT_TYPE));
+        textControlExtension.setUploadPath(super.getStringProperty(controlElement, ATTR_UPLOAD_PATH));
+
         return textControlExtension;
     }
 
@@ -583,7 +673,9 @@ public class EditorExtensionParser extends NabuccoExtensionParserSupport impleme
      * 
      * @param controlElement
      *            the element to be parsed
+     * 
      * @return parsed extension
+     * 
      * @throws ExtensionParserException
      *             if errors by parsing
      * @throws ExtensionException
@@ -591,11 +683,14 @@ public class EditorExtensionParser extends NabuccoExtensionParserSupport impleme
      */
     private EditorControlExtension parsePickerControlExtension(Element controlElement) throws ExtensionParserException,
             ExtensionException {
+
         PickerControlExtension pickerControlExtenstion = new PickerControlExtension();
         pickerControlExtenstion.setMultipleSelection(super.getBooleanProperty(controlElement, ATTR_MULTIPLE_SELECTION));
         pickerControlExtenstion.setDisplayPath(super.getStringProperty(controlElement, ATTR_DISPLAY_PATH));
         pickerControlExtenstion.setPickerDialog(super.getStringProperty(controlElement, ATTR_PICKER_DIALOG));
         pickerControlExtenstion.setOpenAction(super.getStringProperty(controlElement, ATTR_OPEN_ACTION));
+        pickerControlExtenstion.setAutoCompletionFilter(super.getStringProperty(controlElement, ATTR_AUTO_COMPLETION));
+
         QueryParameterMappingExtension queryParameterMappingExtension = new QueryParameterMappingExtension();
         pickerControlExtenstion.setQueryParameterMapping(queryParameterMappingExtension);
 
@@ -626,6 +721,10 @@ public class EditorExtensionParser extends NabuccoExtensionParserSupport impleme
     private EditorControlExtension parseLinkControlExtension(Element controlElement) throws ExtensionParserException {
         LinkControlExtension linkControlExtension = new LinkControlExtension();
         linkControlExtension.setAction(super.getStringProperty(controlElement, ATTR_ACTIONID));
+        linkControlExtension.setIcon(super.getStringProperty(controlElement, ATTR_ICON));
+        linkControlExtension.setUrl(super.getStringProperty(controlElement, ATTR_URL));
+        linkControlExtension.setLinkType(super.getEnumerationProperty(controlElement, ATTR_LINK_TYPE));
+
         return linkControlExtension;
     }
 
@@ -737,32 +836,82 @@ public class EditorExtensionParser extends NabuccoExtensionParserSupport impleme
         relationExtension.setLabel(super.getStringProperty(relationElement, ATTR_LABEL));
         relationExtension.setTooltip(super.getStringProperty(relationElement, ATTR_TOOLTIP));
         relationExtension.setDoubleclickAction(super.getStringProperty(relationElement, ATTR_DOUBLECLICK_ACTION));
+        relationExtension.setLoadAction(super.getStringProperty(relationElement, ATTR_LOAD_ACTION));
+        relationExtension.setIsTechnical(super.getBooleanProperty(relationElement, ATTR_IS_TECHNICAL));
+
         DependencySetExtension dependencyExtension = this.parseDependencySetExtension(relationElement);
         relationExtension.setDependencySet(dependencyExtension);
 
-        List<Element> actionElements = super.getElementsByTagName(relationElement, ELEMENT_BUTTON);
-        for (Element actionElement : actionElements) {
-            ListButtonExtension buttonExtension = this.parseListButtonExtension(actionElement);
-            relationExtension.getButtons().add(buttonExtension);
-        }
-
-        List<Element> columnElements = super.getElementsByTagName(relationElement, ELEMENT_COLUMN);
-        for (Element columnElement : columnElements) {
-
-            ColumnExtension columnExtension = new ColumnExtension();
-            columnExtension.setIdentifier(columnElement.getAttribute(ATTR_ID));
-            columnExtension.setLabel(super.getStringProperty(columnElement, ATTR_LABEL));
-            columnExtension.setTooltip(super.getStringProperty(columnElement, ATTR_TOOLTIP));
-            columnExtension.setProperty(super.getStringProperty(columnElement, ATTR_PROPERTY));
-            columnExtension.setVisible(super.getBooleanProperty(columnElement, ATTR_VISIBLE));
-            columnExtension.setSortable(super.getBooleanProperty(columnElement, ATTR_SORTABLE));
-            columnExtension.setRenderer(super.getClassProperty(columnElement, ATTR_RENDERER));
-            columnExtension.setLayout(super.getEnumerationProperty(columnElement, ATTR_LAYOUT));
-            columnExtension.setWidth(super.getStringProperty(columnElement, ATTR_WIDTH));
-            relationExtension.getColumns().add(columnExtension);
+        List<Element> children = super.getChildren(relationElement);
+        for (Element child : children) {
+            String tagName = child.getTagName();
+            if (tagName.equals(ELEMENT_BUTTON_GROUP)) {
+                ListButtonGroupExtension buttonGroupExtension = this.parseListButtonGroupExtension(child);
+                relationExtension.getButtons().add(buttonGroupExtension);
+            } else if (tagName.equals(ELEMENT_BUTTON)) {
+                ListButtonExtension buttonExtension = this.parseListButtonExtension(child);
+                relationExtension.getButtons().add(buttonExtension);
+            } else if (tagName.equals(ELEMENT_COLUMN)) {
+                ColumnExtension columnExtension = this.parseColumnExtension(child);
+                relationExtension.getColumns().add(columnExtension);
+            } else if (tagName.equals(ELEMENT_MENU)) {
+                MenuButtonExtension menuExtension = this.parseMenuExtension(child);
+                relationExtension.setMenuButton(menuExtension);
+            } else {
+                throw new ExtensionParserException("Relation Tab has unallowed content '" + tagName + "'.");
+            }
         }
 
         return relationExtension;
     }
 
+    /**
+     * Parses the given element and returns the list of buttons for the menu
+     * 
+     * @param element
+     *            the element to be parsed
+     * @return list with buttons and button groups
+     * 
+     * @throws ExtensionException
+     * @throws ExtensionParserException
+     */
+    private MenuButtonExtension parseMenuExtension(Element element) throws ExtensionParserException, ExtensionException {
+        MenuButtonExtension retVal = new MenuButtonExtension();
+
+        List<Element> menuChildren = super.getChildren(element);
+        for (Element menuElement : menuChildren) {
+            String tagName = menuElement.getTagName();
+
+            if (tagName.equals(ELEMENT_BUTTON)) {
+                ListButtonExtension buttonExtension = this.parseListButtonExtension(menuElement);
+                retVal.getButtons().add(buttonExtension);
+            } else if (tagName.equals(ELEMENT_BUTTON_GROUP)) {
+                ListButtonGroupExtension buttonGroupExtension = this.parseListButtonGroupExtension(menuElement);
+                retVal.getButtons().add(buttonGroupExtension);
+            }
+        }
+        return retVal;
+    }
+
+    /**
+     * Parses the relation Column extension
+     * 
+     * @param columnElement
+     *            element to be parsed
+     * @return parsed column
+     * @throws ExtensionParserException
+     */
+    private ColumnExtension parseColumnExtension(Element columnElement) throws ExtensionParserException {
+        ColumnExtension columnExtension = new ColumnExtension();
+        columnExtension.setIdentifier(columnElement.getAttribute(ATTR_ID));
+        columnExtension.setLabel(super.getStringProperty(columnElement, ATTR_LABEL));
+        columnExtension.setTooltip(super.getStringProperty(columnElement, ATTR_TOOLTIP));
+        columnExtension.setProperty(super.getStringProperty(columnElement, ATTR_PROPERTY));
+        columnExtension.setVisible(super.getBooleanProperty(columnElement, ATTR_VISIBLE));
+        columnExtension.setSortable(super.getBooleanProperty(columnElement, ATTR_SORTABLE));
+        columnExtension.setRenderer(super.getClassProperty(columnElement, ATTR_RENDERER));
+        columnExtension.setLayout(super.getEnumerationProperty(columnElement, ATTR_LAYOUT));
+        columnExtension.setWidth(super.getStringProperty(columnElement, ATTR_WIDTH));
+        return columnExtension;
+    }
 }

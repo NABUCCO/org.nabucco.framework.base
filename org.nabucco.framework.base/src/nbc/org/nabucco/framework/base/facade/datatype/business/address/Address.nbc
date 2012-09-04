@@ -16,13 +16,13 @@
  */
 package org.nabucco.framework.base.facade.datatype.business.address;
 
-import org.nabucco.framework.base.facade.datatype.Description;
 import org.nabucco.framework.base.facade.datatype.FunctionalIdentifier;
 import org.nabucco.framework.base.facade.datatype.MultiTenantDatatype;
 import org.nabucco.framework.base.facade.datatype.Owner;
 import org.nabucco.framework.base.facade.datatype.StatusType;
 import org.nabucco.framework.base.facade.datatype.business.address.AddressType;
 import org.nabucco.framework.base.facade.datatype.code.Code;
+import org.nabucco.framework.base.facade.datatype.text.LongDescription;
 
 @Author			Dominic Trumpfheller
 @Company		PRODYNA AG
@@ -35,7 +35,7 @@ public Datatype Address extends MultiTenantDatatype  {
 	private Basetype Owner[1] owner;
 	
 	@Description	The Address description.
-	private Basetype Description[0..1] description;
+	private Basetype LongDescription[0..1] description;
 	
 	@Description	Type of the address.
 	protected Enumeration AddressType[1] type; 

@@ -18,8 +18,8 @@ package org.nabucco.framework.base.ui.web.model.table.filter;
 
 import java.util.Date;
 
-import org.nabucco.framework.base.facade.datatype.Basetype;
 import org.nabucco.framework.base.facade.datatype.NDate;
+import org.nabucco.framework.base.facade.datatype.NType;
 
 /**
  * Default filter for NABUCCO Date Basetypes.
@@ -46,7 +46,7 @@ public class NDateFilter implements TableColumnFilter {
     }
 
     @Override
-    public boolean accept(Basetype basetype) {
+    public boolean accept(NType basetype) {
         if (!(basetype instanceof NDate)) {
             return false;
         }

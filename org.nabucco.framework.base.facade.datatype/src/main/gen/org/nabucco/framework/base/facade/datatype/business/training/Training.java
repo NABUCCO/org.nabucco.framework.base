@@ -1,18 +1,16 @@
 /*
  * Copyright 2012 PRODYNA AG
- *
- * Licensed under the Eclipse Public License (EPL), Version 1.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
+ * 
+ * Licensed under the Eclipse Public License (EPL), Version 1.0 (the "License"); you may not use
+ * this file except in compliance with the License. You may obtain a copy of the License at
+ * 
  * http://www.opensource.org/licenses/eclipse-1.0.php or
  * http://www.nabucco.org/License.html
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+ * 
+ * Unless required by applicable law or agreed to in writing, software distributed under the
+ * License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND,
+ * either express or implied. See the License for the specific language governing permissions
+ * and limitations under the License.
  */
 package org.nabucco.framework.base.facade.datatype.business.training;
 
@@ -21,7 +19,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import org.nabucco.framework.base.facade.datatype.Datatype;
-import org.nabucco.framework.base.facade.datatype.Description;
 import org.nabucco.framework.base.facade.datatype.FunctionalIdentifier;
 import org.nabucco.framework.base.facade.datatype.NabuccoDatatype;
 import org.nabucco.framework.base.facade.datatype.Name;
@@ -35,6 +32,7 @@ import org.nabucco.framework.base.facade.datatype.property.NabuccoPropertyDescri
 import org.nabucco.framework.base.facade.datatype.property.PropertyAssociationType;
 import org.nabucco.framework.base.facade.datatype.property.PropertyCache;
 import org.nabucco.framework.base.facade.datatype.property.PropertyDescriptorSupport;
+import org.nabucco.framework.base.facade.datatype.text.LongDescription;
 
 /**
  * Training<p/>A Training in the Training Component<p/>
@@ -49,7 +47,7 @@ public class Training extends NabuccoDatatype implements Datatype {
     private static final StatusType STATUSTYPE_DEFAULT = StatusType.ACTIVE;
 
     private static final String[] PROPERTY_CONSTRAINTS = { "l3,12;u0,n;m1,1;", "l0,255;u0,n;m1,1;",
-            "l0,255;u0,n;m0,1;", "m1,1;", "l0,n;u0,n;m0,1;", "m0,1;" };
+            "l0,4000;u0,n;m0,1;", "m1,1;", "l0,n;u0,n;m0,1;", "m0,1;" };
 
     public static final String OWNER = "owner";
 
@@ -70,7 +68,7 @@ public class Training extends NabuccoDatatype implements Datatype {
     private Name name;
 
     /** The training description. */
-    private Description description;
+    private LongDescription description;
 
     /** The training status type. */
     private StatusType statusType;
@@ -131,7 +129,7 @@ public class Training extends NabuccoDatatype implements Datatype {
                 PropertyDescriptorSupport.createBasetype(OWNER, Owner.class, 3, PROPERTY_CONSTRAINTS[0], false));
         propertyMap.put(NAME,
                 PropertyDescriptorSupport.createBasetype(NAME, Name.class, 4, PROPERTY_CONSTRAINTS[1], false));
-        propertyMap.put(DESCRIPTION, PropertyDescriptorSupport.createBasetype(DESCRIPTION, Description.class, 5,
+        propertyMap.put(DESCRIPTION, PropertyDescriptorSupport.createBasetype(DESCRIPTION, LongDescription.class, 5,
                 PROPERTY_CONSTRAINTS[2], false));
         propertyMap.put(STATUSTYPE, PropertyDescriptorSupport.createEnumeration(STATUSTYPE, StatusType.class, 6,
                 PROPERTY_CONSTRAINTS[3], true));
@@ -171,8 +169,8 @@ public class Training extends NabuccoDatatype implements Datatype {
         } else if ((property.getName().equals(NAME) && (property.getType() == Name.class))) {
             this.setName(((Name) property.getInstance()));
             return true;
-        } else if ((property.getName().equals(DESCRIPTION) && (property.getType() == Description.class))) {
-            this.setDescription(((Description) property.getInstance()));
+        } else if ((property.getName().equals(DESCRIPTION) && (property.getType() == LongDescription.class))) {
+            this.setDescription(((LongDescription) property.getInstance()));
             return true;
         } else if ((property.getName().equals(STATUSTYPE) && (property.getType() == StatusType.class))) {
             this.setStatusType(((StatusType) property.getInstance()));
@@ -324,18 +322,18 @@ public class Training extends NabuccoDatatype implements Datatype {
     /**
      * The training description.
      *
-     * @return the Description.
+     * @return the LongDescription.
      */
-    public Description getDescription() {
+    public LongDescription getDescription() {
         return this.description;
     }
 
     /**
      * The training description.
      *
-     * @param description the Description.
+     * @param description the LongDescription.
      */
-    public void setDescription(Description description) {
+    public void setDescription(LongDescription description) {
         this.description = description;
     }
 
@@ -349,7 +347,7 @@ public class Training extends NabuccoDatatype implements Datatype {
             if ((description == null)) {
                 return;
             }
-            this.description = new Description();
+            this.description = new LongDescription();
         }
         this.description.setValue(description);
     }

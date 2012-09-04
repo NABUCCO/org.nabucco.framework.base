@@ -21,7 +21,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 
 import org.nabucco.framework.base.facade.datatype.Datatype;
 import org.nabucco.framework.base.facade.datatype.DatatypeState;
@@ -29,14 +28,15 @@ import org.nabucco.framework.base.facade.datatype.collection.NabuccoListImpl;
 import org.nabucco.framework.base.facade.datatype.logger.NabuccoLogger;
 import org.nabucco.framework.base.facade.datatype.logger.NabuccoLoggingFactory;
 import org.nabucco.framework.base.facade.datatype.property.NabuccoProperty;
-import org.nabucco.framework.base.facade.datatype.property.NabuccoPropertyResolver;
+import org.nabucco.framework.base.facade.datatype.property.PropertyAccessor;
 import org.nabucco.framework.base.facade.datatype.property.PropertyOwner;
 import org.nabucco.framework.base.facade.datatype.visitor.VisitorException;
 import org.nabucco.framework.base.ui.web.json.JsonElement;
 import org.nabucco.framework.base.ui.web.json.JsonMap;
 import org.nabucco.framework.base.ui.web.model.browser.BindableBrowserEntry;
-import org.nabucco.framework.base.ui.web.model.control.ControlModel;
-import org.nabucco.framework.base.ui.web.model.control.util.dependency.DependencyController;
+import org.nabucco.framework.base.ui.web.model.editor.EditorGridElementModel;
+import org.nabucco.framework.base.ui.web.model.editor.control.ControlModel;
+import org.nabucco.framework.base.ui.web.model.editor.util.dependency.DependencyController;
 import org.nabucco.framework.base.ui.web.model.relation.RelationTabModel;
 import org.nabucco.framework.base.ui.web.model.work.workflow.WorkflowModel;
 
@@ -58,11 +58,11 @@ public class EditorModel extends WorkItemModel {
     /** List with bound browser entries (one bound property -> one entry) */
     private List<BindableBrowserEntry> browserEntryList = new ArrayList<BindableBrowserEntry>();
 
-    /** Relation Tab Table Models by their properties */
-    private Map<String, RelationTabModel> relationTables = new HashMap<String, RelationTabModel>();
+    /** Relation Tab Table Models */
+    private List<RelationTabModel> relationTables = new ArrayList<RelationTabModel>();
 
-    /** Control Models by their properties. */
-    private Map<String, ControlModel<?>> controlMap = new HashMap<String, ControlModel<?>>();
+    /** editor grid elements by their ids. */
+    private Map<String, EditorGridElementModel> controlMap = new HashMap<String, EditorGridElementModel>();
 
     /** Workflow Model */
     private WorkflowModel workflowModel;
@@ -72,6 +72,8 @@ public class EditorModel extends WorkItemModel {
 
     /** Indicates if the model changes its state so the ui refresh is needed */
     private boolean modelRefreshNeeded = false;
+
+    private PropertyAccessor accessor = null;
 
     /**
      * Creates a new {@link EditorModel} instance.
@@ -112,6 +114,35 @@ public class EditorModel extends WorkItemModel {
     }
 
     /**
+     * Setter for the property accessor
+     * 
+     * the accessor may be set only once by the initialisation of the editor
+     * 
+     * @param newAccessor
+     *            accessor to be used by resolving of datatype properties
+     */
+    public void setPropertyAccessor(PropertyAccessor newAccessor) {
+        if (newAccessor == null) {
+            throw new IllegalArgumentException("Invalid Property Accessor for the editor. Given value is 'null'");
+        }
+
+        if (this.accessor != null) {
+            logger.debug("Trying to overwrite the instanciated property accessor. It may be a configuration problem. Resolver may be set only once by initialisation!");
+        }
+
+        this.accessor = newAccessor;
+    }
+
+    /**
+     * Getter for the actual property accessor
+     * 
+     * @return property accessor
+     */
+    public PropertyAccessor getPropertyAccessor() {
+        return accessor;
+    }
+
+    /**
      * Add a relation table model to the editor model.
      * 
      * @param property
@@ -119,17 +150,26 @@ public class EditorModel extends WorkItemModel {
      * @param relationTableModel
      *            the relation table model
      */
-    public void addRelationTable(String property, RelationTabModel relationTableModel) {
-        if (property == null) {
-            throw new IllegalArgumentException("Cannot add relation table model for property [null].");
-        }
+    public void addRelationTable(RelationTabModel relationTableModel) {
         if (relationTableModel == null) {
             throw new IllegalArgumentException("Cannot add relation table model [null].");
         }
-        this.relationTables.put(property, relationTableModel);
 
-        relationTableModel.getTableModel().setPropertyName(property);
-        relationTableModel.getTableModel().addPropertyChangeListener(property, this);
+        if (relationTableModel.isLazy()) {
+            // If lazy no binding is possible
+        } else {
+            String property = relationTableModel.getPropertyPath();
+
+            if (property == null || property.isEmpty()) {
+                throw new IllegalArgumentException("Cannot add relation tab with property 'null'.");
+            }
+
+            relationTableModel.getTableModel().setPropertyName(property);
+            relationTableModel.getTableModel().addPropertyChangeListener(property, this);
+        }
+
+        relationTables.add(relationTableModel);
+
     }
 
     /**
@@ -142,13 +182,13 @@ public class EditorModel extends WorkItemModel {
         if (entry == null) {
             throw new IllegalArgumentException("Cannot add browser entry because the entry is [null].");
         }
-        this.browserEntryList.add(entry);
+        browserEntryList.add(entry);
     }
 
     @Override
     public boolean isInitialized() {
-        for (ControlModel<?> controlModel : this.controlMap.values()) {
-            if (!controlModel.isInitialized()) {
+        for (EditorGridElementModel controlModel : controlMap.values()) {
+            if (controlModel.isVisible() && !controlModel.isInitialized()) {
                 return false;
             }
         }
@@ -161,7 +201,7 @@ public class EditorModel extends WorkItemModel {
      * @return Returns the datatype.
      */
     public Datatype getDatatype() {
-        return this.datatype;
+        return datatype;
     }
 
     /**
@@ -182,29 +222,27 @@ public class EditorModel extends WorkItemModel {
         // whole datatype is updating
         this.fireDatatypeReloadingEvent(true);
 
-        Datatype oldValue = this.datatype;
+        Datatype oldValue = datatype;
 
-        this.datatype = newValue;
+        datatype = newValue;
 
         this.updateControls();
 
-        stateSaver.apply(this.datatype);
+        stateSaver.apply(datatype);
 
         this.updateRelations();
 
-        NabuccoPropertyResolver<?> resolver = new NabuccoPropertyResolver<Datatype>(this.datatype);
-
-        for (BindableBrowserEntry entry : this.browserEntryList) {
+        for (BindableBrowserEntry entry : browserEntryList) {
             String boundProperty = entry.getPropertyPath();
-            NabuccoProperty property = resolver.resolveProperty(boundProperty);
+            NabuccoProperty property = accessor.resolveProperty(boundProperty, datatype);
 
             if (property != null) {
                 entry.setProperty(property);
             }
         }
 
-        if (this.workflowModel != null) {
-            this.workflowModel.setDatatype(newValue);
+        if (workflowModel != null) {
+            workflowModel.setDatatype(newValue);
         }
 
         super.updateProperty(PROPERTY_DATATYPE, oldValue, newValue);
@@ -239,43 +277,46 @@ public class EditorModel extends WorkItemModel {
      * @return Returns the workflowModel.
      */
     public WorkflowModel getWorkflowModel() {
-        return this.workflowModel;
+        return workflowModel;
     }
 
     /**
      * Update the editor controls and fire property change events for the modified properties.
      */
     private void updateControls() {
-        NabuccoPropertyResolver<Datatype> resolver = new NabuccoPropertyResolver<Datatype>(this.datatype);
 
         Map<String, NabuccoProperty> resolvedPropertiesMap = new HashMap<String, NabuccoProperty>();
 
-        for (String id : this.controlMap.keySet()) {
-            ControlModel<?> controlModel = this.controlMap.get(id);
-            String propertyPath = controlModel.getPropertyPath();
+        for (String id : controlMap.keySet()) {
+            EditorGridElementModel model = controlMap.get(id);
 
-            NabuccoProperty resolvedProperty = null;
+            if (model instanceof ControlModel) {
+                ControlModel<?> controlModel = (ControlModel<?>) model;
+                String propertyPath = controlModel.getPropertyPath();
 
-            if (resolvedPropertiesMap.containsKey(propertyPath)) {
-                resolvedProperty = resolvedPropertiesMap.get(propertyPath);
-            } else {
-                resolvedProperty = resolver.resolveProperty(propertyPath);
-                resolvedPropertiesMap.put(propertyPath, resolvedProperty);
+                NabuccoProperty resolvedProperty = null;
+
+                if (resolvedPropertiesMap.containsKey(propertyPath)) {
+                    resolvedProperty = resolvedPropertiesMap.get(propertyPath);
+                } else {
+                    resolvedProperty = accessor.resolveProperty(propertyPath, datatype);
+                    resolvedPropertiesMap.put(propertyPath, resolvedProperty);
+                }
+
+                if (resolvedProperty == null) {
+                    String datatypeName = datatype != null ? datatype.getClass().getName() : "null";
+                    logger.warning("No property for path '", propertyPath, "' defined in datatype ", datatypeName, ".");
+                    continue;
+                }
+
+                controlModel.setProperty(resolvedProperty);
             }
-
-            if (resolvedProperty == null) {
-                String datatypeName = this.datatype != null ? this.datatype.getClass().getName() : "null";
-                logger.warning("No property for path '", propertyPath, "' defined in datatype ", datatypeName, ".");
-                continue;
-            }
-
-            controlModel.setProperty(resolvedProperty);
         }
     }
 
     @Override
     public void refresh() {
-        this.setDatatype(this.datatype);
+        this.setDatatype(datatype);
     }
 
     /**
@@ -283,11 +324,12 @@ public class EditorModel extends WorkItemModel {
      */
     @SuppressWarnings("unchecked")
     private void updateRelations() {
-        NabuccoPropertyResolver<Datatype> resolver = new NabuccoPropertyResolver<Datatype>(this.datatype);
+        for (RelationTabModel relationTabModel : relationTables) {
+            if (relationTabModel.isLazy()) {
+                continue;
+            }
 
-        for (Entry<String, RelationTabModel> entry : this.relationTables.entrySet()) {
-
-            NabuccoProperty property = resolver.resolveProperty(entry.getKey());
+            NabuccoProperty property = accessor.resolveProperty(relationTabModel.getPropertyPath(), datatype);
             if (property == null) {
                 continue;
             }
@@ -306,16 +348,16 @@ public class EditorModel extends WorkItemModel {
                     newProperty.getParent().setProperty(newProperty);
                 }
 
-                entry.getValue().setContent((List<Datatype>) instance);
+                relationTabModel.setContent((List<Datatype>) instance);
                 break;
 
             case COMPONENT_RELATION:
-                entry.getValue().setContent((List<Datatype>) instance);
+                relationTabModel.setContent((List<Datatype>) instance);
                 break;
 
             }
 
-            entry.getValue().setProperty(property);
+            relationTabModel.setProperty(property);
 
         }
     }
@@ -328,14 +370,20 @@ public class EditorModel extends WorkItemModel {
     public boolean validate() {
         boolean retVal = true;
 
-        for (ControlModel<?> model : this.controlMap.values()) {
-            model.setValidating(true);
-            if (!model.validate().isEmpty()) {
-                retVal = false;
+        for (EditorGridElementModel model : controlMap.values()) {
+
+            // Only controls can be validated
+            if (model instanceof ControlModel<?>) {
+                ControlModel<?> controlModel = (ControlModel<?>) model;
+                controlModel.setValidating(true);
+                if (!controlModel.validate().isEmpty()) {
+                    retVal = false;
+                }
             }
+
         }
 
-        for (RelationTabModel model : this.relationTables.values()) {
+        for (RelationTabModel model : relationTables) {
             model.setValidating(true);
             if (!model.validate().isEmpty()) {
                 retVal = false;
@@ -353,17 +401,18 @@ public class EditorModel extends WorkItemModel {
      * @param type
      *            the control type
      */
-    public void addControl(ControlModel<?> controlModel) {
-        if (controlModel == null) {
+    public void addControl(EditorGridElementModel gridElementModel) {
+        if (gridElementModel == null) {
             throw new IllegalArgumentException("Cannot add control model [null] to editor model.");
         }
 
-        controlModel.addPropertyChangeListener(controlModel.getPropertyPath(), this);
-
-        this.controlMap.put(controlModel.getId(), controlModel);
+        if (gridElementModel instanceof ControlModel) {
+            gridElementModel.addPropertyChangeListener(((ControlModel<?>) gridElementModel).getPropertyPath(), this);
+        }
+        controlMap.put(gridElementModel.getId(), gridElementModel);
 
         // Let control to have reference on its editor
-        controlModel.setEditorModel(this);
+        gridElementModel.setEditorModel(this);
     }
 
     /**
@@ -371,9 +420,9 @@ public class EditorModel extends WorkItemModel {
      * 
      * @return list of ids
      */
-    public List<String> getRefreshNeededControlIds() {
+    public List<String> getRefreshNeededGridElementsIds() {
         List<String> retVal = new ArrayList<String>();
-        for (ControlModel<?> control : this.controlMap.values()) {
+        for (EditorGridElementModel control : controlMap.values()) {
             if (control.isRefreshNeeded()) {
                 retVal.add(control.getId());
             }
@@ -383,15 +432,16 @@ public class EditorModel extends WorkItemModel {
 
     @Override
     public boolean isDirty() {
-        if (this.datatype == null) {
+        if (datatype == null) {
             return false;
         }
 
         DatatypeDirtyVisitor visitor = new DatatypeDirtyVisitor();
 
         try {
-            this.datatype.accept(visitor);
-            return visitor.isDirty();
+            datatype.accept(visitor);
+            boolean dirty = visitor.isDirty();
+            return dirty;
         } catch (VisitorException ve) {
             logger.error(ve, "Error checking datatype state.");
             return false;
@@ -412,7 +462,7 @@ public class EditorModel extends WorkItemModel {
 
             if (propertyChanged && this.isInitialized()) {
 
-                if (this.datatype != null) {
+                if (datatype != null) {
                     this.modifyDatatype(event.getPropertyName());
                 }
             }
@@ -420,10 +470,10 @@ public class EditorModel extends WorkItemModel {
 
         boolean dirtyStateAfter = this.isDirty();
 
-        // theck if dirty state changed during the property change event and mark model for refresh
+        // check if dirty state changed during the property change event and mark model for refresh
         // if the state changed
         if (dirtyStateBefore != dirtyStateAfter) {
-            this.modelRefreshNeeded = true;
+            modelRefreshNeeded = true;
         }
     }
 
@@ -433,7 +483,7 @@ public class EditorModel extends WorkItemModel {
      * @return Returns the modelRefreshNeeded.
      */
     public boolean isModelRefreshNeeded() {
-        return this.modelRefreshNeeded;
+        return modelRefreshNeeded;
     }
 
     /**
@@ -445,8 +495,7 @@ public class EditorModel extends WorkItemModel {
     private void modifyDatatype(String propertyPath) {
 
         // Resolve changed child Property.
-        NabuccoPropertyResolver<Datatype> resolver = new NabuccoPropertyResolver<Datatype>(this.datatype);
-        NabuccoProperty property = resolver.resolveProperty(propertyPath);
+        NabuccoProperty property = accessor.resolveProperty(propertyPath, datatype);
 
         PropertyOwner parent = property.getParent();
 
@@ -460,16 +509,12 @@ public class EditorModel extends WorkItemModel {
         }
     }
 
-
-
-
-
     @Override
     public JsonElement toJson() {
         JsonMap json = (JsonMap) super.toJson();
         json.add(JSON_DIRTY, this.isDirty());
 
-        this.modelRefreshNeeded = false;
+        modelRefreshNeeded = false;
         return json;
     }
 

@@ -28,19 +28,26 @@ import org.nabucco.framework.base.facade.datatype.extension.property.PropertyLoa
 import org.nabucco.framework.base.facade.datatype.extension.schema.queryfilter.QueryFilterExtension;
 import org.nabucco.framework.base.facade.datatype.extension.schema.ui.common.ColumnExtension;
 import org.nabucco.framework.base.facade.datatype.extension.schema.ui.common.ListButtonExtension;
+import org.nabucco.framework.base.facade.datatype.extension.schema.ui.common.ListButtonGroupExtension;
+import org.nabucco.framework.base.facade.datatype.extension.schema.ui.common.MenuButtonExtension;
 import org.nabucco.framework.base.facade.datatype.extension.schema.ui.common.filter.FilterReferenceExtension;
 import org.nabucco.framework.base.facade.datatype.extension.schema.ui.work.WorkItemBrowserEntryExtension;
 import org.nabucco.framework.base.facade.datatype.extension.schema.ui.work.WorkItemBrowserExtension;
 import org.nabucco.framework.base.facade.datatype.extension.schema.ui.work.list.ListExtension;
 import org.nabucco.framework.base.facade.datatype.logger.NabuccoLogger;
 import org.nabucco.framework.base.facade.datatype.logger.NabuccoLoggingFactory;
+import org.nabucco.framework.base.facade.datatype.visitor.VisitorException;
 import org.nabucco.framework.base.ui.web.component.WebElement;
 import org.nabucco.framework.base.ui.web.component.WebElementType;
 import org.nabucco.framework.base.ui.web.component.common.button.Button;
 import org.nabucco.framework.base.ui.web.component.common.button.ListButton;
+import org.nabucco.framework.base.ui.web.component.common.button.ListButtonGroup;
+import org.nabucco.framework.base.ui.web.component.common.button.MenuButton;
 import org.nabucco.framework.base.ui.web.component.work.WorkItem;
 import org.nabucco.framework.base.ui.web.component.work.WorkItemType;
 import org.nabucco.framework.base.ui.web.component.work.util.QueryFilterExtensionUtil;
+import org.nabucco.framework.base.ui.web.component.work.visitor.WebElementVisitor;
+import org.nabucco.framework.base.ui.web.component.work.visitor.WebElementVisitorContext;
 import org.nabucco.framework.base.ui.web.json.JsonList;
 import org.nabucco.framework.base.ui.web.json.JsonMap;
 import org.nabucco.framework.base.ui.web.model.browser.BrowserEntry;
@@ -68,7 +75,11 @@ public final class ListItem extends WorkItem implements TableElement {
 
     private static final String JSON_DOUBLECLICK_ACTION = "doubleclickAction";
 
+    private static final String JSON_MENU_BUTTONS = "menuButtons";
+
     private Map<String, FilterItem> filterMap = new LinkedHashMap<String, FilterItem>();
+
+    private MenuButton menuButtonContainer;
 
     /** Logger */
     private static NabuccoLogger logger = NabuccoLoggingFactory.getInstance().getLogger(ListItem.class);
@@ -91,10 +102,39 @@ public final class ListItem extends WorkItem implements TableElement {
 
         TableModel<Datatype> tableModel = this.getTableModel();
 
-        for (ListButtonExtension buttonExtension : this.getExtension().getButtons()) {
-            ListButton button = new ListButton(buttonExtension);
-            this.addElement(button.getId(), button);
-            button.init();
+        for (ListButtonExtension actionExtension : this.getExtension().getButtons()) {
+            if (actionExtension instanceof ListButtonGroupExtension) {
+                ListButtonGroup buttonGroup = new ListButtonGroup((ListButtonGroupExtension) actionExtension);
+                this.addElement(buttonGroup.getId(), buttonGroup);
+                buttonGroup.init();
+            } else {
+                ListButton button = new ListButton(actionExtension);
+                this.addElement(button.getId(), button);
+                button.init();
+            }
+        }
+
+        if (this.getExtension().getMenuButton() != null) {
+            MenuButtonExtension menuButton = this.getExtension().getMenuButton();
+            if (menuButton != null) {
+                menuButtonContainer = new MenuButton(menuButton);
+                for (ListButtonExtension buttonExtension : menuButton.getButtons()) {
+                    Button button;
+
+                    if (buttonExtension instanceof ListButtonGroupExtension) {
+                        button = new ListButtonGroup((ListButtonGroupExtension) buttonExtension);
+                    } else if (buttonExtension instanceof ListButtonExtension) {
+                        button = new ListButton(buttonExtension);
+                    } else {
+                        throw new IllegalArgumentException(
+                                "Cannot add a button to the relation tab menu. Not supported extension type");
+                    }
+
+                    button.init();
+                    menuButtonContainer.addButton(button);
+                }
+
+            }
         }
 
         for (ColumnExtension columnExtension : this.getExtension().getColumns()) {
@@ -135,9 +175,9 @@ public final class ListItem extends WorkItem implements TableElement {
                     FilterItem filterItem = null;
 
                     if (filterExtension == null) {
-                        filterItem = new FilterItem(filterExt);
+                        filterItem = new FilterItem(refId, filterExt);
                     } else {
-                        filterItem = new FilterItem(filterExt, filterExtension);
+                        filterItem = new FilterItem(refId, filterExt, filterExtension);
                     }
 
                     this.filterMap.put(filterItem.getRefId(), filterItem);
@@ -149,6 +189,17 @@ public final class ListItem extends WorkItem implements TableElement {
         }
 
         return new ArrayList<FilterItem>(this.filterMap.values());
+    }
+
+    /**
+     * Getter for the filter item with
+     * 
+     * @param filterId
+     *            the id of the filter to search fot
+     * @return filter item or null if nothing found
+     */
+    public FilterItem getFilter(String filterId) {
+        return this.filterMap.get(filterId);
     }
 
     /**
@@ -277,7 +328,6 @@ public final class ListItem extends WorkItem implements TableElement {
         return null;
     }
 
-
     /**
      * Getter for all configured editor buttons.
      * 
@@ -288,6 +338,28 @@ public final class ListItem extends WorkItem implements TableElement {
 
         List<ListButton> buttonList = new ArrayList<ListButton>();
         for (WebElement child : super.getElements()) {
+            if (child.getType() == WebElementType.BUTTON) {
+                ListButton button = (ListButton) child;
+                button.updateStatus(hasSelectedValue, true);
+                buttonList.add(button);
+            }
+        }
+        return buttonList;
+    }
+
+    /**
+     * Getter for all configured editor buttons.
+     * 
+     * @return the list of buttons
+     */
+    public List<ListButton> getMenuButtons() {
+        boolean hasSelectedValue = this.getListModel().hasSelectedValue();
+
+        List<ListButton> buttonList = new ArrayList<ListButton>();
+        if (menuButtonContainer == null) {
+            return buttonList;
+        }
+        for (WebElement child : this.menuButtonContainer.getElements()) {
             if (child.getType() == WebElementType.BUTTON) {
                 ListButton button = (ListButton) child;
                 button.updateStatus(hasSelectedValue, true);
@@ -310,9 +382,31 @@ public final class ListItem extends WorkItem implements TableElement {
         return doubleclickAction;
     }
 
+    /**
+     * Accepts the web element visitor. Overload this function to let element be visited
+     * 
+     * @param visitor
+     *            visitor to be accepted
+     * @param context
+     *            context of the visitor
+     */
+    @Override
+    public <T extends WebElementVisitorContext> void accept(WebElementVisitor<T> visitor, T context)
+            throws VisitorException {
+        if (visitor != null) {
+            visitor.visit(this, context);
+        }
+    }
+
     @Override
     public JsonMap toJson() {
         JsonMap json = super.toJson();
+
+        JsonList menuButtonList = new JsonList();
+        for (Button button : this.getMenuButtons()) {
+            menuButtonList.add(button.toJson());
+        }
+        json.add(JSON_MENU_BUTTONS, menuButtonList);
 
         JsonList buttonList = new JsonList();
         for (Button button : this.getAllButtons()) {

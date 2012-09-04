@@ -16,7 +16,7 @@
  */
 package org.nabucco.framework.base.ui.web.model.table.filter;
 
-import org.nabucco.framework.base.facade.datatype.Basetype;
+import org.nabucco.framework.base.facade.datatype.NType;
 
 /**
  * Filter for NABUCCO Basetypes.
@@ -32,5 +32,6 @@ public interface TableColumnFilter {
      *            The value to accept.
      * @return true if value is accepted, otherwise false.
      */
-    public boolean accept(Basetype type);
+    public boolean accept(NType type);
+
 }

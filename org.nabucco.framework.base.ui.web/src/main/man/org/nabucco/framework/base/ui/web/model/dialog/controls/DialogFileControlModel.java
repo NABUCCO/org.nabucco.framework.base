@@ -32,6 +32,7 @@ public class DialogFileControlModel extends DialogControlModel {
     private static final String JSON_EXTFILTER = "extensionFilter";
 
     private String filterExtension;
+
     /**
      * 
      * Creates a new {@link DialogFileControlModel} instance.
@@ -52,17 +53,16 @@ public class DialogFileControlModel extends DialogControlModel {
     public DialogFileControlModel(String id, String label, String tooltip, DialogControlType type, String position,
             boolean mandatory, String filterExtension) {
 
-        super(id, label, tooltip, DialogControlType.FILE, position, mandatory);
+        super(id, label, tooltip, DialogControlType.FILE, position, mandatory, true);
 
         this.filterExtension = filterExtension;
     }
-
 
     @Override
     public JsonMap toJson() {
         JsonMap json = super.toJson();
 
-        json.add(JSON_EXTFILTER, this.filterExtension);
+        json.add(JSON_EXTFILTER, filterExtension);
 
         return json;
     }

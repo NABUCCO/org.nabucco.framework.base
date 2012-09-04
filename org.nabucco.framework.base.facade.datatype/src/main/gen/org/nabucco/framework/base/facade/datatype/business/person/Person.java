@@ -1,18 +1,16 @@
 /*
  * Copyright 2012 PRODYNA AG
- *
- * Licensed under the Eclipse Public License (EPL), Version 1.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
+ * 
+ * Licensed under the Eclipse Public License (EPL), Version 1.0 (the "License"); you may not use
+ * this file except in compliance with the License. You may obtain a copy of the License at
+ * 
  * http://www.opensource.org/licenses/eclipse-1.0.php or
  * http://www.nabucco.org/License.html
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+ * 
+ * Unless required by applicable law or agreed to in writing, software distributed under the
+ * License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND,
+ * either express or implied. See the License for the specific language governing permissions
+ * and limitations under the License.
  */
 package org.nabucco.framework.base.facade.datatype.business.person;
 
@@ -21,7 +19,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import org.nabucco.framework.base.facade.datatype.Datatype;
-import org.nabucco.framework.base.facade.datatype.Description;
 import org.nabucco.framework.base.facade.datatype.FunctionalIdentifier;
 import org.nabucco.framework.base.facade.datatype.NabuccoDatatype;
 import org.nabucco.framework.base.facade.datatype.Name;
@@ -40,6 +37,7 @@ import org.nabucco.framework.base.facade.datatype.property.PropertyAssociationTy
 import org.nabucco.framework.base.facade.datatype.property.PropertyCache;
 import org.nabucco.framework.base.facade.datatype.property.PropertyDescriptorSupport;
 import org.nabucco.framework.base.facade.datatype.security.UserId;
+import org.nabucco.framework.base.facade.datatype.text.LongDescription;
 
 /**
  * Person<p/>A natural person in the Person Component.<p/>
@@ -53,7 +51,7 @@ public class Person extends NabuccoDatatype implements Datatype {
 
     private static final StatusType STATUSTYPE_DEFAULT = StatusType.ACTIVE;
 
-    private static final String[] PROPERTY_CONSTRAINTS = { "l3,12;u0,n;m1,1;", "l0,255;u0,n;m0,1;",
+    private static final String[] PROPERTY_CONSTRAINTS = { "l3,12;u0,n;m1,1;", "l0,4000;u0,n;m0,1;",
             "l0,255;u0,n;m1,1;", "l0,255;u0,n;m0,1;", "l0,255;u0,n;m1,1;", "l0,255;u0,n;m0,1;", "l0,n;u0,n;m0,1;",
             "l0,255;u0,n;m0,1;", "m0,1;", "m0,1;", "m0,1;", "m0,1;", "m0,1;", "m0,1;", "l3,32;u0,n;m0,1;", "m1,1;",
             "l0,n;u0,n;m0,1;", "m0,1;" };
@@ -98,7 +96,7 @@ public class Person extends NabuccoDatatype implements Datatype {
     private Owner owner;
 
     /** The description of the Person. */
-    private Description description;
+    private LongDescription description;
 
     /** The Persons forename. */
     private Name forename;
@@ -232,7 +230,7 @@ public class Person extends NabuccoDatatype implements Datatype {
         propertyMap.putAll(PropertyCache.getInstance().retrieve(NabuccoDatatype.class).getPropertyMap());
         propertyMap.put(OWNER,
                 PropertyDescriptorSupport.createBasetype(OWNER, Owner.class, 3, PROPERTY_CONSTRAINTS[0], false));
-        propertyMap.put(DESCRIPTION, PropertyDescriptorSupport.createBasetype(DESCRIPTION, Description.class, 4,
+        propertyMap.put(DESCRIPTION, PropertyDescriptorSupport.createBasetype(DESCRIPTION, LongDescription.class, 4,
                 PROPERTY_CONSTRAINTS[1], false));
         propertyMap.put(FORENAME,
                 PropertyDescriptorSupport.createBasetype(FORENAME, Name.class, 5, PROPERTY_CONSTRAINTS[2], false));
@@ -307,8 +305,8 @@ public class Person extends NabuccoDatatype implements Datatype {
         if ((property.getName().equals(OWNER) && (property.getType() == Owner.class))) {
             this.setOwner(((Owner) property.getInstance()));
             return true;
-        } else if ((property.getName().equals(DESCRIPTION) && (property.getType() == Description.class))) {
-            this.setDescription(((Description) property.getInstance()));
+        } else if ((property.getName().equals(DESCRIPTION) && (property.getType() == LongDescription.class))) {
+            this.setDescription(((LongDescription) property.getInstance()));
             return true;
         } else if ((property.getName().equals(FORENAME) && (property.getType() == Name.class))) {
             this.setForename(((Name) property.getInstance()));
@@ -538,18 +536,18 @@ public class Person extends NabuccoDatatype implements Datatype {
     /**
      * The description of the Person.
      *
-     * @return the Description.
+     * @return the LongDescription.
      */
-    public Description getDescription() {
+    public LongDescription getDescription() {
         return this.description;
     }
 
     /**
      * The description of the Person.
      *
-     * @param description the Description.
+     * @param description the LongDescription.
      */
-    public void setDescription(Description description) {
+    public void setDescription(LongDescription description) {
         this.description = description;
     }
 
@@ -563,7 +561,7 @@ public class Person extends NabuccoDatatype implements Datatype {
             if ((description == null)) {
                 return;
             }
-            this.description = new Description();
+            this.description = new LongDescription();
         }
         this.description.setValue(description);
     }

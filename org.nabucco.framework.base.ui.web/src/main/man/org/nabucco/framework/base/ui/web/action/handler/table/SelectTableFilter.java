@@ -17,14 +17,13 @@
 package org.nabucco.framework.base.ui.web.action.handler.table;
 
 import org.nabucco.framework.base.facade.exception.client.ClientException;
-import org.nabucco.framework.base.ui.web.action.WebAction;
-import org.nabucco.framework.base.ui.web.action.WebActionHandler;
-import org.nabucco.framework.base.ui.web.action.WebActionRegistry;
+import org.nabucco.framework.base.ui.web.action.WebActionHandlerSupport;
 import org.nabucco.framework.base.ui.web.action.parameter.WebActionParameter;
 import org.nabucco.framework.base.ui.web.action.result.RefreshItem;
 import org.nabucco.framework.base.ui.web.action.result.WebActionResult;
 import org.nabucco.framework.base.ui.web.component.WebElementType;
 import org.nabucco.framework.base.ui.web.component.work.WorkItem;
+import org.nabucco.framework.base.ui.web.component.work.list.FilterItem;
 import org.nabucco.framework.base.ui.web.component.work.list.ListItem;
 import org.nabucco.framework.base.ui.web.servlet.util.NabuccoServletUtil;
 import org.nabucco.framework.base.ui.web.servlet.util.path.NabuccoServletPathType;
@@ -36,7 +35,9 @@ import org.nabucco.framework.base.ui.web.servlet.util.path.NabuccoServletPathTyp
  * 
  * @author Leonid Agranovskiy, PRODYNA AG
  */
-public class SelectTableFilter extends WebActionHandler {
+public class SelectTableFilter extends WebActionHandlerSupport {
+
+    private static final String DEFAULT_APPLY_FILTER_ACTION = ApplyTableFilterHandler.ID;
 
     @Override
     public WebActionResult execute(WebActionParameter parameter) throws ClientException {
@@ -48,20 +49,29 @@ public class SelectTableFilter extends WebActionHandler {
         if (workItem == null) {
             throw new ClientException("Cannot allocate the Work item with id " + listInstance);
         }
-        if (workItem instanceof ListItem) {
-            ((ListItem) workItem).getListModel().setActiveFilterId(filterId);
+        if (workItem instanceof ListItem == false) {
+            throw new IllegalArgumentException("Cannot execute table filter. The instance if not a list.");
+        }
+
+        ListItem listItem = (ListItem) workItem;
+        listItem.getListModel().setActiveFilterId(filterId);
+
+        FilterItem filter = listItem.getFilter(filterId);
+        if (filter == null) {
+            throw new IllegalStateException("The configured filter is not found in the list.");
+        }
+
+        String filterLoadAction = filter.getCustomLoadAction();
+
+        if (filterLoadAction == null || filterLoadAction.isEmpty()) {
+            filterLoadAction = DEFAULT_APPLY_FILTER_ACTION;
         }
 
         // Process filter
-        WebAction action = WebActionRegistry.getInstance().newAction(ApplyTableFilterHandler.ID);
-
-        if (action == null) {
-            throw new ClientException("Cannot instanciate filter action.");
-        }
-        WebActionResult executeResult = action.execute(parameter);
-
         WebActionResult result = new WebActionResult();
-        result.addResult(executeResult);
+        WebActionResult res = super.executeAction(filterLoadAction, parameter);
+
+        result.addResult(res);
         result.addItem(new RefreshItem(WebElementType.LIST, listInstance));
 
         return result;

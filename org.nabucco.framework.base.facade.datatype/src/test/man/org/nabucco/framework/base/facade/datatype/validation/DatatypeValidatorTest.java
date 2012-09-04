@@ -38,6 +38,7 @@ public class DatatypeValidatorTest {
         user.setOwner("");
         user.setDescription("This is a dummy Description!");
         user.setUserType(new Code());
+        user.setTenant("NABUCCO");
 
         user.validate(result, ValidationType.SHALLOW);
 
@@ -65,6 +66,7 @@ public class DatatypeValidatorTest {
         user.setOwner("NBC");
         user.setDescription("This is a dummy Description!");
         user.setUserType(new Code());
+        user.setTenant("NABUCCO");
 
         user.validate(result, ValidationType.SHALLOW);
 
@@ -90,7 +92,7 @@ public class DatatypeValidatorTest {
         user.validate(result, ValidationType.SHALLOW);
 
         System.out.println(result);
-        Assert.assertEquals(4, result.getErrorList().size());
+        Assert.assertEquals(5, result.getErrorList().size());
         System.out.println();
     }
 

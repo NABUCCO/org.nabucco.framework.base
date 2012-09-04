@@ -40,22 +40,35 @@ public abstract class AbstractWidgetAnalyser implements WidgetAnalyser {
     }
 
     @Override
-    public final WidgetAnalyserResult evaluate(List<NabuccoDatatype> values) throws ClientException {
+    public final WidgetAnalyserResult evaluate(List<NabuccoDatatype> values, String viewName) throws ClientException {
 
         WidgetAnalyserResult result = this.createResultInstance(EMPTY_STRING);
 
-        for (NabuccoDatatype item : values) {
-            WidgetAnalyserResult evResult = this.evaluateDatatype(item);
-            
+        List<NabuccoDatatype> resolvedValues = this.resolveValues(values);
+
+        for (NabuccoDatatype item : resolvedValues) {
+            WidgetAnalyserResult evResult = this.evaluateDatatype(item, viewName);
+
             if (evResult == null) {
-                throw new ClientException(
-                        "Evaluating mechanism of the custom widget analyser returns null. Cannot render widget.");
+                continue;
             }
-            
+
             result.appendResult(evResult);
         }
 
         return result;
+    }
+
+    /**
+     * Resolves the values. If resolving needed, than override the method in the concrete analyser
+     * class
+     * 
+     * @param unresolvedValuesList
+     *            the unresolved list
+     * @return resolved list
+     */
+    protected List<NabuccoDatatype> resolveValues(List<NabuccoDatatype> unresolvedValuesList) {
+        return unresolvedValuesList;
     }
 
     @Override
@@ -122,6 +135,7 @@ public abstract class AbstractWidgetAnalyser implements WidgetAnalyser {
         WidgetAnalyserResultImpl retVal = new WidgetAnalyserResultImpl(parent, label);
 
         parent.addChild(retVal);
+
         return retVal;
     }
 
@@ -130,8 +144,11 @@ public abstract class AbstractWidgetAnalyser implements WidgetAnalyser {
      * 
      * @param item
      *            the datatype to be evaluated
-     * @return result of the evaluation as a composite tree
+     * @param viewName
+     *            the name of the view for evaluation
+     * @return result of the evaluation as a composite tree or null if need to skip
      */
-    protected abstract WidgetAnalyserResult evaluateDatatype(NabuccoDatatype item) throws ClientException;
+    protected abstract WidgetAnalyserResult evaluateDatatype(NabuccoDatatype item, String viewName)
+            throws ClientException;
 
 }

@@ -23,8 +23,8 @@ import org.nabucco.framework.base.ui.web.action.result.RefreshItem;
 import org.nabucco.framework.base.ui.web.action.result.WebActionResult;
 import org.nabucco.framework.base.ui.web.component.WebElementType;
 import org.nabucco.framework.base.ui.web.component.work.editor.EditTab;
+import org.nabucco.framework.base.ui.web.component.work.editor.EditorGridElement;
 import org.nabucco.framework.base.ui.web.component.work.editor.EditorItem;
-import org.nabucco.framework.base.ui.web.component.work.editor.control.EditorControl;
 import org.nabucco.framework.base.ui.web.servlet.util.NabuccoServletUtil;
 import org.nabucco.framework.base.ui.web.servlet.util.path.NabuccoServletPathType;
 
@@ -57,9 +57,9 @@ public class RefreshEditorDependenciesHandler extends WebActionHandlerSupport {
             EditTab editTab = editor.getEditArea().getFocusedTab();
 
             // Add refresh items for dependent elements
-            for (String controlId : editor.getModel().getRefreshNeededControlIds()) {
-                EditorControl tabControl = editTab.getControl(controlId);
-                if (tabControl != null) {
+            for (String controlId : editor.getModel().getRefreshNeededGridElementsIds()) {
+                EditorGridElement editorElement = editTab.getGridElement(controlId);
+                if (editorElement != null) {
                     RefreshItem dependentControl = new RefreshItem(WebElementType.CONTROL, controlId);
                     retVal.addItem(dependentControl);
                 }

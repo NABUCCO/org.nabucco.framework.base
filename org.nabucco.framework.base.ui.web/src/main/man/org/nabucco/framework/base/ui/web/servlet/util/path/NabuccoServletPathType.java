@@ -47,6 +47,8 @@ public enum NabuccoServletPathType {
 
     EDITOR("editor"),
 
+    BULKEDITOR("bulkeditor"),
+
     LIST("list"),
 
     DASHBOARD("dashboard"),
@@ -61,18 +63,20 @@ public enum NabuccoServletPathType {
 
     CONTROL("control"),
 
+    COLUMN("column"),
+
     WIDGET("widget"),
 
     ACTION("action"),
-    
+
     WORKFLOW("workflow"),
-    
+
     SIGNAL("signal"),
 
     INSTANCE("instance"),
 
     ROW("row"),
-    
+
     PICKER("picker"),
 
     FILTERID("filterId"),
@@ -84,6 +88,10 @@ public enum NabuccoServletPathType {
     FILE("file"),
 
     PARAMETER("parameter"),
+
+    INDEX("index"),
+
+    QUERY("query"),
 
     ID("id");
 

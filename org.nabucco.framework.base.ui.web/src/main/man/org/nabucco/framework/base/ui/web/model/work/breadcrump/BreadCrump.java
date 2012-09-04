@@ -26,7 +26,7 @@ import java.util.List;
 import org.nabucco.framework.base.ui.web.json.JsonElement;
 import org.nabucco.framework.base.ui.web.json.JsonList;
 import org.nabucco.framework.base.ui.web.model.WebModel;
-import org.nabucco.framework.base.ui.web.model.control.util.PropertyStringParser;
+import org.nabucco.framework.base.ui.web.model.editor.util.PropertyStringParser;
 
 /**
  * BreadCrump

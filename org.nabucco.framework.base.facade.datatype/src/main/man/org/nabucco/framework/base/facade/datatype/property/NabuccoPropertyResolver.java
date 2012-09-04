@@ -16,6 +16,8 @@
  */
 package org.nabucco.framework.base.facade.datatype.property;
 
+import java.util.List;
+
 import org.nabucco.framework.base.facade.datatype.Basetype;
 import org.nabucco.framework.base.facade.datatype.Datatype;
 import org.nabucco.framework.base.facade.datatype.ExtendedAttribute;
@@ -33,16 +35,24 @@ import org.nabucco.framework.base.facade.datatype.logger.NabuccoLoggingFactory;
  * 
  * @author Nicolas Moser, PRODYNA AG
  */
-public class NabuccoPropertyResolver<T extends Datatype> {
+public class NabuccoPropertyResolver<T extends Datatype> implements PropertyAccessor {
 
     /** Constant for property path seperators. */
-    private static final String PROPERTY_SEPARATOR = ".";
+    protected static final String PROPERTY_SEPARATOR = ".";
 
     /** The parent datatype. */
     private T datatype;
 
     /** Logger */
     private NabuccoLogger logger = NabuccoLoggingFactory.getInstance().getLogger(NabuccoPropertyResolver.class);
+
+    /**
+     * Creates a new {@link NabuccoPropertyResolver} instance.
+     * 
+     */
+    public NabuccoPropertyResolver() {
+        this.datatype = null;
+    }
 
     /**
      * Creates a new {@link NabuccoPropertyResolver} instance.
@@ -72,6 +82,9 @@ public class NabuccoPropertyResolver<T extends Datatype> {
      * @return the referenced property or an empty string
      */
     public NabuccoProperty resolveProperty(String propertyPath) {
+        if (datatype == null) {
+            throw new IllegalArgumentException("Cannot resolve property of parent datatype 'null'.");
+        }
         return this.resolveProperty(propertyPath, this.datatype);
     }
 
@@ -85,7 +98,8 @@ public class NabuccoPropertyResolver<T extends Datatype> {
      * 
      * @return the referenced property
      */
-    private NabuccoProperty resolveProperty(String propertyPath, Datatype datatype) {
+    @Override
+    public NabuccoProperty resolveProperty(String propertyPath, Datatype datatype) {
         if (propertyPath == null || propertyPath.isEmpty()) {
             return null;
         }
@@ -102,7 +116,7 @@ public class NabuccoPropertyResolver<T extends Datatype> {
             int index = propertyPath.indexOf(PROPERTY_SEPARATOR);
             String parentPath = propertyPath.substring(0, index);
 
-            NabuccoProperty property = datatype.getProperty(parentPath);
+            NabuccoProperty property = this.locateProperty(parentPath, datatype);
             if (property == null) {
                 return null;
             }
@@ -121,12 +135,8 @@ public class NabuccoPropertyResolver<T extends Datatype> {
 
                     @SuppressWarnings("unchecked")
                     NabuccoList<Datatype> list = (NabuccoList<Datatype>) property.getInstance();
-                    NType first = list.first();
-                    if (first instanceof Datatype) {
-                        return this.resolveProperty(childPath, (Datatype) first);
-                    }
+                    return this.resolveCollectionProperty(childPath, list);
                 }
-
                 break;
             }
 
@@ -136,12 +146,9 @@ public class NabuccoPropertyResolver<T extends Datatype> {
                     @SuppressWarnings("unchecked")
                     NabuccoList<ComponentRelation<NabuccoDatatype>> list = (NabuccoList<ComponentRelation<NabuccoDatatype>>) property
                             .getInstance();
-                    ComponentRelation<NabuccoDatatype> first = list.first();
-                    if (first != null) {
-                        return this.resolveProperty(childPath, first.getTarget());
-                    }
-                }
 
+                    return this.resolveRelationProperty(childPath, list);
+                }
                 break;
             }
 
@@ -150,7 +157,7 @@ public class NabuccoPropertyResolver<T extends Datatype> {
             return null;
         }
 
-        NabuccoProperty property = datatype.getProperty(propertyPath);
+        NabuccoProperty property = this.locateProperty(propertyPath, datatype);
 
         if (property == null) {
             property = this.resolveExtendedAttribute(propertyPath, datatype);
@@ -158,6 +165,64 @@ public class NabuccoPropertyResolver<T extends Datatype> {
 
         return property;
 
+    }
+
+    /**
+     * Default handling of component relation properties
+     * 
+     * @param childPath
+     *            childpath to be resolved
+     * @param datatypeList
+     *            the list to be resolved
+     * @return property
+     */
+    protected NabuccoProperty resolveRelationProperty(String childPath,
+            NabuccoList<ComponentRelation<NabuccoDatatype>> datatypeList) {
+        if (datatypeList.size() > 0) {
+
+            ComponentRelation<NabuccoDatatype> first = datatypeList.first();
+            if (first != null) {
+                return this.resolveProperty(childPath, first.getTarget());
+            }
+        }
+        return null;
+    }
+
+    /**
+     * Default handling of list properties
+     * 
+     * @param childPath
+     *            childpath to be resolved
+     * @param datatypeList
+     *            the list to be resolved
+     * @return property
+     */
+    protected NabuccoProperty resolveCollectionProperty(String childPath, List<Datatype> datatypeList) {
+        if (datatypeList.size() > 0) {
+            NType first = datatypeList.get(0);
+
+            if (first instanceof Datatype) {
+                return this.resolveProperty(childPath, (Datatype) first);
+            }
+        }
+        return null;
+    }
+
+    /**
+     * Locates the property of the given datatype
+     * 
+     * Can be overloaded to change the standard location mechanism
+     * 
+     * @param propertyName
+     *            the property name to be located
+     * @param datatype
+     *            the datatype where the property should be located
+     * @return located property or null if nothing found
+     * 
+     * @author Leonid Agranovskiy
+     */
+    protected NabuccoProperty locateProperty(String propertyName, Datatype datatype) {
+        return datatype.getProperty(propertyName);
     }
 
     /**

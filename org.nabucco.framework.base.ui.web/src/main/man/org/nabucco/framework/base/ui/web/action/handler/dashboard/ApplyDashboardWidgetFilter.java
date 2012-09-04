@@ -60,9 +60,9 @@ public class ApplyDashboardWidgetFilter extends FilteringActionHandler {
                 throw new ClientException("Cannot get widget item with id '" + widgetId + "'.");
             }
 
-            String activeFilterId = widget.getActiveFilterId();
-
-            List<Datatype> values = this.getFilteredData(activeFilterId, parameter);
+            String selectedId = widget.getCurrentFilterId();
+            String filterId = widget.getQueryFilterId(selectedId);
+            List<Datatype> values = this.getFilteredData(filterId, parameter);
             if (values == null) {
                 values = Collections.<Datatype> emptyList();
             }
@@ -72,7 +72,7 @@ public class ApplyDashboardWidgetFilter extends FilteringActionHandler {
                 filteredData.add((NabuccoDatatype) value);
             }
 
-            widget.getModel().setContent(filteredData);
+            widget.getModel().setContent(filterId, filteredData, widget.getActiveFilterViewName());
 
         } catch (Exception e) {
             throw new ClientException("Cannot apply filter to Dashboard widget '" + widgetId + "'", e);

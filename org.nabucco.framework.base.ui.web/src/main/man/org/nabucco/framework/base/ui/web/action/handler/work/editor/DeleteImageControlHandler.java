@@ -54,12 +54,15 @@ public class DeleteImageControlHandler extends WebActionHandler {
         // TODO: Remove the old file if possible
         NabuccoProperty property = control.getModel().getProperty();
         List<?> instance = (List<?>) property.getInstance();
-        instance.clear();
-        property.getParent().setProperty(property.createProperty(instance));
 
-        control.getModel().setProperty(property);
+        if (instance.isEmpty() == false) {
+            instance.clear();
+            property.getParent().setProperty(property.createProperty(instance));
 
-        result.addItem(new RefreshItem(WebElementType.CONTROL, controlId));
+            control.getModel().setProperty(property);
+
+            result.addItem(new RefreshItem(WebElementType.EDITOR));
+        }
 
         return result;
     }

@@ -1,18 +1,16 @@
 /*
  * Copyright 2012 PRODYNA AG
- *
- * Licensed under the Eclipse Public License (EPL), Version 1.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
+ * 
+ * Licensed under the Eclipse Public License (EPL), Version 1.0 (the "License"); you may not use
+ * this file except in compliance with the License. You may obtain a copy of the License at
+ * 
  * http://www.opensource.org/licenses/eclipse-1.0.php or
  * http://www.nabucco.org/License.html
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+ * 
+ * Unless required by applicable law or agreed to in writing, software distributed under the
+ * License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND,
+ * either express or implied. See the License for the specific language governing permissions
+ * and limitations under the License.
  */
 package org.nabucco.framework.base.facade.datatype.extension.schema.ui.application;
 
@@ -24,6 +22,7 @@ import org.nabucco.framework.base.facade.datatype.Datatype;
 import org.nabucco.framework.base.facade.datatype.extension.property.BooleanProperty;
 import org.nabucco.framework.base.facade.datatype.extension.property.StringProperty;
 import org.nabucco.framework.base.facade.datatype.extension.schema.ui.UiExtension;
+import org.nabucco.framework.base.facade.datatype.extension.schema.ui.application.LocalizationExtension;
 import org.nabucco.framework.base.facade.datatype.property.NabuccoProperty;
 import org.nabucco.framework.base.facade.datatype.property.NabuccoPropertyContainer;
 import org.nabucco.framework.base.facade.datatype.property.NabuccoPropertyDescriptor;
@@ -42,7 +41,7 @@ public class ApplicationExtension extends UiExtension implements Datatype {
     private static final long serialVersionUID = 1L;
 
     private static final String[] PROPERTY_CONSTRAINTS = { "m1,1;", "m1,1;", "m1,1;", "m1,1;", "m1,1;", "m1,1;",
-            "m1,1;" };
+            "m1,1;", "m1,1;" };
 
     public static final String RESOURCE = "resource";
 
@@ -57,6 +56,8 @@ public class ApplicationExtension extends UiExtension implements Datatype {
     public static final String STATUSBAR = "statusBar";
 
     public static final String DEBUGMODE = "debugMode";
+
+    public static final String LOCALIZATION = "localization";
 
     /** The Application Resource. */
     private StringProperty resource;
@@ -78,6 +79,9 @@ public class ApplicationExtension extends UiExtension implements Datatype {
 
     /** Whether the application runs in debug mode or not. */
     private BooleanProperty debugMode;
+
+    /** The localization settings of the application */
+    private LocalizationExtension localization;
 
     /** Constructs a new ApplicationExtension instance. */
     public ApplicationExtension() {
@@ -117,6 +121,9 @@ public class ApplicationExtension extends UiExtension implements Datatype {
         if ((this.getDebugMode() != null)) {
             clone.setDebugMode(this.getDebugMode().cloneObject());
         }
+        if ((this.getLocalization() != null)) {
+            clone.setLocalization(this.getLocalization().cloneObject());
+        }
     }
 
     /**
@@ -141,6 +148,8 @@ public class ApplicationExtension extends UiExtension implements Datatype {
                 PROPERTY_CONSTRAINTS[5], false, PropertyAssociationType.COMPOSITION));
         propertyMap.put(DEBUGMODE, PropertyDescriptorSupport.createDatatype(DEBUGMODE, BooleanProperty.class, 10,
                 PROPERTY_CONSTRAINTS[6], false, PropertyAssociationType.COMPOSITION));
+        propertyMap.put(LOCALIZATION, PropertyDescriptorSupport.createDatatype(LOCALIZATION,
+                LocalizationExtension.class, 11, PROPERTY_CONSTRAINTS[7], false, PropertyAssociationType.COMPOSITION));
         return new NabuccoPropertyContainer(propertyMap);
     }
 
@@ -165,6 +174,8 @@ public class ApplicationExtension extends UiExtension implements Datatype {
                 null));
         properties.add(super.createProperty(ApplicationExtension.getPropertyDescriptor(DEBUGMODE), this.getDebugMode(),
                 null));
+        properties.add(super.createProperty(ApplicationExtension.getPropertyDescriptor(LOCALIZATION),
+                this.getLocalization(), null));
         return properties;
     }
 
@@ -193,6 +204,9 @@ public class ApplicationExtension extends UiExtension implements Datatype {
             return true;
         } else if ((property.getName().equals(DEBUGMODE) && (property.getType() == BooleanProperty.class))) {
             this.setDebugMode(((BooleanProperty) property.getInstance()));
+            return true;
+        } else if ((property.getName().equals(LOCALIZATION) && (property.getType() == LocalizationExtension.class))) {
+            this.setLocalization(((LocalizationExtension) property.getInstance()));
             return true;
         }
         return false;
@@ -248,6 +262,11 @@ public class ApplicationExtension extends UiExtension implements Datatype {
                 return false;
         } else if ((!this.debugMode.equals(other.debugMode)))
             return false;
+        if ((this.localization == null)) {
+            if ((other.localization != null))
+                return false;
+        } else if ((!this.localization.equals(other.localization)))
+            return false;
         return true;
     }
 
@@ -262,6 +281,7 @@ public class ApplicationExtension extends UiExtension implements Datatype {
         result = ((PRIME * result) + ((this.perspectiveArea == null) ? 0 : this.perspectiveArea.hashCode()));
         result = ((PRIME * result) + ((this.statusBar == null) ? 0 : this.statusBar.hashCode()));
         result = ((PRIME * result) + ((this.debugMode == null) ? 0 : this.debugMode.hashCode()));
+        result = ((PRIME * result) + ((this.localization == null) ? 0 : this.localization.hashCode()));
         return result;
     }
 
@@ -396,6 +416,24 @@ public class ApplicationExtension extends UiExtension implements Datatype {
      */
     public BooleanProperty getDebugMode() {
         return this.debugMode;
+    }
+
+    /**
+     * The localization settings of the application
+     *
+     * @param localization the LocalizationExtension.
+     */
+    public void setLocalization(LocalizationExtension localization) {
+        this.localization = localization;
+    }
+
+    /**
+     * The localization settings of the application
+     *
+     * @return the LocalizationExtension.
+     */
+    public LocalizationExtension getLocalization() {
+        return this.localization;
     }
 
     /**

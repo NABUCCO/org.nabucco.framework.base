@@ -63,7 +63,7 @@ public class DialogController {
         Dialog dialog = (Dialog) this.elementMap.get(dialogId);
 
         if (dialog == null) {
-            
+
             try {
                 // TODO: Dialog Stack!
 

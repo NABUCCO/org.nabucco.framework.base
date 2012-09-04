@@ -16,7 +16,6 @@
  */
 package org.nabucco.framework.base.facade.datatype.business.person;
 
-import org.nabucco.framework.base.facade.datatype.Description;
 import org.nabucco.framework.base.facade.datatype.FunctionalIdentifier;
 import org.nabucco.framework.base.facade.datatype.NabuccoDatatype;
 import org.nabucco.framework.base.facade.datatype.Name;
@@ -28,6 +27,7 @@ import org.nabucco.framework.base.facade.datatype.business.person.PersonTitle;
 import org.nabucco.framework.base.facade.datatype.code.Code;
 import org.nabucco.framework.base.facade.datatype.date.Date;
 import org.nabucco.framework.base.facade.datatype.security.UserId;
+import org.nabucco.framework.base.facade.datatype.text.LongDescription;
 
 @Author			Dominic Trumpfheller
 @Company		PRODYNA AG
@@ -40,7 +40,7 @@ public Datatype Person extends NabuccoDatatype {
 	private Basetype Owner[1] owner;
 	
 	@Description		The description of the Person.
-	private Basetype Description[0..1] description;
+	private Basetype LongDescription[0..1] description;
 	
 	@Description		The Persons forename.
 	private Basetype Name[1] forename;

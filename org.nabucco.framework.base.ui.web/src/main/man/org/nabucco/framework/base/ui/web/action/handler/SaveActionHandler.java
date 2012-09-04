@@ -29,14 +29,17 @@ import org.nabucco.framework.base.facade.datatype.workflow.transition.Transition
 import org.nabucco.framework.base.facade.datatype.workflow.transition.TransitionParameter;
 import org.nabucco.framework.base.facade.exception.client.ClientException;
 import org.nabucco.framework.base.facade.exception.client.action.ActionException;
-import org.nabucco.framework.base.ui.web.action.WebActionHandler;
+import org.nabucco.framework.base.ui.web.action.WebActionHandlerSupport;
 import org.nabucco.framework.base.ui.web.action.parameter.WebActionParameter;
 import org.nabucco.framework.base.ui.web.action.result.RefreshItem;
 import org.nabucco.framework.base.ui.web.action.result.WebActionResult;
+import org.nabucco.framework.base.ui.web.component.WebElement;
 import org.nabucco.framework.base.ui.web.component.WebElementType;
 import org.nabucco.framework.base.ui.web.component.work.WorkArea;
 import org.nabucco.framework.base.ui.web.component.work.WorkItem;
+import org.nabucco.framework.base.ui.web.component.work.WorkItemActionType;
 import org.nabucco.framework.base.ui.web.component.work.editor.EditorItem;
+import org.nabucco.framework.base.ui.web.model.work.WorkItemModel;
 import org.nabucco.framework.base.ui.web.model.work.workflow.WorkflowEntry;
 import org.nabucco.framework.base.ui.web.model.work.workflow.WorkflowModel;
 import org.nabucco.framework.base.ui.web.servlet.util.NabuccoServletUtil;
@@ -47,7 +50,7 @@ import org.nabucco.framework.base.ui.web.servlet.util.path.NabuccoServletPathTyp
  * 
  * @author Nicolas Moser, PRODYNA AG
  */
-public abstract class SaveActionHandler<D extends NabuccoDatatype> extends WebActionHandler {
+public abstract class SaveActionHandler<D extends NabuccoDatatype> extends WebActionHandlerSupport {
 
     /** The Logger */
     private static NabuccoLogger logger = NabuccoLoggingFactory.getInstance().getLogger(SaveActionHandler.class);
@@ -55,9 +58,16 @@ public abstract class SaveActionHandler<D extends NabuccoDatatype> extends WebAc
     @Override
     public final WebActionResult execute(WebActionParameter parameter) throws ClientException {
 
-        String instanceId = parameter.get(NabuccoServletPathType.EDITOR);
-
-        EditorItem editor = NabuccoServletUtil.getEditor(instanceId);
+        WebElement element = parameter.getElement();
+        EditorItem editor = null;
+        String instanceId = null;
+        if (element == null || element.getType() != WebElementType.EDITOR) {
+            instanceId = parameter.get(NabuccoServletPathType.EDITOR);
+            editor = NabuccoServletUtil.getEditor(instanceId);
+        } else {
+            editor = (EditorItem) element;
+            instanceId = editor.getInstanceId();
+        }
 
         if (editor == null) {
             throw new ActionException("Cannot locate editor item with id '" + instanceId + "'.");
@@ -79,7 +89,6 @@ public abstract class SaveActionHandler<D extends NabuccoDatatype> extends WebAc
                 @SuppressWarnings("unchecked")
                 D datatype = (D) editor.getModel().getDatatype();
                 datatype = this.saveDatatype(datatype, editor, parameter);
-
                 if (datatype == null) {
                     throw new IllegalStateException("Operation saveDatatype of '"
                             + this.getClass().getCanonicalName() + "' does not return a valid datatype [null].");
@@ -101,6 +110,12 @@ public abstract class SaveActionHandler<D extends NabuccoDatatype> extends WebAc
 
                 this.afterExecution(datatype, editor, parameter);
 
+                // Add some custom result actions if any
+                WebActionResult customResultActions = this.getCustomResultActions(datatype, editor, parameter);
+                if (customResultActions != null) {
+                    result.addResult(customResultActions);
+                }
+
             } catch (ClientException ce) {
                 logger.error(ce, "Error maintaining Datatype.");
                 throw ce;
@@ -115,8 +130,23 @@ public abstract class SaveActionHandler<D extends NabuccoDatatype> extends WebAc
         result.addItem(new RefreshItem(WebElementType.WORK_AREA));
         result.addItem(new RefreshItem(WebElementType.BROWSER_AREA));
 
-        if (editor.getSource() != null) {
-            editor.getSource().getModel().refresh();
+        WorkItem source = editor.getSource();
+        if (source != null) {
+            WorkItemModel sourceModel = source.getModel();
+            sourceModel.refresh();
+
+            // Workaround: Save the item by saving of a child
+            // Should be replaced with another expected saving method
+            if (sourceModel.isDirty()) {
+                WebActionParameter param = new WebActionParameter(parameter.getSession(), parameter.getJsonRequest(),
+                        null);
+                param.setParameter(NabuccoServletPathType.EDITOR, source.getInstanceId());
+                param.setParameter(NabuccoServletPathType.SIGNAL, null);
+                param.setParameter(NabuccoServletPathType.WORKFLOW, null);
+                String saveAction = source.getWorkingItemAction(WorkItemActionType.SAVE);
+                this.executeAction(saveAction, param);
+            }
+
             result.addItem(new RefreshItem(WebElementType.EDITOR_RELATION_AREA, editor.getSource().getInstanceId()));
         }
 
@@ -138,16 +168,16 @@ public abstract class SaveActionHandler<D extends NabuccoDatatype> extends WebAc
         }
 
         String instanceId = parameter.get(NabuccoServletPathType.WORKFLOW);
-        String signalName = parameter.get(NabuccoServletPathType.SIGNAL);
+        String signalId = parameter.get(NabuccoServletPathType.SIGNAL);
 
-        if (instanceId == null || signalName == null) {
+        if (instanceId == null || signalId == null) {
 
             List<WorkflowEntry> entries = editor.getWorkflow().getModel().getEntryList();
             if (!entries.isEmpty()) {
 
                 WorkflowTransitionContext context = new WorkflowTransitionContext();
                 WorkflowTransitionContextRequest request = new WorkflowTransitionContextRequest();
-                request.setTransitionContext(entries.get(0).getTransitionContext());
+                // request.setTransitionContext(entries.get(0).getTransitionContext());
                 context.setRequestTransitionContext(request);
 
                 parameter.getSession().getServiceContext().putRequestContext(context);
@@ -173,7 +203,8 @@ public abstract class SaveActionHandler<D extends NabuccoDatatype> extends WebAc
                 continue;
             }
 
-            if (signalName.equals(signal.getName().getValue())) {
+            long singalIdentifier = Long.parseLong(signalId);
+            if (singalIdentifier == signal.getId()) {
                 transitionContext.setSignal(signal);
 
                 WorkflowTransitionContext context = new WorkflowTransitionContext();
@@ -223,4 +254,18 @@ public abstract class SaveActionHandler<D extends NabuccoDatatype> extends WebAc
     protected void afterExecution(D datatype, EditorItem editor, WebActionParameter parameter) throws ClientException {
     }
 
+    /**
+     * Hook method that gives the possibility to add some custom result actions of save operations
+     * 
+     * @param datatype
+     *            the datatype that was saved
+     * @param editor
+     *            the editor of the datatype
+     * @param parameter
+     *            the sent parameter
+     * @return
+     */
+    protected WebActionResult getCustomResultActions(D datatype, EditorItem editor, WebActionParameter parameter) {
+        return null;
+    }
 }

@@ -30,16 +30,21 @@ import org.nabucco.framework.base.facade.datatype.extension.schema.ui.work.WorkI
 import org.nabucco.framework.base.facade.datatype.extension.schema.ui.work.WorkItemExtension;
 import org.nabucco.framework.base.facade.datatype.extension.schema.ui.work.WorkItemWorkflowExtension;
 import org.nabucco.framework.base.facade.datatype.extension.schema.ui.work.dashboard.DashboardExtension;
+import org.nabucco.framework.base.facade.datatype.visitor.VisitorException;
 import org.nabucco.framework.base.ui.web.component.WebComposite;
+import org.nabucco.framework.base.ui.web.component.WebElement;
 import org.nabucco.framework.base.ui.web.component.WebElementType;
 import org.nabucco.framework.base.ui.web.component.browser.Browser;
 import org.nabucco.framework.base.ui.web.component.work.dashboard.DashboardItem;
 import org.nabucco.framework.base.ui.web.component.work.editor.EditorItem;
 import org.nabucco.framework.base.ui.web.component.work.list.ListItem;
+import org.nabucco.framework.base.ui.web.component.work.visitor.WebElementVisitor;
+import org.nabucco.framework.base.ui.web.component.work.visitor.WebElementVisitorContext;
 import org.nabucco.framework.base.ui.web.json.JsonMap;
 import org.nabucco.framework.base.ui.web.model.browser.BrowserEntry;
-import org.nabucco.framework.base.ui.web.model.control.util.PropertyStringParser;
+import org.nabucco.framework.base.ui.web.model.bulkeditor.BulkEditorModel;
 import org.nabucco.framework.base.ui.web.model.dashboard.DashboardItemModel;
+import org.nabucco.framework.base.ui.web.model.editor.util.PropertyStringParser;
 import org.nabucco.framework.base.ui.web.model.list.ListModel;
 import org.nabucco.framework.base.ui.web.model.table.TableModel;
 import org.nabucco.framework.base.ui.web.model.work.EditorModel;
@@ -78,7 +83,10 @@ public abstract class WorkItem extends WebComposite {
     private String instanceId;
 
     /** The Source Work Item */
-    private WorkItem source;
+    private WorkItem sourceWorkItem;
+
+    /** The Source web element */
+    private WebElement sourceWebElement;
 
     /** The id of the following element. Important by replacing of editors */
     private String followerId;
@@ -127,6 +135,9 @@ public abstract class WorkItem extends WebComposite {
             return WebElementType.EDITOR;
         case LIST:
             return WebElementType.LIST;
+        case BULKEDITOR: {
+            return WebElementType.BULKEDITOR;
+        }
         }
 
         return null;
@@ -135,14 +146,14 @@ public abstract class WorkItem extends WebComposite {
     @Override
     public void init() throws ExtensionException {
 
-        String label = PropertyLoader.loadProperty(this.extension.getLabel());
-        String tooltip = PropertyLoader.loadProperty(this.extension.getTooltip());
-        String icon = PropertyLoader.loadProperty(this.extension.getIcon());
+        String label = PropertyLoader.loadProperty(extension.getLabel());
+        String tooltip = PropertyLoader.loadProperty(extension.getTooltip());
+        String icon = PropertyLoader.loadProperty(extension.getIcon());
 
-        this.breadCrump = new BreadCrump();
-        this.breadCrump.addLast(label, tooltip, this.getInstanceId());
+        breadCrump = new BreadCrump();
+        breadCrump.addLast(label, tooltip, this.getInstanceId());
 
-        WorkItemWorkflowExtension workflowExtension = this.extension.getWorkflowExtension();
+        WorkItemWorkflowExtension workflowExtension = extension.getWorkflowExtension();
 
         if (workflowExtension != null) {
             WorkItemWorkflow workflow = new WorkItemWorkflow(workflowExtension);
@@ -150,42 +161,47 @@ public abstract class WorkItem extends WebComposite {
             workflow.init();
         }
 
-        switch (this.type) {
+        switch (type) {
 
         case EDITOR: {
             EditorModel editorModel = new EditorModel(label, tooltip, icon);
 
             PropertyStringParser parser = new PropertyStringParser(label, tooltip, icon);
             for (String property : parser.parseProperties()) {
-                editorModel.addPropertyChangeListener(property, this.breadCrump);
+                editorModel.addPropertyChangeListener(property, breadCrump);
             }
 
             if (workflowExtension != null) {
                 editorModel.setWorkflowModel(this.getWorkflow().getModel());
             }
 
-            this.model = editorModel;
+            model = editorModel;
 
             break;
         }
 
         case DASHBOARD: {
-            DashboardExtension ext = (DashboardExtension) this.extension;
+            DashboardExtension ext = (DashboardExtension) extension;
             String grid = PropertyLoader.loadProperty(ext.getGrid());
             String id = ext.getIdentifier().getValue();
-            this.model = new DashboardItemModel(id, label, tooltip, icon, grid);
+            model = new DashboardItemModel(id, label, tooltip, icon, grid);
 
-            this.model.init();
+            model.init();
             break;
         }
-        
+
         case LIST: {
             TableModel<Datatype> tableModel = new TableModel<Datatype>();
-            this.model = new ListModel(label, tooltip, icon, tableModel);
+            model = new ListModel(label, tooltip, icon, tableModel);
+            break;
+        }
+
+        case BULKEDITOR: {
+            model = new BulkEditorModel(label, tooltip, icon);
             break;
         }
         default:
-            this.model = new WorkItemModel(label, tooltip, icon);
+            model = new WorkItemModel(label, tooltip, icon);
         }
 
         this.addBrowserEntries();
@@ -198,7 +214,7 @@ public abstract class WorkItem extends WebComposite {
      *            the work item to create the browser entries for
      */
     private void addBrowserEntries() {
-        for (WorkItemBrowserExtension browserExt : this.extension.getBrowsers()) {
+        for (WorkItemBrowserExtension browserExt : extension.getBrowsers()) {
             String browserId = PropertyLoader.loadProperty(browserExt.getBrowserId());
 
             Browser browser = NabuccoServletUtil.getBrowser(browserId);
@@ -237,8 +253,7 @@ public abstract class WorkItem extends WebComposite {
             icon = this.getIcon();
         }
 
-        BrowserEntry browserEntry = new BrowserEntry(this.instanceId, label, tooltip, icon, false, this.type,
-                this.instanceId);
+        BrowserEntry browserEntry = new BrowserEntry(instanceId, label, tooltip, icon, false, type, instanceId);
 
         PropertyStringParser propertyParser = new PropertyStringParser(label, tooltip, icon);
         for (String propertyName : propertyParser.parseProperties()) {
@@ -261,7 +276,7 @@ public abstract class WorkItem extends WebComposite {
                     "Can not get the action id of the work item because the actionType is 'null'");
         }
 
-        WorkItemActionsExtension actionsExtension = this.extension.getActions();
+        WorkItemActionsExtension actionsExtension = extension.getActions();
 
         if (actionsExtension == null) {
             throw new IllegalArgumentException("Actions are not configured for the working item " + this.getId());
@@ -272,7 +287,7 @@ public abstract class WorkItem extends WebComposite {
             throw new IllegalArgumentException("Actions are not configured for the working item " + this.getId());
         }
 
-        for (WorkItemActionExtension actionExt : this.extension.getActions().getActions()) {
+        for (WorkItemActionExtension actionExt : extension.getActions().getActions()) {
             WorkItemActionType type = PropertyLoader.loadProperty(WorkItemActionType.class, actionExt.getActionType());
             if (actionType.equals(type)) {
                 String actionId = PropertyLoader.loadProperty(actionExt.getActionId());
@@ -288,7 +303,7 @@ public abstract class WorkItem extends WebComposite {
      * @return Returns the instanceId.
      */
     public String getInstanceId() {
-        return this.instanceId;
+        return instanceId;
     }
 
     /**
@@ -307,7 +322,7 @@ public abstract class WorkItem extends WebComposite {
      * @return Returns the extension.
      */
     protected WorkItemExtension getExtension() {
-        return this.extension;
+        return extension;
     }
 
     /**
@@ -317,7 +332,7 @@ public abstract class WorkItem extends WebComposite {
      */
     public WorkItemType getItemType() {
 
-        return this.type;
+        return type;
     }
 
     /**
@@ -326,7 +341,7 @@ public abstract class WorkItem extends WebComposite {
      * @return the work item id
      */
     public String getId() {
-        ExtensionId identifier = this.extension.getIdentifier();
+        ExtensionId identifier = extension.getIdentifier();
         if (identifier != null) {
             return identifier.getValue();
         }
@@ -339,7 +354,7 @@ public abstract class WorkItem extends WebComposite {
      * @return the editor label
      */
     public String getLabel() {
-        return PropertyLoader.loadProperty(this.extension.getLabel());
+        return PropertyLoader.loadProperty(extension.getLabel());
     }
 
     /**
@@ -348,7 +363,7 @@ public abstract class WorkItem extends WebComposite {
      * @return the editor tooltip
      */
     public String getTooltip() {
-        return PropertyLoader.loadProperty(this.extension.getTooltip());
+        return PropertyLoader.loadProperty(extension.getTooltip());
     }
 
     /**
@@ -357,7 +372,7 @@ public abstract class WorkItem extends WebComposite {
      * @return the editor icon
      */
     public String getIcon() {
-        return PropertyLoader.loadProperty(this.extension.getIcon());
+        return PropertyLoader.loadProperty(extension.getIcon());
     }
 
     /**
@@ -366,7 +381,7 @@ public abstract class WorkItem extends WebComposite {
      * @return Returns the model.
      */
     public WorkItemModel getModel() {
-        return this.model;
+        return model;
     }
 
     /**
@@ -385,7 +400,7 @@ public abstract class WorkItem extends WebComposite {
      */
     public List<String> getBrowserRefIds() {
         List<String> browserIds = new ArrayList<String>();
-        for (WorkItemBrowserExtension browserExtension : this.extension.getBrowsers()) {
+        for (WorkItemBrowserExtension browserExtension : extension.getBrowsers()) {
             String browserId = PropertyLoader.loadProperty(browserExtension.getBrowserId());
             browserIds.add(browserId);
         }
@@ -398,7 +413,7 @@ public abstract class WorkItem extends WebComposite {
      * @return Returns the breadCrump.
      */
     public BreadCrump getBreadCrump() {
-        return this.breadCrump;
+        return breadCrump;
     }
 
     /**
@@ -407,7 +422,7 @@ public abstract class WorkItem extends WebComposite {
      * @return Returns the source.
      */
     public WorkItem getSource() {
-        return this.source;
+        return sourceWorkItem;
     }
 
     /**
@@ -417,11 +432,31 @@ public abstract class WorkItem extends WebComposite {
      *            The source to set.
      */
     public void setSource(WorkItem source) {
-        this.source = source;
+        // TODO: Rename to setSourceWorkItem
+        sourceWorkItem = source;
 
         if (source != null && source.getBreadCrump() != null) {
-            this.breadCrump.addFirst(source.getBreadCrump().getEntries());
+            breadCrump.addFirst(source.getBreadCrump().getEntries());
         }
+    }
+
+    /**
+     * Setter for the sourceWebElement.
+     * 
+     * @param sourceWebElement
+     *            The sourceWebElement to set.
+     */
+    public void setSourceWebElement(WebElement sourceWebElement) {
+        this.sourceWebElement = sourceWebElement;
+    }
+
+    /**
+     * Getter for the sourceWebElement.
+     * 
+     * @return Returns the sourceWebElement.
+     */
+    public WebElement getSourceWebElement() {
+        return sourceWebElement;
     }
 
     /**
@@ -440,14 +475,27 @@ public abstract class WorkItem extends WebComposite {
      * @return Returns the followerId.
      */
     public String getFollowerId() {
-        return this.followerId;
+        return followerId;
+    }
+
+    /**
+     * Accepts the web element visitor. Overload this function to let element be visited
+     * 
+     * @param visitor
+     */
+    @Override
+    public <T extends WebElementVisitorContext> void accept(WebElementVisitor<T> visitor, T context)
+            throws VisitorException {
+        if (visitor != null) {
+            visitor.visit(this, context);
+        }
     }
 
     @Override
     public JsonMap toJson() {
         JsonMap json = new JsonMap();
 
-        json.add(JSON_BREADCRUMPS, this.breadCrump.toJson());
+        json.add(JSON_BREADCRUMPS, breadCrump.toJson());
 
         WorkItemWorkflow workflow = this.getWorkflow();
 

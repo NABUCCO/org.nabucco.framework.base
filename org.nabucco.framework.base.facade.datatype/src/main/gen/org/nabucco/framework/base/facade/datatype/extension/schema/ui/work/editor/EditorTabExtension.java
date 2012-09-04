@@ -1,18 +1,16 @@
 /*
  * Copyright 2012 PRODYNA AG
- *
- * Licensed under the Eclipse Public License (EPL), Version 1.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
+ * 
+ * Licensed under the Eclipse Public License (EPL), Version 1.0 (the "License"); you may not use
+ * this file except in compliance with the License. You may obtain a copy of the License at
+ * 
  * http://www.opensource.org/licenses/eclipse-1.0.php or
  * http://www.nabucco.org/License.html
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+ * 
+ * Unless required by applicable law or agreed to in writing, software distributed under the
+ * License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND,
+ * either express or implied. See the License for the specific language governing permissions
+ * and limitations under the License.
  */
 package org.nabucco.framework.base.facade.datatype.extension.schema.ui.work.editor;
 
@@ -24,6 +22,7 @@ import org.nabucco.framework.base.facade.datatype.Datatype;
 import org.nabucco.framework.base.facade.datatype.collection.NabuccoCollectionState;
 import org.nabucco.framework.base.facade.datatype.collection.NabuccoList;
 import org.nabucco.framework.base.facade.datatype.collection.NabuccoListImpl;
+import org.nabucco.framework.base.facade.datatype.extension.property.BooleanProperty;
 import org.nabucco.framework.base.facade.datatype.extension.property.StringProperty;
 import org.nabucco.framework.base.facade.datatype.extension.schema.ui.UiExtension;
 import org.nabucco.framework.base.facade.datatype.extension.schema.ui.work.editor.control.EditorControlExtension;
@@ -44,7 +43,7 @@ public class EditorTabExtension extends UiExtension implements Datatype {
 
     private static final long serialVersionUID = 1L;
 
-    private static final String[] PROPERTY_CONSTRAINTS = { "m1,1;", "m1,1;", "m1,1;", "m1,1;", "m0,n;" };
+    private static final String[] PROPERTY_CONSTRAINTS = { "m1,1;", "m1,1;", "m1,1;", "m1,1;", "m0,n;", "m0,1;" };
 
     public static final String LABEL = "label";
 
@@ -55,6 +54,8 @@ public class EditorTabExtension extends UiExtension implements Datatype {
     public static final String GRID = "grid";
 
     public static final String FIELDS = "fields";
+
+    public static final String ISTECHNICAL = "isTechnical";
 
     /** The Tab Label. */
     private StringProperty label;
@@ -70,6 +71,9 @@ public class EditorTabExtension extends UiExtension implements Datatype {
 
     /** The Editor fields. */
     private NabuccoList<EditorControlExtension> fields;
+
+    /** Describes if the tab should be printed */
+    private BooleanProperty isTechnical;
 
     /** Constructs a new EditorTabExtension instance. */
     public EditorTabExtension() {
@@ -102,6 +106,9 @@ public class EditorTabExtension extends UiExtension implements Datatype {
         }
         if ((this.fields != null)) {
             clone.fields = this.fields.cloneCollection();
+        }
+        if ((this.getIsTechnical() != null)) {
+            clone.setIsTechnical(this.getIsTechnical().cloneObject());
         }
     }
 
@@ -147,6 +154,8 @@ public class EditorTabExtension extends UiExtension implements Datatype {
                 PROPERTY_CONSTRAINTS[3], false, PropertyAssociationType.COMPOSITION));
         propertyMap.put(FIELDS, PropertyDescriptorSupport.createCollection(FIELDS, EditorControlExtension.class, 8,
                 PROPERTY_CONSTRAINTS[4], false, PropertyAssociationType.COMPOSITION));
+        propertyMap.put(ISTECHNICAL, PropertyDescriptorSupport.createDatatype(ISTECHNICAL, BooleanProperty.class, 9,
+                PROPERTY_CONSTRAINTS[5], false, PropertyAssociationType.COMPOSITION));
         return new NabuccoPropertyContainer(propertyMap);
     }
 
@@ -164,6 +173,8 @@ public class EditorTabExtension extends UiExtension implements Datatype {
         properties.add(super.createProperty(EditorTabExtension.getPropertyDescriptor(ICON), this.getIcon(), null));
         properties.add(super.createProperty(EditorTabExtension.getPropertyDescriptor(GRID), this.getGrid(), null));
         properties.add(super.createProperty(EditorTabExtension.getPropertyDescriptor(FIELDS), this.fields, null));
+        properties.add(super.createProperty(EditorTabExtension.getPropertyDescriptor(ISTECHNICAL),
+                this.getIsTechnical(), null));
         return properties;
     }
 
@@ -187,6 +198,9 @@ public class EditorTabExtension extends UiExtension implements Datatype {
             return true;
         } else if ((property.getName().equals(FIELDS) && (property.getType() == EditorControlExtension.class))) {
             this.fields = ((NabuccoList<EditorControlExtension>) property.getInstance());
+            return true;
+        } else if ((property.getName().equals(ISTECHNICAL) && (property.getType() == BooleanProperty.class))) {
+            this.setIsTechnical(((BooleanProperty) property.getInstance()));
             return true;
         }
         return false;
@@ -227,6 +241,11 @@ public class EditorTabExtension extends UiExtension implements Datatype {
                 return false;
         } else if ((!this.grid.equals(other.grid)))
             return false;
+        if ((this.isTechnical == null)) {
+            if ((other.isTechnical != null))
+                return false;
+        } else if ((!this.isTechnical.equals(other.isTechnical)))
+            return false;
         return true;
     }
 
@@ -238,6 +257,7 @@ public class EditorTabExtension extends UiExtension implements Datatype {
         result = ((PRIME * result) + ((this.tooltip == null) ? 0 : this.tooltip.hashCode()));
         result = ((PRIME * result) + ((this.icon == null) ? 0 : this.icon.hashCode()));
         result = ((PRIME * result) + ((this.grid == null) ? 0 : this.grid.hashCode()));
+        result = ((PRIME * result) + ((this.isTechnical == null) ? 0 : this.isTechnical.hashCode()));
         return result;
     }
 
@@ -330,6 +350,24 @@ public class EditorTabExtension extends UiExtension implements Datatype {
             this.fields = new NabuccoListImpl<EditorControlExtension>(NabuccoCollectionState.INITIALIZED);
         }
         return this.fields;
+    }
+
+    /**
+     * Describes if the tab should be printed
+     *
+     * @param isTechnical the BooleanProperty.
+     */
+    public void setIsTechnical(BooleanProperty isTechnical) {
+        this.isTechnical = isTechnical;
+    }
+
+    /**
+     * Describes if the tab should be printed
+     *
+     * @return the BooleanProperty.
+     */
+    public BooleanProperty getIsTechnical() {
+        return this.isTechnical;
     }
 
     /**

@@ -21,13 +21,17 @@ import org.nabucco.framework.base.facade.datatype.extension.property.PropertyLoa
 import org.nabucco.framework.base.facade.datatype.extension.schema.ui.common.DialogButtonExtension;
 import org.nabucco.framework.base.facade.datatype.extension.schema.ui.dialog.DialogExtension;
 import org.nabucco.framework.base.facade.datatype.extension.schema.ui.dialog.GridDialogExtension;
+import org.nabucco.framework.base.facade.datatype.extension.schema.ui.dialog.control.DateDialogControlExtension;
 import org.nabucco.framework.base.facade.datatype.extension.schema.ui.dialog.control.DialogControlExtension;
+import org.nabucco.framework.base.facade.datatype.extension.schema.ui.dialog.control.DropDownDialogControlExtension;
 import org.nabucco.framework.base.facade.datatype.extension.schema.ui.dialog.control.FileDialogControlExtension;
 import org.nabucco.framework.base.facade.datatype.extension.schema.ui.dialog.control.LinkDialogControlExtension;
 import org.nabucco.framework.base.facade.datatype.extension.schema.ui.dialog.control.TextDialogControlExtension;
 import org.nabucco.framework.base.ui.web.component.WebComposite;
 import org.nabucco.framework.base.ui.web.component.WebElementType;
 import org.nabucco.framework.base.ui.web.component.dialog.controls.DialogControl;
+import org.nabucco.framework.base.ui.web.component.dialog.controls.DialogDateControl;
+import org.nabucco.framework.base.ui.web.component.dialog.controls.DialogDropDownControl;
 import org.nabucco.framework.base.ui.web.component.dialog.controls.DialogFileControl;
 import org.nabucco.framework.base.ui.web.component.dialog.controls.DialogLinkControl;
 import org.nabucco.framework.base.ui.web.component.dialog.controls.DialogTextControl;
@@ -134,6 +138,16 @@ public class Dialog extends WebComposite {
                 }
                 case TEXTLINK: {
                     control = new DialogLinkControl((LinkDialogControlExtension) controlExtension);
+                    control.init();
+                    break;
+                }
+                case DATE: {
+                    control = new DialogDateControl((DateDialogControlExtension) controlExtension);
+                    control.init();
+                    break;
+                }
+                case DROPDOWN: {
+                    control = new DialogDropDownControl((DropDownDialogControlExtension) controlExtension);
                     control.init();
                     break;
                 }

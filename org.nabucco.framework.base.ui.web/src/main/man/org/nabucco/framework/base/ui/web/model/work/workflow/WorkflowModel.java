@@ -22,16 +22,12 @@ import java.util.List;
 import java.util.Map;
 
 import org.nabucco.framework.base.facade.datatype.Datatype;
-import org.nabucco.framework.base.facade.datatype.DatatypeAccessor;
-import org.nabucco.framework.base.facade.datatype.Identifier;
-import org.nabucco.framework.base.facade.datatype.NabuccoDatatype;
 import org.nabucco.framework.base.facade.datatype.collection.NabuccoMap;
-import org.nabucco.framework.base.facade.datatype.componentrelation.ComponentRelation;
-import org.nabucco.framework.base.facade.datatype.componentrelation.ComponentRelationContainer;
 import org.nabucco.framework.base.facade.datatype.context.ServiceSubContext;
 import org.nabucco.framework.base.facade.datatype.context.ServiceSubContextType;
 import org.nabucco.framework.base.facade.datatype.context.WorkflowTransitionContext;
 import org.nabucco.framework.base.facade.datatype.context.WorkflowTransitionContextResponse;
+import org.nabucco.framework.base.facade.datatype.visitor.VisitorException;
 import org.nabucco.framework.base.facade.datatype.workflow.transition.TransitionContext;
 import org.nabucco.framework.base.ui.web.json.JsonElement;
 import org.nabucco.framework.base.ui.web.json.JsonList;
@@ -114,9 +110,20 @@ public class WorkflowModel extends WebModel {
 
         TransitionContext datatypeTransitionContext = null;
         for (TransitionContext transitionContext : actuallTransitionContexts) {
-            if (this.holdsInstance(datatype, transitionContext.getInstanceId())) {
-                datatypeTransitionContext = transitionContext;
-                break;
+            try {
+                WorkflowInstanceReferenceVisitor visitor = new WorkflowInstanceReferenceVisitor(
+                        transitionContext.getInstanceId());
+
+                datatype.accept(visitor);
+                boolean hasReference = visitor.hasReference();
+                if (hasReference) {
+                    datatypeTransitionContext = transitionContext;
+                    break;
+                }
+
+            } catch (VisitorException e) {
+                throw new IllegalStateException(
+                        "Cannot analyse datatype if it references the workflow from the transition context", e);
             }
         }
 
@@ -129,49 +136,6 @@ public class WorkflowModel extends WebModel {
         this.addEntry(datatypeTransitionContext);
 
         session.getServiceContext().putRequestContext(context);
-    }
-
-    /**
-     * Check whether the given datatype holds a component-relation to the workflow instance with the
-     * given id.
-     * 
-     * @param datatype
-     *            the datatype to check for component-relations
-     * @param instanceId
-     *            ID of the workflow instance to check for
-     * 
-     * @return <b>true</b> if the datatype holds a component relation to the given instance,
-     *         <b>false</b> if not
-     */
-    private boolean holdsInstance(Datatype datatype, Identifier instanceId) {
-
-        // Skip if instance ID is null.
-        if (instanceId == null || instanceId.getValue() == null) {
-            return false;
-        }
-
-        ComponentRelationContainer container = DatatypeAccessor.getInstance().getComponentRelation(datatype);
-
-        for (ComponentRelation<?> relation : container.getAllComponentRelations()) {
-
-            // Skip when relation is null
-            if (relation == null) {
-                continue;
-            }
-
-            // Skip when relation target is null
-            NabuccoDatatype target = relation.getTarget();
-            if (target == null || target.getId() == null) {
-                continue;
-            }
-
-            // Target holds the instance with the given ID!
-            if (target.getId().equals(instanceId.getValue())) {
-                return true;
-            }
-        }
-
-        return false;
     }
 
     /**

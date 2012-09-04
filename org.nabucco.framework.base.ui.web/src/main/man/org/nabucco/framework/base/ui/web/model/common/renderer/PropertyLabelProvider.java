@@ -28,7 +28,7 @@ import org.nabucco.framework.base.facade.datatype.code.Code;
 import org.nabucco.framework.base.facade.datatype.property.NabuccoProperty;
 import org.nabucco.framework.base.facade.datatype.property.NabuccoPropertyResolver;
 import org.nabucco.framework.base.facade.datatype.utils.MessageFormatter;
-import org.nabucco.framework.base.ui.web.model.control.util.PropertyStringParser;
+import org.nabucco.framework.base.ui.web.model.editor.util.PropertyStringParser;
 
 /**
  * Label Provider for labels created from property paths.
@@ -64,7 +64,7 @@ public class PropertyLabelProvider<T extends Datatype> extends WebLabelProvider<
             return DEFAULT_LABEL;
         }
 
-        return renderer.render((NType) instance);
+        return renderer.render((NType) instance, property);
     }
 
     @Override
@@ -87,13 +87,13 @@ public class PropertyLabelProvider<T extends Datatype> extends WebLabelProvider<
             Object propertyInstance = resolvedProperty.getInstance();
 
             if (propertyInstance instanceof Basetype) {
-                String value = renderer.render((NType) propertyInstance);
+                String value = renderer.render((NType) propertyInstance, resolvedProperty);
                 propertyMap.put(propertyName, value);
             } else if (propertyInstance instanceof Enumeration) {
-                String value = renderer.render((NType) propertyInstance);
+                String value = renderer.render((NType) propertyInstance, resolvedProperty);
                 propertyMap.put(propertyName, value);
             } else if (propertyInstance instanceof Code) {
-                String value = renderer.render((NType) propertyInstance);
+                String value = renderer.render((NType) propertyInstance, resolvedProperty);
                 propertyMap.put(propertyName, value);
             } else {
                 propertyMap.put(propertyName, DEFAULT_LABEL);

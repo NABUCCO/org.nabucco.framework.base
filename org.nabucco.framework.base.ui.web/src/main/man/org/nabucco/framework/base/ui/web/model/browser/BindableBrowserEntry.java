@@ -37,7 +37,7 @@ import org.nabucco.framework.base.ui.web.model.common.renderer.DefaultWebRendere
 import org.nabucco.framework.base.ui.web.model.common.renderer.PropertyLabelProvider;
 import org.nabucco.framework.base.ui.web.model.common.renderer.WebLabelProvider;
 import org.nabucco.framework.base.ui.web.model.common.renderer.WebRenderer;
-import org.nabucco.framework.base.ui.web.model.control.util.PropertyStringParser;
+import org.nabucco.framework.base.ui.web.model.editor.util.PropertyStringParser;
 import org.nabucco.framework.base.ui.web.model.table.TableModel;
 
 /**
